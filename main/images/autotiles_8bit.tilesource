@@ -1,0 +1,10 @@
+image: "/main/images/autotiles_8bit.png"
+tile_width: 32
+tile_height: 32
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+collision_groups: "default"
+extrude_borders: 0
+inner_padding: 0

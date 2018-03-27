@@ -1,0 +1,32 @@
+key_trigger {
+  input: KEY_LSHIFT
+  action: "shift"
+}
+key_trigger {
+  input: KEY_RSHIFT
+  action: "shift"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "left"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "down"
+}
+key_trigger {
+  input: KEY_UP
+  action: "up"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "right"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_LEFT
+  action: "left_click"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_RIGHT
+  action: "right_click"
+}
