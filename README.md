@@ -40,7 +40,7 @@ Here, `tile_width` and `tile_height` refer to the pixel dimensions of your suppl
     }
 ```
     
-Where the keys are decided on by the user, and the values refer to the id of the associated base tile in the tilesource containing your map tiles. I'll explain what I mean by base tile later.
+Where the keys are decided on by the user, and the values refer to the id of the associated base tile in the tilesource containing your map tiles. I'll explain what I mean by base tile at a later date.
 
 To use the auto tiler, you must tell moku which tile types should use the functionality. You do this by using
 
@@ -55,4 +55,6 @@ Now to autotile your map, simply call
 moku.auto_tile_map(map)
 ```
 
-There is more functionality, and a lot of nuances, but for now, this is the usage guide you get :P
+There is more functionality, and a lot of nuances, but for now, this is the usage guide you get. :P
+
+(Oh, you should probably make sure that your tilesheet follows the same format as those in the demno project. Again this will be explained later.)
