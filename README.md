@@ -57,4 +57,4 @@ moku.auto_tile_map(map)
 
 There is more functionality, and a lot of nuances, but for now, this is the usage guide you get. :P
 
-(Oh, you should probably make sure that your tilesheet follows the same format as those in the demno project. Again this will be explained later.)
+(Oh, you should probably make sure that your tilesheet follows the same format as those in the demo project. Again this will be explained later.)
