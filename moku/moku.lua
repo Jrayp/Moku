@@ -303,26 +303,26 @@ end
 --o  Auto-tiling
 --o=================o
 
-function M.add_auto_tile(map, tile_type, bits, include_self, include_border, include_nil, additional_types)
+function M.add_auto_tile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
 
     map.auto_tiles[tile_type] = {}
 
     map.auto_tiles[tile_type].bits = bits
 
-    if include_self then
+    if join_self then
         map.auto_tiles[tile_type][tile_type] = true
     end
 
-    if include_border then
+    if join_edge then
         map.auto_tiles[tile_type][border] = true
     end
 
-    if include_nil then
+    if join_nil then
         map.auto_tiles[tile_type][null] = true
     end
 
-    if additional_types then
-        for i, v in ipairs(additional_types) do
+    if joining_types then
+        for i, v in ipairs(joining_types) do
             map.auto_tiles[tile_type][v] = true
         end
     end
