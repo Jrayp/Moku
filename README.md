@@ -10,6 +10,8 @@ This documentation is also not yet complete. Refer to the demo project, and the 
 
 Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request)
 
+Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moke.layer_name`, and defaults to layer1).However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individial layers, and changing the layer name for working with them.
+
 # Moku Functions
 
 Following are the functions offered by Moku. The majority require the user to supply a moku map.
