@@ -159,6 +159,7 @@ end
 --o  Iterator Functions
 --o=========================o
 
+
 function M.iterate_region(map, x, y, width, height, fn)
 
     local _v
@@ -205,13 +206,13 @@ function M.on_border(map, x, y)
     or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
 end
 
-function M.within_dimensions(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
+function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_world_y)
 
     local map_shift_x = map_world_x + (map.bounds.x - 1) * map.dimensions.tile_width
     local map_shift_y = map_world_y + (map.bounds.y - 1) * map.dimensions.tile_height
 
-    return pick_world_x >= map_shift_x and pick_world_x < map_shift_x + map.dimensions.world_width
-    and pick_world_y >= map_shift_y and pick_world_y < map_shift_y + map.dimensions.world_height
+    return test_world_x >= map_shift_x and test_world_x < map_shift_x + map.dimensions.world_width
+    and test_world_y >= map_shift_y and test_world_y < map_shift_y + map.dimensions.world_height
 
 end
 
