@@ -58,3 +58,29 @@ moku.auto_tile_map(map)
 There is more functionality, and a lot of nuances, but for now, this is the usage guide you get. :P
 
 (Oh, you should probably make sure that your tilesheet follows the same format as those in the demo project. Again this will be explained later.)
+
+## Functions
+
+### moku.new(width, height, tile_width, tile_height, tile_types, fill_type, [tilemap_url])
+Creates a new moku map from scratch. The `tile_types` argument must be of a specific form as shown in the example. The keys are chosen by the user, and should be descriptive names of the tiles that your moku map uses. Thier associated values are the integer positions of that tile types base tile image in a tile source.
+
+Example:
+
+ ```lua
+ local tile_types = {
+    WALL = 1,
+    YELLOW_WALL = 17,
+    FLOOR = 16
+ }
+ 
+local my_map = moku.new(8, 8, 32, 32, tile_types, tile_types.FLOOR)
+```
+
+_PARAMETERS_
+* __width__ <kbd>Integer</kbd> - Width of the new map in cells.
+* __height__ <kbd>Integer</kbd> - Height of the new map in cells.
+* __tile_width__ <kbd>Integer</kbd> - Width of individual tiles/cells in pixels.
+* __tile_height__ <kbd>Integer</kbd> - Width of individual tiles/cells in pixels.
+* __tile_types__ <kbd>Table</kbd> - A table of keys and integer values representing different tile types.
+* __fill_type__ <kbd>Integer</kbd> - The initial tile type (defined in the previous table) of the cells in the new map.  
+* __tilemap_url__ <kbd>String</kbd> - Optional path to a defold tilemap. Required for auto-tiling, but not required for creating tiling matrices, explained below. 
