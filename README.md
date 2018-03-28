@@ -4,9 +4,11 @@ Map utility &amp; auto-tile module for the Defold game engine. Partially based o
 ## State
 Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe.
 
-## Moku Functions
+# Moku Functions
 
-### Constructor Functions
+Following are the functions offered by Moku. The majority require the user to supply a moku map.
+
+## Constructor Functions
 
 These functions return new moku maps. Moku maps are tables of tile values, and other relevant data.
 
@@ -61,7 +63,7 @@ _PARAMETERS_
 _RETURNS_
 * __moku_map__ <kbd>table</kbd> - A new moku map.
 
-### Iterator Functions
+## Iterator Functions
 
 These functions are convienience functions for iterating through a specified region of a moku map. If you need custom iteration, you can of course iterate using a nested for loop. Just be aware that the moku map table also contains non coordinate data. It is therefore advised that you do not use a forp loop to avoid errors. 
 
@@ -131,7 +133,7 @@ _PARAMETERS_
 * __y__ <kbd>Integer</kbd> - y coordinate of center cell.
 * __fn__ <kbd>Function</kbd> - Optional filter function.
 
-### General Functions
+## General Functions
 
 These are general functions that do not fit into any specific category. For now they are mostly related to simple cell/coordinate uses, such as determining the value of a neighboring cell.
 
@@ -201,3 +203,28 @@ _PARAMETERS_
 
 _RETURNS_
 * __within_dimensions_flag__ <kbd>Boolean</kbd> - True if within dimensions, false otherwise.
+
+### moku.neighbor_coords(x, y, dir)
+Returns the coordinates of a supplied origin cells neighbor. The neighbor is specified by use of the `dir` argument. This argument is an integer that corresponds to one of the 8 directions on a (simple) compass, starting at 1 for north and continuing in clock-wise fashion to 8 for north-west. Moku provides an improvised "enum" table for direction, acessable with `moku.dir.[DIRECTION]` for convinience. 
+
+Note that this calculation is independent of any moku map It is not guarenteed that the returned value is within the bounds of whatever map you may be using it for. 
+
+Example:
+
+```lua
+local sw_x, sw_y = moku.neighbor_coords(5, 5, moku.dir.SOUTH_WEST)
+
+-- Same thing
+-- local sw_x, sw_y = moku.neighbor_coords(5, 5, 6)
+
+print(sw_x, sw_y) -- Prints "4, 4"
+```
+
+_PARAMETERS_
+* __x__ <kbd>Integer</kbd> - x coordinate of origin cell.
+* __y__ <kbd>Integer</kbd> - y coordinate of origin cell. 
+* __dir__ <kbd>Integer</kbd> - Direction of coordinate we want. Range: 1-8
+
+_RETURNS_
+* __nx__ <kbd>Integer</kbd> - Neighbors x coordinate.
+* __ny__ <kbd>Integer</kbd> - Neighbors y coordinate.
