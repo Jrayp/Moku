@@ -265,3 +265,49 @@ _PARAMETERS_
 _RETURNS_
 * __cx__ <kbd>Integer</kbd> - x coordinate of picked tile, nil if none.
 * __cy__ <kbd>Integer</kbd> - y coordinate of picked tile, nil if none.
+
+## Auto-tiling functions
+
+These functions handle auto-tiling and the creation of tiling matrices. Currently, to use auto tiling you must supply a tilemap url to your moku map. If you are not using a defold tilemap, you may use the somewhat more cumbersome and expensive, but equally effective, tiling matrices. 
+
+### moku.add_auto_tile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
+This function tells a moku map which `tile_type` should be treated as an auto tile. Once added this tile type will be taken into consideration when using any of the other functions listed under this section. Tile types that have not been added using this function are ignored completely.
+
+You must supply a moku map and a `tile_type` as defined in your `tile_types` table.
+
+You must then decide on which autotiling algorithm you will use. 4-bit or 8-bit. 4-bit autotiling does not take corners into account, and requires only 16 images to work correctly. 8-bit autotiling does take corners into account but requires a whopping 48 images to work correctly. This decision is clearly dependent in your use case. I recommend using 4-bit tiling when possible.
+
+The three joining flags tell moku how this autotile should respond to tiles of its own type, the maps edge, and empty cells in your map, respectively. If set to true the autotiler will consider these cases as "joining tiles" during the autotiling process. 
+
+Any additional tile types that should act as valid joining tiles to the original autotile can be added in a list under the `joining_types` argument. 
+
+Note that you will not necessarily be using auto tiling for every tile type. Think walls (require auto-tiling) and floors (usually do not).  
+
+Example:
+
+```lua
+local tile_types = {
+    -- Autotiles
+    PLAINS = 1,
+    PLATEAU = 49,
+    -- Normal Tiles
+    OCEAN = 97
+}
+
+my_map = moku.new_from_tilemap("map_go#tilemap", 32, 32, tile_types)
+
+-- Adds the PLAINS tile type as an autotile, sets it to use 8-bit autotiling, and instructs moku to treat other PLAINS tiles and the maps edges as joining tiles. Empty tiles will not act as joining tiles. Furthermore, PLATEAU tiles will act as additional joining tiles.
+moku.add_auto_tile(my_map, tile_types.PLAINS, 8, true, true, false, {tile_types.PLATEAU})
+
+-- Similar to PLAINS we now add PLATEAU tiles. These act similar to plains, but do not treat PLAINS as joining tiles.
+moku.add_auto_tile(my_map, tile_types.PLATEAU, 8, true, true, false)
+```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __tile_type__ <kbd>Integer</kbd> - Tile type to add as an auto tile. 
+* __bits__ <kbd>Integer</kbd> - Autotiling algorithm. 4 or 8. 
+* __join_self__ <kbd>Boolean</kbd> - Whether or not this autotile will join to tiles of its own type.
+* __join_edge__ <kbd>Boolean</kbd> - Whether or not this autotile will join to the edge of the map.
+* __join_nil__ <kbd>Boolean</kbd> - Whether or not this autotile will join to empty cells of the map.
+* __joining_types__ <kbd>Table</kbd> - Further tile types to actas joining tiles, supplied in list form.
