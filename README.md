@@ -8,6 +8,8 @@ Currently in very early, untested alpha. Missing features, probably a bit unwiel
 
 ### Constructor Functions
 
+These functions return new moku maps. Moku maps are tables of tile values, and other relevant data.
+
 #### moku.new(width, height, tile_width, tile_height, tile_types, fill_type, [tilemap_url])
 Creates a new moku map from scratch. The `tile_types` argument must be of a specific form as shown in the example. The keys are chosen by the user, and should be descriptive names of the tiles that your moku map uses. Their associated values are the integer positions of that tiles base tile image in a tile source.
 
@@ -55,6 +57,8 @@ _PARAMETERS_
 
 ### Iterator Functions
 
+These functions are convienience functions for iterating through a specified region of a moku map. If you need custom iteration, you can of course iterate using a nested for loop. Just be aware that the moku map table also contains non coordinate data. It is therefore advised that you do not use a forp loop to avoid errors. 
+
 #### moku.iterate_region(map, x, y, width, height, [fn])
 Iterates a rectangular region of the supplied moku map, using `x`, `y`, `width`, and `height` as bounds. An optional function `fn` can be supplied to filter results.
 
@@ -65,8 +69,58 @@ local function is_plains(v)
     return v == tile_types.PLAINS
 end
 
-for x, y, v in moku.iterate(my_map, 5, 5, 3, 3, is_plains) do
+for x, y, v in moku.iterate_region(my_map, 5, 5, 3, 3, is_plains) do
     -- Change all plains tiles in the supplied rectangle to ocean tiles.
     map[x][y] = tile_types.OCEAN
 end
 ```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of bottom left cell of region.
+* __y__ <kbd>Integer</kbd> - y coordinate of bottom left cell of region.
+* __width__ <kbd>Integer</kbd> - Width of the region.
+* __width__ <kbd>Integer</kbd> - Height of the region.
+* __fn__ <kbd>Function</kbd> - Optional filter function.
+
+#### moku.iterate(map, [fn])
+Convinience/wrapper function for `moku.iterate_region(...)`. Iterates the entire moku map. A filter function can be supplied.
+
+Example (assuming a `tile_types` table has been constructed and declared):
+
+```lua
+local function is_plains(v)
+    return v == tile_types.PLAINS
+end
+
+for x, y, v in moku.iterate(my_map, is_plains) do
+    -- Change all plains tiles of the map to ocean tiles.
+    map[x][y] = tile_types.OCEAN
+end
+```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __fn__ <kbd>Function</kbd> - Optional filter function.
+
+#### moku.iterate_surrounding(map, x, y, [fn])
+Convinience/wrapper function for `moku.iterate_region(...)`. Iterates a 3x3 surrounding region of central cell. A filter function can be supplied.
+
+Example (assuming a `tile_types` table has been constructed and declared):
+
+```lua
+local function is_plains(v)
+    return v == tile_types.PLAINS
+end
+
+for x, y, v in moku.iterate_surrounding(my_map, 5, 5, is_plains) do
+    -- Change all plains tiles of the supplied cell + its 8 surrounding neighbors, to ocean.
+    map[x][y] = tile_types.OCEAN
+end
+```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of center cell.
+* __y__ <kbd>Integer</kbd> - y coordinate of center cell.
+* __fn__ <kbd>Function</kbd> - Optional filter function.
