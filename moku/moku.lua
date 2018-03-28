@@ -219,7 +219,7 @@ end
 function M.neighbor_coords(x, y, dir)
 
     if dir == M.dir.NORTH then
-        y = x + 1
+        y = y + 1
     elseif dir == M.dir.NORTH_EAST then
         x = x + 1
         y = y + 1
@@ -244,6 +244,7 @@ function M.neighbor_coords(x, y, dir)
 
 end
 
+--[[ Dont just copy over code from other projects without testing ;)
 function M.all_neighbor_coords(x, y)
 
     local nc = {}
@@ -278,6 +279,7 @@ function M.all_neighbor_values(map, x, y)
     return nv
 
 end
+--]]
 
 --o====================o
 --o  Picking Functions
