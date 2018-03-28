@@ -310,4 +310,31 @@ _PARAMETERS_
 * __join_self__ <kbd>Boolean</kbd> - Whether or not this autotile will join to tiles of its own type.
 * __join_edge__ <kbd>Boolean</kbd> - Whether or not this autotile will join to the edge of the map.
 * __join_nil__ <kbd>Boolean</kbd> - Whether or not this autotile will join to empty cells of the map.
-* __joining_types__ <kbd>Table</kbd> - Further tile types to actas joining tiles, supplied in list form.
+* __joining_types__ <kbd>Table</kbd> - Further tile types to act as joining tiles, supplied in list form.
+
+### moku.tile_sum(map, x, y)
+Returns the calculated binary sum of a supplied tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling. 
+
+This function is of limited practical use on its own, but is used extensively by other functions in this section.
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of cell you want to autotile.
+* __y__ <kbd>Integer</kbd> - y coordinate of cell you want to autotile.
+
+_RETURNS_
+* __sum__ <kbd>Table</kbd> - Calculated binary sum of this cell.
+
+### moku.auto_tile_cell(map, x, y)
+Autotiles the supplied cell. Note that your supplied map must have been given a valid `tilemap_url` for this to work. Returns the calculated binary sum of the tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling. 
+
+This function is of limited practical use on its own, but is used extensively by other functions in this section.
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of cell you want to autotile.
+* __y__ <kbd>Integer</kbd> - y coordinate of cell you want to autotile.
+
+_RETURNS_
+* __sum__ <kbd>Table</kbd> - Calculated binary sum of this cell.
+
