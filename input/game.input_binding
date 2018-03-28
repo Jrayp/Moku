@@ -22,11 +22,15 @@ key_trigger {
   input: KEY_RIGHT
   action: "right"
 }
+key_trigger {
+  input: KEY_LCTRL
+  action: "ctrl"
+}
+key_trigger {
+  input: KEY_RCTRL
+  action: "ctrl"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "left_click"
-}
-mouse_trigger {
-  input: MOUSE_BUTTON_RIGHT
-  action: "right_click"
 }

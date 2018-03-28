@@ -35,7 +35,7 @@ function on_input(self, action_id, action)
             manipulate_4bit(self, tx, ty, self.map_4bit.tile_types.WALL)
         end
 
-    elseif action_id == hash("right_click") then
+    elseif action_id == hash("ctrl") then
 
         local bits, tx, ty = pick_cell(self, action.screen_x, action.screen_y)
 
