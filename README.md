@@ -6,9 +6,9 @@ Currently in very early, untested alpha. Missing features, probably a bit unwiel
 
 At this stage I am very open to moderate redesign. I'm aware that this is not perfect, and I have some ideas of my own, but if you have any suggestions let me know. For now it is definitely at least functional (barring hidden bugs). Also, please don't hesitate to offer better naming ideas for functions, etc. I am notriously bad at this, and my own naming bothers me.
 
-This documentation is also not yet complete. Refer to the demo project, and the function guide below, to infer how its used. A guide will be posted in the future. Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request)
+This documentation is also not yet complete. Refer to the demo project, and the function guide below, to infer how its used. A guide will be posted in the future. Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request if you have time)
 
-Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moke.layer_name`, and defaults to layer1).However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individial layers, and changing the layer name when working with them.
+Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moku.layer_name`, and defaults to `layer1`). However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individial layers, and changing the layer name when working with them.
 
 # Moku Functions
 
