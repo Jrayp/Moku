@@ -152,8 +152,8 @@ end
 
 _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
-* __x__ <kbd>Integer</kbd> - x coordinate you want to test for.
-* __y__ <kbd>Integer</kbd> - y coordinate you want to test for.
+* __x__ <kbd>Integer</kbd> - x coordinate we want to test for.
+* __y__ <kbd>Integer</kbd> - y coordinate we want to test for.
 
 _RETURNS_
 * __within_bounds_flag__ <kbd>Boolean</kbd> - True if within bounds, false otherwise.
@@ -198,16 +198,16 @@ _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
 * __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner. 
 * __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner. 
-* __test_world_x__ <kbd>Integer</kbd> - Pixel x in world cooridnates we are testing for.
-* __test_world_y__ <kbd>Integer</kbd> - Pixel y in world cooridnates we are testing for
+* __test_world_x__ <kbd>Integer</kbd> - Pixel x in world coordinates we are testing for.
+* __test_world_y__ <kbd>Integer</kbd> - Pixel y in world coordinates we are testing for
 
 _RETURNS_
 * __within_dimensions_flag__ <kbd>Boolean</kbd> - True if within dimensions, false otherwise.
 
 ### moku.neighbor_coords(x, y, dir)
-Returns the coordinates of a supplied origin cells neighbor. The neighbor is specified by use of the `dir` argument. This argument is an integer that corresponds to one of the 8 directions on a (simple) compass, starting at 1 for north and continuing in clock-wise fashion to 8 for north-west. Moku provides an improvised "enum" table for direction, acessable with `moku.dir.[DIRECTION]` for convinience. 
+Returns the coordinates of a supplied origin cells neighbor. The neighbor is specified by use of the `dir` argument. This argument is an integer that corresponds to one of the 8 directions on a (simple) compass, starting at 1 for north and continuing in clock-wise fashion to 8 for north-west. Moku provides an improvised "enum" table for direction, accessible with `moku.dir.[DIRECTION]`, for convinience. 
 
-Note that this calculation is independent of any moku map It is not guarenteed that the returned value is within the bounds of whatever map you may be using it for. 
+Note that this calculation is independent of any moku map. It is not guarenteed that the returned value is within the bounds of whatever map you may be using it for. 
 
 Example:
 
@@ -228,3 +228,40 @@ _PARAMETERS_
 _RETURNS_
 * __nx__ <kbd>Integer</kbd> - Neighbors x coordinate.
 * __ny__ <kbd>Integer</kbd> - Neighbors y coordinate.
+
+## Picking Functions
+
+These functions handle cell picking, and take world position and map dimensions into account. 
+
+### moku.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
+Returns the coordinates of a moku map cell given the supplied world coordinates. Moku maps do not (currently) store current world position, so the user must supply this information. Returns nil if the world coordinates fall outside the world dimensions of the supplied moku map.
+
+Example:
+
+```lua
+function on_input(self, action_id, action)
+    if action_id == hash("left_click") then
+        local cam_pos = go.get_position("camera")
+        local wx = action.screen_x + cam_pos.x
+        local wy = action.screen_y + cam_pos.y
+        tx, ty = moku.pick_cell(my_map, my_map_pos_x, my_map_pos_y, wx, wy)
+        
+        if tx and ty then
+            print("You clicked on the tile at (tx, ty). Good job!)
+        else
+            print("You clicked outside of the map! Reported.)
+        end
+    end 
+end
+```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner. 
+* __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner. 
+* __pick_world_x__ <kbd>Integer</kbd> - Pixel x in world coordinates we are testing for.
+* __pick_world_y__ <kbd>Integer</kbd> - Pixel y in world coordinates we are testing for
+
+_RETURNS_
+* __cx__ <kbd>Integer</kbd> - x coordinate of picked tile, nil if none.
+* __cy__ <kbd>Integer</kbd> - y coordinate of picked tile, nil if none.
