@@ -2,7 +2,9 @@
 Map utility &amp; auto-tile module for the Defold game engine. Partially based on the method outlined here: https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
 
 ## State
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe.
+Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe. This documentation is also not yet complete. Refer to the demo project, and the function guide below, to infer how its used. A guide will be posted in the future.
+
+Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request)
 
 # Moku Functions
 
@@ -326,9 +328,9 @@ _RETURNS_
 * __sum__ <kbd>Table</kbd> - Calculated binary sum of this cell.
 
 ### moku.auto_tile_cell(map, x, y)
-Autotiles the supplied cell. Note that your supplied map must have been given a valid `tilemap_url` for this to work. Returns the calculated binary sum of the tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling. 
+Autotiles the supplied cell. Returns the calculated binary sum of the tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling. Probably of limited practical use on its own, but is used extensively by other functions in this section.
 
-This function is of limited practical use on its own, but is used extensively by other functions in this section.
+Note that your supplied map must have been given a valid `tilemap_url` for this to work, and you must have added at least one auto tile with `moku.add_auto_tile(..)` to see any difference.
 
 _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
@@ -338,3 +340,40 @@ _PARAMETERS_
 _RETURNS_
 * __sum__ <kbd>Table</kbd> - Calculated binary sum of this cell.
 
+### moku.auto_tile_region(map, x, y, width, height)
+Autotiles a rectangular region of the supplied moku map, using `x`, `y`, `width`, and `height` as bounds. Probably of limited practical use, but used by other functions in this section.
+
+Note that your supplied map must have been given a valid `tilemap_url` for this to work, and you must have added at least one auto tile with `moku.add_auto_tile(..)` to see any difference.
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of bottom left cell of region.
+* __y__ <kbd>Integer</kbd> - y coordinate of bottom left cell of region.
+* __width__ <kbd>Integer</kbd> - Width of the region.
+* __width__ <kbd>Integer</kbd> - Height of the region.
+
+### moku.auto_tile_map(map)
+Autotiles the entire supplied moku map.
+
+Note that your supplied map must have been given a valid `tilemap_url` for this to work, and you must have added at least one auto tile with `moku.add_auto_tile(..)` to see any difference.
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+
+### moku.auto_tile_surrounding(map, x, y)
+Convinience/wrapper function for `moku.auto_tile_region(...)`. Autotiles a 3x3 surrounding region of a supplied central cell. Very useful for real time autotiling!
+
+Note that your supplied map must have been given a valid `tilemap_url` for this to work, and you must have added at least one auto tile with `moku.add_auto_tile(..)` to see any difference.
+
+Example:
+
+```lua
+-- This will quickly autotile the changed cell, as well as the surrounding tiles that are affected by the change.
+my_map[i][j] = tile_types.WALL
+moku.auto_tile_surrounding(my_map, i, j)
+```
+
+_PARAMETERS_
+* __map__ <kbd>Table</kbd> - A moku map.
+* __x__ <kbd>Integer</kbd> - x coordinate of center cell.
+* __y__ <kbd>Integer</kbd> - y coordinate of center cell.
