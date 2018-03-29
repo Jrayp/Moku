@@ -102,7 +102,7 @@ local get_type
 -- @tparam number tile_height Pixel height of your tiles
 -- @tparam table tile_types A table of tile types
 -- @tparam number fill_type Initial tile type of new cells
--- @tparam url tilemap_irl Optional url of a tilemap
+-- @tparam[opt] url tilemap_url Tilemap url
 -- @return A new moku map
 function M.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)
 
@@ -122,7 +122,7 @@ function M.new(width, height, tile_width, tile_height, tile_types, fill_type, ti
 end
 
 --- Builds and returns a new moku map from a supplied defold tilemap.
--- @tparam url tilemap_irl Url of a tilemap
+-- @tparam url tilemap_url Tilemap url
 -- @tparam number tile_width Pixel width of your tiles
 -- @tparam number tile_height Pixel height of your tiles
 -- @tparam table tile_types A table of tile types
@@ -154,7 +154,7 @@ function constructor_helper(new_map, x, y, width, height, tile_width, tile_heigh
     local world_height = height * tile_height
 
     new_map.tile_types = tile_types
-    new_map.auto_tiles = {}
+    new_map.autotiles = {}
     new_map.tilemap_url = tilemap_url
 
     new_map.bounds = {
@@ -177,12 +177,14 @@ end
 --o  Iterator Functions
 --o=========================o
 
---- Builds and returns a new moku map from a supplied defold tilemap.
--- @tparam url tilemap_irl Url of a tilemap
--- @tparam number tile_width Pixel width of your tiles
--- @tparam number tile_height Pixel height of your tiles
--- @tparam table tile_types A table of tile types
--- @return A new moku map
+--- Iterates through a rectangular region of a moku maps cells.
+-- An optional filter function can be applied
+-- @tparam map map A moku map
+-- @tparam number x Lower left x coordinate of region
+-- @tparam number y Lower left y coordinate of region
+-- @tparam number width Width of the region
+-- @tparam number height Height of the region
+-- @tparam[opt] function fn Filter function
 function M.iterate_region(map, x, y, width, height, fn)
 
     local _v
@@ -207,10 +209,20 @@ function M.iterate_region(map, x, y, width, height, fn)
     )
 end
 
+--- Iterates through all moku map cells.
+-- An optional filter function can be applied
+-- @tparam map map A moku map
+-- @tparam[opt] function fn Filter function
 function M.iterate_map(map, fn)
     return M.iterate_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height, fn)
 end
 
+--- Iterates through a given cell and its surrounding cells.
+-- An optional filter function can be applied
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
+-- @tparam[opt] function fn Filter function
 function M.iterate_surrounding(map, x, y, fn)
     return M.iterate_region(map, x - 1, y - 1, 3, 3, fn)
 end
@@ -370,6 +382,14 @@ end
 --o  Picking Functions
 --o====================o
 
+--- Returns the coordinates of the cell at given world coordinates
+-- @tparam map map A moku map
+-- @tparam number map_world_x World x of the map
+-- @tparam number map_world_y World y of the map
+-- @tparam number pick_world_x Given world x
+-- @tparam number pick_world_y Given world y
+-- @return x coordinate of cell at given world coordinates. Nil if out of map bounds
+-- @return y coordinate of cell at given world coordinates. Nil if out of map bounds
 function M.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
 
     if M.within_dimensions(map, map_world_x, map_world_y, pick_world_x, pick_world_y) then
@@ -388,27 +408,34 @@ end
 --o  Auto-tiling
 --o=================o
 
-function M.add_auto_tile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
+--- Designates a tile type as as an autotile.
+-- @tparam map map A moku map
+-- @tparam number tile_type The tile type to be designated as an autotile
+-- @tparam moku.bits bits The autotiling algorithm to be used
+-- @tparam bool join_self Whether tiles of the same type act as joining tiles
+-- @tparam bool join_edge Whether the edge ofthe map acts as a joining tile
+-- @tparam bool join_nil Whether empty cells act as joining tiles
+-- @tparam table joining_types Additional tile types to act as joining tiles
+function M.set_autotile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
 
-    map.auto_tiles[tile_type] = {}
-
-    map.auto_tiles[tile_type].bits = bits
+    map.autotiles[tile_type] = {}
+    map.autotiles[tile_type].bits = bits
 
     if join_self then
-        map.auto_tiles[tile_type][tile_type] = true
+        map.autotiles[tile_type][tile_type] = true
     end
 
     if join_edge then
-        map.auto_tiles[tile_type][border] = true
+        map.autotiles[tile_type][border] = true
     end
 
     if join_nil then
-        map.auto_tiles[tile_type][null] = true
+        map.autotiles[tile_type][null] = true
     end
 
     if joining_types then
         for i, v in ipairs(joining_types) do
-            map.auto_tiles[tile_type][v] = true
+            map.autotiles[tile_type][v] = true
         end
     end
 
@@ -422,8 +449,8 @@ function M.tile_sum(map, x, y)
     -- References the appropriate lookup table
     -- or returns null (0) if not a tilable type
     local lookup
-    if map.auto_tiles[tile_type] then
-        lookup = map.auto_tiles[tile_type]
+    if map.autotiles[tile_type] then
+        lookup = map.autotiles[tile_type]
     else
         return null
     end
@@ -454,7 +481,7 @@ end
 function M.auto_tile_region(map, x, y, width, height)
 
     for _x, _y, _v in M.iterate_map(map) do
-        if map.auto_tiles[_v] then
+        if map.autotiles[_v] then
             M.auto_tile_cell(map, _x, _y)
         end
     end
@@ -479,7 +506,7 @@ function M.tiling_matrix_region(map, x, y, width, height)
             tiling_matrix[_x] = {}
         end
 
-        if map.auto_tiles[_v] then
+        if map.autotiles[_v] then
             tiling_matrix[_x][_y] = M.tile_sum(map, _x, _y)
         else
             tiling_matrix[_x][_y] = null
