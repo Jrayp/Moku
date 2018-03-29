@@ -1,4 +1,5 @@
 --- Moku Module
+--@module Moku
 
 local M = {}
 
@@ -90,9 +91,13 @@ local binary_sum_8bit
 local binary_sum_4bit
 local get_type
 
---o=================o
---o  Constructors
---o=================o
+--o=========================================o
+
+--- Constructors.
+-- Functions for creating new moku maps
+-- @section Constructors
+
+--o=========================================o
 
 
 --- Returns a new moku map from scratch.
@@ -173,9 +178,21 @@ function constructor_helper(new_map, x, y, width, height, tile_width, tile_heigh
 
 end
 
---o=========================o
---o  Iterator Functions
---o=========================o
+--o=========================================o
+
+--- Iterators.
+-- Iterator functions
+-- @section Iterators
+
+--o=========================================o
+
+--- Iterates through all moku map cells.
+-- An optional filter function can be applied
+-- @tparam map map A moku map
+-- @tparam[opt] function fn Filter function
+function M.iterate_map(map, fn)
+    return M.iterate_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height, fn)
+end
 
 --- Iterates through a rectangular region of a moku maps cells.
 -- An optional filter function can be applied
@@ -209,14 +226,6 @@ function M.iterate_region(map, x, y, width, height, fn)
     )
 end
 
---- Iterates through all moku map cells.
--- An optional filter function can be applied
--- @tparam map map A moku map
--- @tparam[opt] function fn Filter function
-function M.iterate_map(map, fn)
-    return M.iterate_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height, fn)
-end
-
 --- Iterates through a given cell and its surrounding cells.
 -- An optional filter function can be applied
 -- @tparam map map A moku map
@@ -227,9 +236,13 @@ function M.iterate_surrounding(map, x, y, fn)
     return M.iterate_region(map, x - 1, y - 1, 3, 3, fn)
 end
 
---o=========================o
---o  General Map Functions
---o=========================o
+--o=========================================o
+
+--- General.
+-- Assorted moku map functions
+-- @section General
+
+--o=========================================o
 
 --- Return whether or not a given cell is within the map bounds.
 -- @tparam map map A moku map
@@ -377,10 +390,13 @@ function M.all_neighbor_values(map, x, y)
 
 end
 
+--o=========================================o
 
---o====================o
---o  Picking Functions
---o====================o
+--- Cell Picking.
+-- Functions related to cell picking
+-- @section Cell-Picking
+
+--o=========================================o
 
 --- Returns the coordinates of the cell at given world coordinates
 -- @tparam map map A moku map
@@ -404,9 +420,13 @@ function M.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
 
 end
 
---o=================o
---o  Auto-tiling
---o=================o
+--o=========================================o
+
+--- Auto-Tiling.
+-- Functions related to moku auto-tiling
+-- @section Auto-Tiling
+
+--o=========================================o
 
 --- Designates a tile type as as an autotile.
 -- @tparam map map A moku map
@@ -441,7 +461,12 @@ function M.set_autotile(map, tile_type, bits, join_self, join_edge, join_nil, jo
 
 end
 
-function M.tile_sum(map, x, y)
+--- Calculates a given cells autotile id
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @return The autotile id
+function M.autotile_id(map, x, y)
 
     -- Tile type of this cell
     local tile_type = map[x][y]
@@ -469,33 +494,65 @@ function M.tile_sum(map, x, y)
 
 end
 
-function M.auto_tile_cell(map, x, y)
+--- Autotiles a given cell. Returns the cells autotile id
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @return The autotile id
+function M.autotile_cell(map, x, y)
 
-    local sum = M.tile_sum(map, x, y)
+    local sum = M.autotile_id(map, x, y)
     tilemap.set_tile(map.tilemap_url, M.layer_name, x, y, sum)
 
     return sum
 
 end
 
-function M.auto_tile_region(map, x, y, width, height)
+--- Autotiles a rectangular region of a moku map.
+-- @tparam map map A moku map
+-- @tparam number x Lower left x coordinate of region
+-- @tparam number y Lower left y coordinate of region
+-- @tparam number width Width of the region
+-- @tparam number height Height of the region
+function M.autotile_region(map, x, y, width, height)
 
     for _x, _y, _v in M.iterate_map(map) do
         if map.autotiles[_v] then
-            M.auto_tile_cell(map, _x, _y)
+            M.autotile_cell(map, _x, _y)
         end
     end
 
 end
 
-function M.auto_tile_map(map)
-    return M.auto_tile_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
+--- Autotiles an entire moku map.
+-- @tparam map map A moku map
+function M.autotile_map(map)
+    return M.autotile_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
 end
 
-function M.auto_tile_surrounding(map, x, y)
-    return M.auto_tile_region(map, x - 1, y - 1, 3, 3)
+--- Autotiles a given cell and its surrounding cells.
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
+function M.autotile_surrounding(map, x, y)
+    return M.autotile_region(map, x - 1, y - 1, 3, 3)
 end
 
+
+--o=========================================o
+
+--- Tiling Matrices.
+-- Functions that return tiling matrices
+-- @section Tiling-matrices
+
+--o=========================================o
+
+--- Returns a rectangular tiling matrix.
+-- @tparam map map A moku map
+-- @tparam number x Lower left x coordinate of region
+-- @tparam number y Lower left y coordinate of region
+-- @tparam number width Width of the region
+-- @tparam number height Height of the region
 function M.tiling_matrix_region(map, x, y, width, height)
 
     local tiling_matrix = {}
@@ -507,7 +564,7 @@ function M.tiling_matrix_region(map, x, y, width, height)
         end
 
         if map.autotiles[_v] then
-            tiling_matrix[_x][_y] = M.tile_sum(map, _x, _y)
+            tiling_matrix[_x][_y] = M.autotile_id(map, _x, _y)
         else
             tiling_matrix[_x][_y] = null
         end
@@ -518,10 +575,16 @@ function M.tiling_matrix_region(map, x, y, width, height)
 
 end
 
+--- Returns a tiling matrix for an entire moku map.
+-- @tparam map map A moku map
 function M.tiling_matrix_map(map)
     return M.tiling_matrix_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
 end
 
+--- Returns a tiling matrix for a given cell and its surrounding cells.
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
 function M.tiling_matrix_surrounding(map, x, y)
     return M.tiling_matrix_region(map, x - 1, y - 1, 3, 3)
 end

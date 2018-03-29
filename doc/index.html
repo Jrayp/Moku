@@ -1,0 +1,1045 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Constructors">Constructors </a></li>
+<li><a href="#Iterators">Iterators </a></li>
+<li><a href="#General">General </a></li>
+<li><a href="#Cell_Picking">Cell Picking </a></li>
+<li><a href="#Auto_Tiling">Auto-Tiling </a></li>
+<li><a href="#Tiling_Matrices">Tiling Matrices </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>Moku</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Moku</code></h1>
+<p>Moku Module</p>
+<p></p>
+
+
+<h2><a href="#Constructors">Constructors </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new">new (width, height, tile_width, tile_height, tile_types, fill_type[, tilemap_url])</a></td>
+	<td class="summary">Returns a new moku map from scratch.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#new_from_tilemap">new_from_tilemap (tilemap_url, tile_width, tile_height, tile_types)</a></td>
+	<td class="summary">Builds and returns a new moku map from a supplied defold tilemap.</td>
+	</tr>
+</table>
+<h2><a href="#Iterators">Iterators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#iterate_map">iterate_map (map[, fn])</a></td>
+	<td class="summary">Iterates through all moku map cells.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#iterate_region">iterate_region (map, x, y, width, height[, fn])</a></td>
+	<td class="summary">Iterates through a rectangular region of a moku maps cells.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#iterate_surrounding">iterate_surrounding (map, x, y[, fn])</a></td>
+	<td class="summary">Iterates through a given cell and its surrounding cells.</td>
+	</tr>
+</table>
+<h2><a href="#General">General </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#within_bounds">within_bounds (map, x, y)</a></td>
+	<td class="summary">Return whether or not a given cell is within the map bounds.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#on_border">on_border (map, x, y)</a></td>
+	<td class="summary">Return whether or not a given cell is a border cell</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#within_dimensions">within_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</a></td>
+	<td class="summary">Return whether or not some world coordinate is within the world dimensions of the map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell_center">cell_center (map, map_world_x, map_world_y, x, y)</a></td>
+	<td class="summary">Return pixel coordinates of a given cells center.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#neighbor_coords">neighbor_coords (x, y, dir)</a></td>
+	<td class="summary">Return coordinates of a cell neighboring a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#all_neighbor_coords">all_neighbor_coords (x, y)</a></td>
+	<td class="summary">Return a list of all coordinates neighboring a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#neighbor_value">neighbor_value (map, x, y, dir)</a></td>
+	<td class="summary">Return the value of a cell neighboring a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#all_neighbor_values">all_neighbor_values (map, x, y)</a></td>
+	<td class="summary">Return a list of all values contained in cells neighboring a given cell.</td>
+	</tr>
+</table>
+<h2><a href="#Cell_Picking">Cell Picking </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#pick_cell">pick_cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</a></td>
+	<td class="summary">Returns the coordinates of the cell at given world coordinates</td>
+	</tr>
+</table>
+<h2><a href="#Auto_Tiling">Auto-Tiling </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#set_autotile">set_autotile (map, tile_type, bits, join_self, join_edge, join_nil, joining_types)</a></td>
+	<td class="summary">Designates a tile type as as an autotile.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_id">autotile_id (map, x, y)</a></td>
+	<td class="summary">Calculates a given cells autotile id</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_cell">autotile_cell (map, x, y)</a></td>
+	<td class="summary">Autotiles a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_region">autotile_region (map, x, y, width, height)</a></td>
+	<td class="summary">Autotiles a rectangular region of a moku map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_map">autotile_map (map)</a></td>
+	<td class="summary">Autotiles an entire moku map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_surrounding">autotile_surrounding (map, x, y)</a></td>
+	<td class="summary">Autotiles a given cell and its surrounding cells.</td>
+	</tr>
+</table>
+<h2><a href="#Tiling_Matrices">Tiling Matrices </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#tiling_matrix_region">tiling_matrix_region (map, x, y, width, height)</a></td>
+	<td class="summary">Returns a rectangular tiling matrix.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tiling_matrix_map">tiling_matrix_map (map)</a></td>
+	<td class="summary">Returns a tiling matrix for an entire moku map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tiling_matrix_surrounding">tiling_matrix_surrounding (map, x, y)</a></td>
+	<td class="summary">Returns a tiling matrix for a given cell and its surrounding cells.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header has-description"><a name="Constructors"></a>Constructors </h2>
+
+          <div class="section-description">
+
+ Functions for creating new moku maps
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "new"></a>
+    <strong>new (width, height, tile_width, tile_height, tile_types, fill_type[, tilemap_url])</strong>
+    </dt>
+    <dd>
+    Returns a new moku map from scratch.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         Width in cells
+        </li>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         Height in cells
+        </li>
+        <li><span class="parameter">tile_width</span>
+            <span class="types"><span class="type">number</span></span>
+         Pixel width of your tiles
+        </li>
+        <li><span class="parameter">tile_height</span>
+            <span class="types"><span class="type">number</span></span>
+         Pixel height of your tiles
+        </li>
+        <li><span class="parameter">tile_types</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         A table of tile types
+        </li>
+        <li><span class="parameter">fill_type</span>
+            <span class="types"><span class="type">number</span></span>
+         Initial tile type of new cells
+        </li>
+        <li><span class="parameter">tilemap_url</span>
+            <span class="types"><span class="type">url</span></span>
+         Tilemap url
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A new moku map
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "new_from_tilemap"></a>
+    <strong>new_from_tilemap (tilemap_url, tile_width, tile_height, tile_types)</strong>
+    </dt>
+    <dd>
+    Builds and returns a new moku map from a supplied defold tilemap.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">tilemap_url</span>
+            <span class="types"><span class="type">url</span></span>
+         Tilemap url
+        </li>
+        <li><span class="parameter">tile_width</span>
+            <span class="types"><span class="type">number</span></span>
+         Pixel width of your tiles
+        </li>
+        <li><span class="parameter">tile_height</span>
+            <span class="types"><span class="type">number</span></span>
+         Pixel height of your tiles
+        </li>
+        <li><span class="parameter">tile_types</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         A table of tile types
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A new moku map
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Iterators"></a>Iterators </h2>
+
+          <div class="section-description">
+
+ Iterator functions
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "iterate_map"></a>
+    <strong>iterate_map (map[, fn])</strong>
+    </dt>
+    <dd>
+    Iterates through all moku map cells.
+ An optional filter function can be applied
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         Filter function
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "iterate_region"></a>
+    <strong>iterate_region (map, x, y, width, height[, fn])</strong>
+    </dt>
+    <dd>
+    Iterates through a rectangular region of a moku maps cells.
+ An optional filter function can be applied
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left x coordinate of region
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left y coordinate of region
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         Width of the region
+        </li>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         Height of the region
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         Filter function
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "iterate_surrounding"></a>
+    <strong>iterate_surrounding (map, x, y[, fn])</strong>
+    </dt>
+    <dd>
+    Iterates through a given cell and its surrounding cells.
+ An optional filter function can be applied
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         Filter function
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="General"></a>General </h2>
+
+          <div class="section-description">
+
+ Assorted moku map functions
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "within_bounds"></a>
+    <strong>within_bounds (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return whether or not a given cell is within the map bounds.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        True if in bounds, false otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "on_border"></a>
+    <strong>on_border (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return whether or not a given cell is a border cell
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        True if on border, false otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "within_dimensions"></a>
+    <strong>within_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</strong>
+    </dt>
+    <dd>
+    Return whether or not some world coordinate is within the world dimensions of the map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">map_world_x</span>
+            <span class="types"><span class="type">number</span></span>
+         World x of the map
+        </li>
+        <li><span class="parameter">map_world_y</span>
+            <span class="types"><span class="type">number</span></span>
+         World y of the map
+        </li>
+        <li><span class="parameter">test_world_x</span>
+            <span class="types"><span class="type">number</span></span>
+         World x to test
+        </li>
+        <li><span class="parameter">test_world_y</span>
+            <span class="types"><span class="type">number</span></span>
+         World y to test
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        True if within bounds, false otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell_center"></a>
+    <strong>cell_center (map, map_world_x, map_world_y, x, y)</strong>
+    </dt>
+    <dd>
+    Return pixel coordinates of a given cells center.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">map_world_x</span>
+            <span class="types"><span class="type">number</span></span>
+         World x of the map
+        </li>
+        <li><span class="parameter">map_world_y</span>
+            <span class="types"><span class="type">number</span></span>
+         World y of the map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Pixel x of cells center</li>
+        <li>
+        Pixel y of cells center</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "neighbor_coords"></a>
+    <strong>neighbor_coords (x, y, dir)</strong>
+    </dt>
+    <dd>
+    Return coordinates of a cell neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><span class="type">moku.dir</span></span>
+         Direction of neighbor coordinates to return
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        The x coordinate of neighbor</li>
+        <li>
+        The y coordinate of neighbor</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "all_neighbor_coords"></a>
+    <strong>all_neighbor_coords (x, y)</strong>
+    </dt>
+    <dd>
+    Return a list of all coordinates neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of neighbor coordinates in the form { {n1x, n1y}, {n2x, n2y}, ... }
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "neighbor_value"></a>
+    <strong>neighbor_value (map, x, y, dir)</strong>
+    </dt>
+    <dd>
+    Return the value of a cell neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><span class="type">moku.dir</span></span>
+         Direction of neighbor value to return
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The value. Nil if outside of bounds
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "all_neighbor_values"></a>
+    <strong>all_neighbor_values (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return a list of all values contained in cells neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of neighbor values
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Cell_Picking"></a>Cell Picking </h2>
+
+          <div class="section-description">
+
+ Functions related to cell picking
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "pick_cell"></a>
+    <strong>pick_cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</strong>
+    </dt>
+    <dd>
+    Returns the coordinates of the cell at given world coordinates
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">map_world_x</span>
+            <span class="types"><span class="type">number</span></span>
+         World x of the map
+        </li>
+        <li><span class="parameter">map_world_y</span>
+            <span class="types"><span class="type">number</span></span>
+         World y of the map
+        </li>
+        <li><span class="parameter">pick_world_x</span>
+            <span class="types"><span class="type">number</span></span>
+         Given world x
+        </li>
+        <li><span class="parameter">pick_world_y</span>
+            <span class="types"><span class="type">number</span></span>
+         Given world y
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        x coordinate of cell at given world coordinates. Nil if out of map bounds</li>
+        <li>
+        y coordinate of cell at given world coordinates. Nil if out of map bounds</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Auto_Tiling"></a>Auto-Tiling </h2>
+
+          <div class="section-description">
+
+ Functions related to moku auto-tiling
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "set_autotile"></a>
+    <strong>set_autotile (map, tile_type, bits, join_self, join_edge, join_nil, joining_types)</strong>
+    </dt>
+    <dd>
+    Designates a tile type as as an autotile.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">tile_type</span>
+            <span class="types"><span class="type">number</span></span>
+         The tile type to be designated as an autotile
+        </li>
+        <li><span class="parameter">bits</span>
+            <span class="types"><span class="type">moku.bits</span></span>
+         The autotiling algorithm to be used
+        </li>
+        <li><span class="parameter">join_self</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether tiles of the same type act as joining tiles
+        </li>
+        <li><span class="parameter">join_edge</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether the edge ofthe map acts as a joining tile
+        </li>
+        <li><span class="parameter">join_nil</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether empty cells act as joining tiles
+        </li>
+        <li><span class="parameter">joining_types</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         Additional tile types to act as joining tiles
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autotile_id"></a>
+    <strong>autotile_id (map, x, y)</strong>
+    </dt>
+    <dd>
+    Calculates a given cells autotile id
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The autotile id
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autotile_cell"></a>
+    <strong>autotile_cell (map, x, y)</strong>
+    </dt>
+    <dd>
+    Autotiles a given cell.  Returns the cells autotile id
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The autotile id
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autotile_region"></a>
+    <strong>autotile_region (map, x, y, width, height)</strong>
+    </dt>
+    <dd>
+    Autotiles a rectangular region of a moku map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left x coordinate of region
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left y coordinate of region
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         Width of the region
+        </li>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         Height of the region
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autotile_map"></a>
+    <strong>autotile_map (map)</strong>
+    </dt>
+    <dd>
+    Autotiles an entire moku map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "autotile_surrounding"></a>
+    <strong>autotile_surrounding (map, x, y)</strong>
+    </dt>
+    <dd>
+    Autotiles a given cell and its surrounding cells.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Tiling_Matrices"></a>Tiling Matrices </h2>
+
+          <div class="section-description">
+
+ Functions that return tiling matrices
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "tiling_matrix_region"></a>
+    <strong>tiling_matrix_region (map, x, y, width, height)</strong>
+    </dt>
+    <dd>
+    Returns a rectangular tiling matrix.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left x coordinate of region
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         Lower left y coordinate of region
+        </li>
+        <li><span class="parameter">width</span>
+            <span class="types"><span class="type">number</span></span>
+         Width of the region
+        </li>
+        <li><span class="parameter">height</span>
+            <span class="types"><span class="type">number</span></span>
+         Height of the region
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tiling_matrix_map"></a>
+    <strong>tiling_matrix_map (map)</strong>
+    </dt>
+    <dd>
+    Returns a tiling matrix for an entire moku map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tiling_matrix_surrounding"></a>
+    <strong>tiling_matrix_surrounding (map, x, y)</strong>
+    </dt>
+    <dd>
+    Returns a tiling matrix for a given cell and its surrounding cells.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2018-03-29 13:30:40 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
