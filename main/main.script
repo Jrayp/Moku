@@ -144,7 +144,7 @@ function setup_4bit(self)
 
     self.tiles = {}
 
-    for x, y, value in moku.iterate(self.map_4bit) do
+    for x, y, value in moku.iterate_map(self.map_4bit) do
 
         if self.tiles[x] == nil then
             self.tiles[x] = {}
@@ -165,7 +165,7 @@ function setup_4bit(self)
 
     local tiling_matrix = moku.tiling_matrix_map(self.map_4bit)
 
-    for x, y, value in moku.iterate(self.map_4bit) do
+    for x, y, value in moku.iterate_map(self.map_4bit) do
 
         local sprite_url = msg.url(nil, self.tiles[x][y], "sprite")
 

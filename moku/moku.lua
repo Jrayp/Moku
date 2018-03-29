@@ -78,14 +78,6 @@ M.dir = {
     NORTH_WEST = 8
 }
 
-M.pivot = {
-    CENTER = 1,
-    TOP_LEFT = 2,
-    TOP_RIGHT = 3,
-    BOTTOM_LEFT = 4,
-    BOTTOM_RIGHT = 5
-}
-
 M.bits = {
     FOUR = 4,
     EIGHT = 8
@@ -102,6 +94,16 @@ local get_type
 --o  Constructors
 --o=================o
 
+
+--- Returns a new moku map from scratch.
+-- @tparam number width Width in cells
+-- @tparam number height Height in cells
+-- @tparam number tile_width Pixel width of your tiles
+-- @tparam number tile_height Pixel height of your tiles
+-- @tparam table tile_types A table of tile types
+-- @tparam number fill_type Initial tile type of new cells
+-- @tparam url tilemap_irl Optional url of a tilemap
+-- @return A new moku map
 function M.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)
 
     local new_map = {}
@@ -119,6 +121,12 @@ function M.new(width, height, tile_width, tile_height, tile_types, fill_type, ti
 
 end
 
+--- Builds and returns a new moku map from a supplied defold tilemap.
+-- @tparam url tilemap_irl Url of a tilemap
+-- @tparam number tile_width Pixel width of your tiles
+-- @tparam number tile_height Pixel height of your tiles
+-- @tparam table tile_types A table of tile types
+-- @return A new moku map
 function M.new_from_tilemap(tilemap_url, tile_width, tile_height, tile_types)
 
     local _x, _y, width, height = tilemap.get_bounds(tilemap_url)
@@ -169,7 +177,12 @@ end
 --o  Iterator Functions
 --o=========================o
 
-
+--- Builds and returns a new moku map from a supplied defold tilemap.
+-- @tparam url tilemap_irl Url of a tilemap
+-- @tparam number tile_width Pixel width of your tiles
+-- @tparam number tile_height Pixel height of your tiles
+-- @tparam table tile_types A table of tile types
+-- @return A new moku map
 function M.iterate_region(map, x, y, width, height, fn)
 
     local _v
@@ -194,7 +207,7 @@ function M.iterate_region(map, x, y, width, height, fn)
     )
 end
 
-function M.iterate(map, fn)
+function M.iterate_map(map, fn)
     return M.iterate_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height, fn)
 end
 
@@ -206,10 +219,10 @@ end
 --o  General Map Functions
 --o=========================o
 
---- Return whether or not a given cell is within the map bounds
--- @tparam table map A moku map
--- @tparam number x The x coordinate of given cell
--- @tparam number x The y coordinate of given cell
+--- Return whether or not a given cell is within the map bounds.
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
 -- @return True if in bounds, false otherwise
 function M.within_bounds(map, x, y)
     return x >= map.bounds.x and x < map.bounds.x + map.bounds.width
@@ -218,9 +231,9 @@ end
 
 
 --- Return whether or not a given cell is a border cell
--- @tparam table map A moku map
--- @tparam number The x coordinate of given cell
--- @tparam number x The y coordinate of given cell
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
 -- @return True if on border, false otherwise
 function M.on_border(map, x, y)
     return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
@@ -228,12 +241,12 @@ function M.on_border(map, x, y)
 end
 
 
---- Return whether or not some world coordinate is within the pixel dimensions of the map
--- @tparam table map A moku map
+--- Return whether or not some world coordinate is within the world dimensions of the map.
+-- @tparam map map A moku map
 -- @tparam number map_world_x World x of the map
 -- @tparam number map_world_y World y of the map
 -- @tparam number test_world_x World x to test
--- @tparam number test_world_y y world y test
+-- @tparam number test_world_y World y to test
 -- @return True if within bounds, false otherwise
 function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_world_y)
 
@@ -245,12 +258,12 @@ function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_w
 
 end
 
---- Return pixel coordinates of a given cells center
--- @tparam table map A moku map
+--- Return pixel coordinates of a given cells center.
+-- @tparam map map A moku map
 -- @tparam number map_world_x World x of the map
 -- @tparam number map_world_y World y of the map
--- @tparam number y The x coordinate of given cell
--- @tparam number x The y coordinate of given cell
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
 -- @return Pixel x of cells center
 -- @return Pixel y of cells center
 function M.cell_center(map, map_world_x, map_world_y, x, y)
@@ -265,9 +278,9 @@ function M.cell_center(map, map_world_x, map_world_y, x, y)
 end
 
 
---- Return coordinates of a cell neighboring a given cell
--- @tparam number x The y coordinate of given cell
--- @tparam number y The x coordinate of given cell
+--- Return coordinates of a cell neighboring a given cell.
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
 -- @tparam moku.dir dir Direction of neighbor coordinates to return
 -- @return The x coordinate of neighbor
 -- @return The y coordinate of neighbor
@@ -299,10 +312,10 @@ function M.neighbor_coords(x, y, dir)
 
 end
 
---- Return a list of all coordinates neighboring a given cell
--- @tparam number x The y coordinate of given cell
--- @tparam number y The x coordinate of given cell
--- @treturn { {n1_x, n1_y}, {n2_x, n_2y}, ...} } A list of neighbor coordinates
+--- Return a list of all coordinates neighboring a given cell.
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @return A list of neighbor coordinates in the form { {n1x, n1y}, {n2x, n2y}, ... }
 function M.all_neighbor_coords(x, y)
 
     local nc = {}
@@ -318,10 +331,10 @@ function M.all_neighbor_coords(x, y)
 
 end
 
---- Return the value of a cell neighboring a given cell
--- @tparam table map A moku map
--- @tparam number x The y coordinate of given cell
--- @tparam number y The x coordinate of given cell
+--- Return the value of a cell neighboring a given cell.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
 -- @tparam moku.dir dir Direction of neighbor value to return
 -- @return The value. Nil if outside of bounds
 function M.neighbor_value(map, x, y, dir)
@@ -335,11 +348,11 @@ function M.neighbor_value(map, x, y, dir)
 
 end
 
---- Return a list of all values contained in cells neighboring a given cell
--- @tparam table map A moku map
--- @tparam number x The y coordinate of given cell
--- @tparam number y The x coordinate of given cell
--- @treturn {v1, v2, ...} A list of neighbor values
+--- Return a list of all values contained in cells neighboring a given cell.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @return A list of neighbor values
 function M.all_neighbor_values(map, x, y)
 
     local nv = {}
@@ -440,7 +453,7 @@ end
 
 function M.auto_tile_region(map, x, y, width, height)
 
-    for _x, _y, _v in M.iterate(map) do
+    for _x, _y, _v in M.iterate_map(map) do
         if map.auto_tiles[_v] then
             M.auto_tile_cell(map, _x, _y)
         end
@@ -460,7 +473,7 @@ function M.tiling_matrix_region(map, x, y, width, height)
 
     local tiling_matrix = {}
 
-    for _x, _y, _v in M.iterate(map) do
+    for _x, _y, _v in M.iterate_map(map) do
 
         if tiling_matrix[_x] == nil then
             tiling_matrix[_x] = {}

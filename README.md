@@ -2,13 +2,13 @@
 Map utility &amp; auto-tile module for the Defold game engine. Partially based on the method outlined here: https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
 
 ## State
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe. 
+Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe.
 
-At this stage I am very open to moderate redesign. I'm aware that this is not perfect, and I have some ideas of my own, but if you have any suggestions let me know. For now it is definitely at least functional (barring hidden bugs). Also, please don't hesitate to offer better naming ideas for functions, etc. I am notriously bad at this, and my own naming bothers me.
+At this stage I am very open to moderate redesign. I'm aware that this is not perfect, and I have some ideas of my own, but if you have any suggestions let me know. For now it is definitely at least functional (barring hidden bugs). Also, please don't hesitate to offer better naming ideas for functions, etc. I am notoriously bad at this, and my own naming bothers me.
 
 This documentation is also not yet complete. Refer to the demo project, and the function guide below, to infer how its used. A guide will be posted in the future. Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request if you have time)
 
-Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moku.layer_name`, and defaults to `layer1`). However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individial layers, and changing the layer name when working with them.
+Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moku.layer_name`, and defaults to `layer1`). However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individual layers, and changing the layer name when working with them.
 
 # Moku Functions
 
@@ -29,7 +29,7 @@ Example:
     FOREST = 49,
     OCEAN = 97
  }
- 
+
 local my_map = moku.new(8, 8, 32, 32, tile_types, tile_types.FLOOR)
 ```
 
@@ -40,7 +40,7 @@ _PARAMETERS_
 * __tile_height__ <kbd>Integer</kbd> - Width of individual tiles/cells in pixels.
 * __tile_types__ <kbd>Table</kbd> - A table of keys and integer values representing different tile types, and their associated base tile id.
 * __fill_type__ <kbd>Integer</kbd> - The initial tile type (defined in the previous table) of the cells in the new map.  
-* __tilemap_url__ <kbd>String</kbd> - Optional path to a defold tilemap. Required for auto-tiling, but not required for creating tiling matrices, explained below. 
+* __tilemap_url__ <kbd>String</kbd> - Optional path to a defold tilemap. Required for auto-tiling, but not required for creating tiling matrices, explained below.
 
 _RETURNS_
 * __moku_map__ <kbd>table</kbd> - A new moku map.
@@ -56,7 +56,7 @@ Example:
     FOREST = 49,
     OCEAN = 97
  }
- 
+
 local my_map = moku.new_from_tilemap("my_map_go#my_tilemap", 32, 32, tile_types)
 ```
 
@@ -71,7 +71,7 @@ _RETURNS_
 
 ## Iterator Functions
 
-These functions are convienience functions for iterating through a specified region of a moku map. If you need custom iteration, you can of course iterate using a nested for loop. Just be aware that the moku map table also contains non coordinate data. It is therefore advised that you do not use a forp loop to avoid errors. 
+These functions are convienience functions for iterating through a specified region of a moku map. If you need custom iteration, you can of course iterate using a nested for loop. Just be aware that the moku map table also contains non coordinate data. It is therefore advised that you do not use a forp loop to avoid errors.
 
 ### moku.iterate_region(map, x, y, width, height, [fn])
 Iterates a rectangular region of the supplied moku map, using `x`, `y`, `width`, and `height` as bounds. An optional function `fn` can be supplied to filter results.
@@ -202,8 +202,8 @@ end
 
 _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
-* __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner. 
-* __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner. 
+* __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner.
+* __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner.
 * __test_world_x__ <kbd>Integer</kbd> - Pixel x in world coordinates we are testing for.
 * __test_world_y__ <kbd>Integer</kbd> - Pixel y in world coordinates we are testing for
 
@@ -211,9 +211,9 @@ _RETURNS_
 * __within_dimensions_flag__ <kbd>Boolean</kbd> - True if within dimensions, false otherwise.
 
 ### moku.neighbor_coords(x, y, dir)
-Returns the coordinates of a supplied origin cells neighbor. The neighbor is specified by use of the `dir` argument. This argument is an integer that corresponds to one of the 8 directions on a (simple) compass, starting at 1 for north and continuing in clock-wise fashion to 8 for north-west. Moku provides an improvised "enum" table for direction, accessible with `moku.dir.[DIRECTION]`, for convinience. 
+Returns the coordinates of a supplied origin cells neighbor. The neighbor is specified by use of the `dir` argument. This argument is an integer that corresponds to one of the 8 directions on a (simple) compass, starting at 1 for north and continuing in clock-wise fashion to 8 for north-west. Moku provides an improvised "enum" table for direction, accessible with `moku.dir.[DIRECTION]`, for convinience.
 
-Note that this calculation is independent of any moku map. It is not guarenteed that the returned value is within the bounds of whatever map you may be using it for. 
+Note that this calculation is independent of any moku map. It is not guarenteed that the returned value is within the bounds of whatever map you may be using it for.
 
 Example:
 
@@ -228,7 +228,7 @@ print(sw_x, sw_y) -- Prints "4, 4"
 
 _PARAMETERS_
 * __x__ <kbd>Integer</kbd> - x coordinate of origin cell.
-* __y__ <kbd>Integer</kbd> - y coordinate of origin cell. 
+* __y__ <kbd>Integer</kbd> - y coordinate of origin cell.
 * __dir__ <kbd>Integer</kbd> - Direction of coordinate we want. Range: 1-8
 
 _RETURNS_
@@ -237,7 +237,7 @@ _RETURNS_
 
 ## Picking Functions
 
-These functions handle cell picking, and take world position and map dimensions into account. 
+These functions handle cell picking, and take world position and map dimensions into account.
 
 ### moku.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
 Returns the coordinates of a moku map cell given the supplied world coordinates. Moku maps do not (currently) store current world position, so the user must supply this information. Returns nil if the world coordinates fall outside the world dimensions of the supplied moku map.
@@ -251,20 +251,20 @@ function on_input(self, action_id, action)
         local wx = action.screen_x + cam_pos.x
         local wy = action.screen_y + cam_pos.y
         tx, ty = moku.pick_cell(my_map, my_map_pos_x, my_map_pos_y, wx, wy)
-        
+
         if tx and ty then
             print("You clicked on the tile at (tx, ty). Good job!)
         else
             print("You clicked outside of the map! Reported.)
         end
-    end 
+    end
 end
 ```
 
 _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
-* __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner. 
-* __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner. 
+* __map_world_x__ <kbd>Integer</kbd> - Current pixel x in world cooridnates of maps lower left corner.
+* __map_world_y__ <kbd>Integer</kbd> - Current pixel y in world cooridnates of maps lower left corner.
 * __pick_world_x__ <kbd>Integer</kbd> - Pixel x in world coordinates we are testing for.
 * __pick_world_y__ <kbd>Integer</kbd> - Pixel y in world coordinates we are testing for
 
@@ -274,7 +274,7 @@ _RETURNS_
 
 ## Auto-tiling functions
 
-These functions handle auto-tiling and the creation of tiling matrices. Currently, to use auto tiling you must supply a tilemap url to your moku map. If you are not using a defold tilemap, you may use the somewhat more cumbersome and expensive, but equally effective, tiling matrices. 
+These functions handle auto-tiling and the creation of tiling matrices. Currently, to use auto tiling you must supply a tilemap url to your moku map. If you are not using a defold tilemap, you may use the somewhat more cumbersome and expensive, but equally effective, tiling matrices.
 
 ### moku.add_auto_tile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
 This function tells a moku map which `tile_type` should be treated as an auto tile. Once added this tile type will be taken into consideration when using any of the other functions listed under this section. Tile types that have not been added using this function are ignored completely.
@@ -283,9 +283,9 @@ You must supply a moku map and a `tile_type` as defined in your `tile_types` tab
 
 You must then decide on which autotiling algorithm you will use. 4-bit or 8-bit. 4-bit autotiling does not take corners into account, and requires only 16 images to work correctly. 8-bit autotiling does take corners into account but requires a whopping 48 images to work correctly. This decision is clearly dependent in your use case. I recommend using 4-bit tiling when possible.
 
-The three joining flags tell moku how this autotile should respond to tiles of its own type, the maps edge, and empty cells in your map, respectively. If set to true the autotiler will consider these cases as "joining tiles" during the autotiling process. 
+The three joining flags tell moku how this autotile should respond to tiles of its own type, the maps edge, and empty cells in your map, respectively. If set to true the autotiler will consider these cases as "joining tiles" during the autotiling process.
 
-Any additional tile types that should act as valid joining tiles to the original autotile can be added in a list under the `joining_types` argument. 
+Any additional tile types that should act as valid joining tiles to the original autotile can be added in a list under the `joining_types` argument.
 
 Note that you will not necessarily be using auto tiling for every tile type. Think walls (require auto-tiling) and floors (usually do not).  
 
@@ -311,15 +311,15 @@ moku.add_auto_tile(my_map, tile_types.PLATEAU, 8, true, true, false)
 
 _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
-* __tile_type__ <kbd>Integer</kbd> - Tile type to add as an auto tile. 
-* __bits__ <kbd>Integer</kbd> - Autotiling algorithm. 4 or 8. 
+* __tile_type__ <kbd>Integer</kbd> - Tile type to add as an auto tile.
+* __bits__ <kbd>Integer</kbd> - Autotiling algorithm. 4 or 8.
 * __join_self__ <kbd>Boolean</kbd> - Whether or not this autotile will join to tiles of its own type.
 * __join_edge__ <kbd>Boolean</kbd> - Whether or not this autotile will join to the edge of the map.
 * __join_nil__ <kbd>Boolean</kbd> - Whether or not this autotile will join to empty cells of the map.
 * __joining_types__ <kbd>Table</kbd> - Further tile types to act as joining tiles, supplied in list form.
 
 ### moku.tile_sum(map, x, y)
-Returns the calculated binary sum of a supplied tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling. 
+Returns the calculated binary sum of a supplied tile. This sum corresponds to the correct position of the image within your maps tilesource, after autotiling.
 
 This function is of limited practical use on its own, but is used extensively by other functions in this section.
 
