@@ -1,14 +1,22 @@
 # Moku
-Map utility &amp; auto-tile module for the Defold game engine. Partially based on the method outlined here: https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673
+Map utility/module for the Defold game engine. 
+
+## Features: 
+
+* Bitmask autotiling partially based on the method outlined here: [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673). Supports both 4 and 8-bit tiling. Can be used in conjuction with defold tilemaps, or your own custom maps.
+
+*  Cell Picking
+
+* Assorted convience functions
+
+## Planned features
+
+* Efficient AStar pathfinding with support for options such as heavy diagonals etc.
 
 ## State
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Will be made PERFECT.. maybe.
+Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. 
 
-At this stage I am very open to moderate redesign. I'm aware that this is not perfect, and I have some ideas of my own, but if you have any suggestions let me know. For now it is definitely at least functional (barring hidden bugs). Also, please don't hesitate to offer better naming ideas for functions, etc. I am notoriously bad at this, and my own naming bothers me.
-
-This documentation is also not yet complete. Refer to the demo project, and the function guide below, to infer how its used. A guide will be posted in the future. Please help me fix the typos, and poor wording in this document, when you come across them! (edit, and issue a pull request if you have time)
-
-Btw the map technically only supports one layer for defold tilemaps (the name can be changed with `moku.layer_name`, and defaults to `layer1`). However, I believe one could add multi layer functionality fairly easily by using multiple moku maps for the individual layers, and changing the layer name when working with them.
+<!---
 
 # Moku Functions
 
@@ -381,3 +389,4 @@ _PARAMETERS_
 * __map__ <kbd>Table</kbd> - A moku map.
 * __x__ <kbd>Integer</kbd> - x coordinate of center cell.
 * __y__ <kbd>Integer</kbd> - y coordinate of center cell.
+--->
