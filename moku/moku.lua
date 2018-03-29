@@ -1,3 +1,5 @@
+--- Moku Module
+
 local M = {}
 
 --o  Local Variables  o--
@@ -74,6 +76,14 @@ M.dir = {
     SOUTH_WEST = 6,
     WEST = 7,
     NORTH_WEST = 8
+}
+
+M.pivot = {
+    CENTER = 1,
+    TOP_LEFT = 2,
+    TOP_RIGHT = 3,
+    BOTTOM_LEFT = 4,
+    BOTTOM_RIGHT = 5
 }
 
 M.bits = {
@@ -196,16 +206,35 @@ end
 --o  General Map Functions
 --o=========================o
 
+--- Return whether or not a given cell is within the map bounds
+-- @tparam table map A moku map
+-- @tparam number x The x coordinate of given cell
+-- @tparam number x The y coordinate of given cell
+-- @return True if in bounds, false otherwise
 function M.within_bounds(map, x, y)
     return x >= map.bounds.x and x < map.bounds.x + map.bounds.width
     and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
 end
 
+
+--- Return whether or not a given cell is a border cell
+-- @tparam table map A moku map
+-- @tparam number The x coordinate of given cell
+-- @tparam number x The y coordinate of given cell
+-- @return True if on border, false otherwise
 function M.on_border(map, x, y)
     return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
     or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
 end
 
+
+--- Return whether or not some world coordinate is within the pixel dimensions of the map
+-- @tparam table map A moku map
+-- @tparam number map_world_x World x of the map
+-- @tparam number map_world_y World y of the map
+-- @tparam number test_world_x World x to test
+-- @tparam number test_world_y y world y test
+-- @return True if within bounds, false otherwise
 function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_world_y)
 
     local map_shift_x = map_world_x + (map.bounds.x - 1) * map.dimensions.tile_width
@@ -216,6 +245,32 @@ function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_w
 
 end
 
+--- Return pixel coordinates of a given cells center
+-- @tparam table map A moku map
+-- @tparam number map_world_x World x of the map
+-- @tparam number map_world_y World y of the map
+-- @tparam number y The x coordinate of given cell
+-- @tparam number x The y coordinate of given cell
+-- @return Pixel x of cells center
+-- @return Pixel y of cells center
+function M.cell_center(map, map_world_x, map_world_y, x, y)
+
+    local ox, oy
+
+    ox = map_world_x + (x - 1) * map.dimensions.tile_width + map.dimensions.tile_width / 2
+    oy = map_world_y + (y - 1) * map.dimensions.tile_height + map.dimensions.tile_height / 2
+
+    return ox, oy
+
+end
+
+
+--- Return coordinates of a cell neighboring a given cell
+-- @tparam number x The y coordinate of given cell
+-- @tparam number y The x coordinate of given cell
+-- @tparam moku.dir dir Direction of neighbor coordinates to return
+-- @return The x coordinate of neighbor
+-- @return The y coordinate of neighbor
 function M.neighbor_coords(x, y, dir)
 
     if dir == M.dir.NORTH then
@@ -244,30 +299,47 @@ function M.neighbor_coords(x, y, dir)
 
 end
 
---[[ Dont just copy over code from other projects without testing ;)
+--- Return a list of all coordinates neighboring a given cell
+-- @tparam number x The y coordinate of given cell
+-- @tparam number y The x coordinate of given cell
+-- @treturn { {n1_x, n1_y}, {n2_x, n_2y}, ...} } A list of neighbor coordinates
 function M.all_neighbor_coords(x, y)
 
     local nc = {}
+    local nx
+    local ny
 
     for i = 1, 8 do
-        nc[i] = M.neighbor_coords(x, y, i)
+        nx, ny = M.neighbor_coords(x, y, i)
+        nc[i] = {nx, ny}
     end
 
     return nc
 
 end
 
+--- Return the value of a cell neighboring a given cell
+-- @tparam table map A moku map
+-- @tparam number x The y coordinate of given cell
+-- @tparam number y The x coordinate of given cell
+-- @tparam moku.dir dir Direction of neighbor value to return
+-- @return The value. Nil if outside of bounds
 function M.neighbor_value(map, x, y, dir)
 
-    local nc = M.neighbor_coords(x, y, dir)
+    local nv = M.neighbor_coords(x, y, dir)
 
-    if M.within_bounds(map, nc.x, nc.y) then
-        return map[nc.x][nc.y]
+    if M.within_bounds(map, nv.x, nv.y) then
+        return map[nv.x][nv.y]
     else return nil
     end
 
 end
 
+--- Return a list of all values contained in cells neighboring a given cell
+-- @tparam table map A moku map
+-- @tparam number x The y coordinate of given cell
+-- @tparam number y The x coordinate of given cell
+-- @treturn {v1, v2, ...} A list of neighbor values
 function M.all_neighbor_values(map, x, y)
 
     local nv = {}
@@ -279,7 +351,7 @@ function M.all_neighbor_values(map, x, y)
     return nv
 
 end
---]]
+
 
 --o====================o
 --o  Picking Functions
