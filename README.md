@@ -17,7 +17,7 @@ Map utility/module for the Defold game engine.
 * Other things I haven't put too much thought into yet
 
 ### State
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. 
+Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Signatures are bound to change until I reach at least beta. If you have suggestions for structure, or function naming, please create an issue.
 
 ## Basic auto-tiling guide
 
