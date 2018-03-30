@@ -8,8 +8,7 @@ Map utility/module for the Defold game engine.
 ### Features: 
 
 * Bitmask autotiling partially based on the method outlined here: [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673). Supports both 4 and 8-bit tiling. Can be used in conjuction with defold tilemaps, or your own custom maps.
-* Cell Picking
-* Assorted convience functions
+* Assorted convience functions including cell picking
 
 ### Planned features
 
@@ -18,6 +17,51 @@ Map utility/module for the Defold game engine.
 
 ### State
 Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Signatures are bound to change until I reach at least beta. If you have suggestions for structure, or function naming, please create an issue.
+
+## Anatomy of a Moku map
+
+A Moku map is nothing but a two-dimensional table of cells containing number values corresponding to your individual tile types, along with some relevant map data. 
+
+A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)` or built from a Defold tilemap using `moku.new_from_tilemap(tilemap_url, tile_width, tile_height, tile_types)`. The `tile_types` argument is a table with the following form:
+
+```lua
+local tile_types = {
+    MY_TILE1 = 1,
+    MY_TILE2 = 2,
+    MY_TILE3 = 3,
+    -- etc
+}
+```
+
+Where the `number` value should correspond to that tiles tile sheet image id. **Your Moku maps cells should generally only contain values that are also found in your tile_types table!**
+
+I will now explain the structure of a Moku map. 
+
+Moku map cells are accessable using indexers, and Moku stores the `tile_types` table passed in the constructor:
+
+```lua
+-- Assuming moku_map was created with one of the above constructor functions,
+-- the cell at coordinate i, j will be changed to the MY_TILE1 type
+moku_map[i][j] = moku_map.tile_types.MY_TILE1
+```
+
+Furthermore Moku keeps track of "bounds" and "dimensional" data. Bounds here, is referring to a maps bottom left corner cell coordinate (negative coordinates are fully supported) and the maps width and height in cells. Dimensions on the other hand refer to world space dimensions in pixels, calculated from the bounds data and your entered tile sizes. Dimensional data is used for things such as cell picking etc. 
+
+```lua
+-- Prints the bottom left cells x, y coordinates
+print(moku_map.bounds.x, moku_map.bounds.y)
+
+-- Prints the maps width and height in cells
+print(moku_map.bounds.width, moku_map.bounds.height)
+
+-- Prints the tile width and height in pixels, as passed in the constructor
+print(moku_map.dimensions.tile_width, moku_map.dimensions.tile_width)
+
+-- Prints the maps total width and height in pixels
+print(moku_map.dimensions.world_width, moku_map.dimensions.world_height)
+```
+
+Lastly a Moku map may store information pertaining to the autotiler with `moku_map.tilemap_url` and `moku_map.autotiles` both of which are meant for internal use. (Though there may be obscure reasons for manually changing the `tilemap_url`, which shouldn't cause any issues.)
 
 ## Basic auto-tiling guide
 
@@ -61,7 +105,7 @@ local tile_types = {
 
 It is recommended to give your tile types simple descriptive names (keys). The value associated with the type is a reference to that types base tile position on the tile sheet. Here the `PLAINS` types base tile occupies position `1` on the tile sheet, the `PLATEAU` type position `49`, and the `OCEAN` type position `97`. 
 
-Create a moku map from your defold tilemap. Assuming your tilemap is named `my_tilemap` and is attached to the gameobject `map_go`:
+Create a Moku map from your defold tilemap. Assuming your tilemap is named `my_tilemap` and is attached to the gameobject `map_go`:
 
 ```lua
 my_new_map = moku.new_from_tilemap("map_go#my_tilemap", 32, 32, tile_types)
@@ -95,7 +139,7 @@ moku.autotile_map(my_new_map)
 
 ![](doc/after.PNG)
 
-Thats it. Much more can be done, but this guide should be enough to at least get an idea of how Moku works, and should be sufficient for the vast majority of use cases. Following is the complete example code:
+Thats it. Much more can be done, but this guide should be enough to at least get an idea of how Moku autotiling works, and should be sufficient for the vast majority of use cases. Following is the complete example code:
 
 ```lua
 local moku = require "moku.moku"    
