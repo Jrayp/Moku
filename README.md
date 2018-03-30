@@ -21,7 +21,7 @@ Currently in very early, untested alpha. Missing features, probably a bit unwiel
 
 ## Basic auto-tiling guide
 
-![alt text](https://github.com/Jrayp/Moku/blob/master/doc/transition.png)
+![image](https://github.com/Jrayp/Moku/blob/master/doc/transition.png)
 
 Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit tiling, but 4-bit tiling works the same way.
 
@@ -29,7 +29,7 @@ Moku auto-tiling can be very easy to use, depending on use case. More involved n
 
 First, your sprite sheet containing your maps tile images must be in a specific layout. In the following tile sheet from the demo project, we have three base tile types: Plains, plateau, and ocean. (This is a modified version of the tile sheet used in the article linked above.) 
 
-![alt text](https://github.com/Jrayp/Moku/blob/master/main/images/autotiles_8bit.png)
+![image](https://github.com/Jrayp/Moku/blob/master/main/images/autotiles_8bit.png)
 
 Since the plains and plateau types will be designated 8-bit autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate an autotile must have 48 images reserved on your tile sheet in EXACTLY this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
 
@@ -41,7 +41,7 @@ The ocean tile does not require autotile functionality, and can be freely placed
 
 In defold, add a tilemap to your collection that references a tilesource derived from your tile sheet. Go ahead and draw on it, but be sure to use only the above mentioned base tiles for drawing (that is the first image related to the tile type). 
 
-![alt text](https://github.com/Jrayp/Moku/blob/master/doc/before.PNG)
+![image](https://github.com/Jrayp/Moku/blob/master/doc/before.PNG)
 
 Now, after importing moku in script, create a table of your tile types as such:
 
@@ -93,7 +93,7 @@ And now we can tell moku to tile the map:
 moku.autotile_map(my_new_map)
 ```
 
-![alt text](https://github.com/Jrayp/Moku/blob/master/doc/after.PNG)
+![image](https://github.com/Jrayp/Moku/blob/master/doc/after.PNG)
 
 Thats it. Much more can be done, but this guide should be enough to at least get an idea of how Moku works, and should be sufficient for the vast majority of use cases. Following is the complete example code:
 
