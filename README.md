@@ -29,7 +29,7 @@ First, your sprite sheet containing your maps tile images must be in a specific 
 
 Since the plains and plateau types will be designated 8-bit autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate an autotile must have 48 images reserved on your tile sheet in EXACTLY this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
 
-Note that you may place your autotiles anywhere on your tilesheet, as long as the preceding 47 images are in the correct order. Mokus incredibly advanced AI can handle this. Also note that if we were using 4-bit tiling that everything would work the same, except that we would only require a much more managable 16 images ber autotile.
+Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. Also note that if we were using 4-bit tiling that everything would work the same, except that we would only require a much more managable 16 images ber autotile.
 
 The ocean tile does not require autotile functionality, and can be freely placed anywhere on your tile sheet.
 
