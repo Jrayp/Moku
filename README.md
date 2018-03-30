@@ -70,7 +70,7 @@ print(moku_map.bounds.x, moku_map.bounds.y)
 print(moku_map.bounds.width, moku_map.bounds.height)
 
 -- Prints the tile width and height in pixels, as passed in the constructor
-print(moku_map.dimensions.tile_width, moku_map.dimensions.tile_width)
+print(moku_map.dimensions.tile_width, moku_map.dimensions.tile_height)
 
 -- Prints the maps total width and height in pixels
 print(moku_map.dimensions.world_width, moku_map.dimensions.world_height)
@@ -162,11 +162,9 @@ Thats it. Much more can be done, but this guide should be enough to at least get
 local moku = require "moku.moku"    
 
 local tile_types = {
-      
     -- Autotiles
     PLAINS = 1,
     PLATEAU = 49,
-        
     -- Normal Tiles
     OCEAN = 97
 }
