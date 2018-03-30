@@ -83,7 +83,7 @@ Lets take a look at this functions parameters
 4. Whether or not this tile interacts/joins with tiles of its own type, usually true
 5. Whether or not this tile interacts/joins with the edge of the map
 6. Whether or not this tile interacts/joins with empty cells (these are supported)
-7. A list of other tile types that the autotile will interact/join to 
+7. An optional list of other tile types that the autotile will interact/join to 
 
 So in our example, the `PLAINS` type will interact/join with everything except `OCEAN` tiles; and the `PLATEAU` type will interact with everything except `OCEAN` and `PLAINS` tiles.
 
@@ -118,6 +118,8 @@ moku.set_autotile(my_new_map, tile_types.PLATEAU, moku.bits.EIGHT, true, true, t
 moku.autotile_map(my_new_map)
 ```
 <!---
+
+OLD SHITTY DOCS
 
 # Moku Functions
 
