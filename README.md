@@ -25,7 +25,7 @@ Moku auto-tiling can be very easy to use, depending on use case. More involved n
 
 ### Tile sheet layout
 
-First, your sprite sheet containing your maps tile images must be in a specific layout. In the following tile sheet from the demo project, we have three base tile types: Plains, plateau, and ocean.  
+First, your sprite sheet containing your maps tile images must be in a specific layout. In the following tile sheet from the demo project, we have three base tile types: Plains, plateau, and ocean. (This is a modified version of the tile sheet used in the article linked above.) 
 
 ![alt text](https://github.com/Jrayp/Moku/blob/master/main/images/autotiles_8bit.png "Logo Title Text 1")
 
