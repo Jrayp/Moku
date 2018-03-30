@@ -1,9 +1,6 @@
 # Moku
 Map utility/module for the Defold game engine. 
 
-![alt text](https://github.com/Jrayp/Moku/blob/master/doc/transition.png)
-
-
 ### Documentation
 
 [LDoc generated module documentation](http://htmlpreview.github.io/?https://github.com/Jrayp/Moku/blob/master/doc/index.html)
@@ -23,6 +20,8 @@ Map utility/module for the Defold game engine.
 Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. 
 
 ## Basic auto-tiling guide
+
+![alt text](https://github.com/Jrayp/Moku/blob/master/doc/transition.png)
 
 Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit tiling, but 4-bit tiling works the same way.
 
