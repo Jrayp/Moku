@@ -23,6 +23,8 @@ Currently in very early, untested alpha. Missing features, probably a bit unwiel
 
 Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit tiling, but 4-bit tiling works the same way.
 
+### Tile sheet layout
+
 First, your sprite sheet containing your maps tile images must be in a specific layout. In the following tile sheet from the demo project, we have three base tile types: Plains, plateau, and ocean.  
 
 ![alt text](https://github.com/Jrayp/Moku/blob/master/main/images/autotiles_8bit.png "Logo Title Text 1")
@@ -32,6 +34,8 @@ Since the plains and plateau types will be designated 8-bit autotiles, they cons
 Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. Also note that if we were using 4-bit tiling that everything would work the same, except that we would only require a much more managable 16 images per autotile.
 
 The ocean tile does not require autotile functionality, and can be freely placed anywhere on your tile sheet.
+
+### Auto tiling a tilemap
 
 In defold, add a tilemap to your collection that references a tilesource derived from your tile sheet. Go ahead and draw on it, but be sure to use only the above mentioned base tiles for drawing (that is the first image related to the tile type). 
 
