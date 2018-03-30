@@ -1,22 +1,59 @@
 # Moku
 Map utility/module for the Defold game engine. 
 
-## Features: 
+### Documentation
+
+[LDoc generated module documentation](http://htmlpreview.github.io/?https://github.com/Jrayp/Moku/blob/master/doc/index.html)
+
+### Features: 
 
 * Bitmask autotiling partially based on the method outlined here: [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673). Supports both 4 and 8-bit tiling. Can be used in conjuction with defold tilemaps, or your own custom maps.
-
-*  Cell Picking
-
+* Cell Picking
 * Assorted convience functions
 
-## Planned features
+### Planned features
 
 * Efficient AStar pathfinding with support for options such as heavy diagonals etc.
+* Other things I haven't put too much thought into yet.
 
-## State
+### State
 Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. 
 
+
+
 <!---
+
+## Usage
+
+Moku can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required.
+
+First, your sprite sheet containing your maps tile images must be of a specific format. Any tile you plan on designating an autotile (explained below) 
+
+In defold, add a tilemap to your collection.
+
+```lua
+    local tile_types = {
+        
+        -- Autotiles
+        PLAINS = 1,
+        PLATEAU = 49,
+        
+        -- Normal Tiles
+        OCEAN = 97
+    }
+
+    self.map_8bit = moku.new_from_tilemap("map_8bit#tilemap", 32, 32, tile_types)
+    self.map_8bit_pos = go.get_position("map_8bit")
+
+    moku.set_autotile(self.map_8bit, tile_types.PLAINS, 8, true, true, true, {tile_types.PLATEAU})
+    moku.set_autotile(self.map_8bit, tile_types.PLATEAU, 8, true, true, true)
+
+    moku.autotile_map(self.map_8bit)
+
+```
+
+
+
 
 # Moku Functions
 
