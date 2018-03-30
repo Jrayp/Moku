@@ -115,8 +115,8 @@ function setup_8bit(self, tile_types_8bit, tile_types_4bit)
     self.map_8bit = moku.new_from_tilemap("map_8bit#tilemap", 32, 32, tile_types)
     self.map_8bit_pos = go.get_position("map_8bit")
 
-    moku.set_autotile(self.map_8bit, tile_types.PLAINS, 8, true, true, true, {tile_types.PLATEAU})
-    moku.set_autotile(self.map_8bit, tile_types.PLATEAU, 8, true, true, true)
+    moku.set_autotile(self.map_8bit, tile_types.PLAINS, moku.bits.EIGHT, true, true, true, {tile_types.PLATEAU})
+    moku.set_autotile(self.map_8bit, tile_types.PLATEAU, moku.bits.EIGHT, true, true, true)
 
     moku.autotile_map(self.map_8bit)
 
@@ -139,8 +139,8 @@ function setup_4bit(self)
     self.map_4bit = moku.new(8, 8, 32, 32, tile_types, tile_types.FLOOR)
     self.map_4bit_pos = go.get_position("map_4bit")
 
-    moku.set_autotile(self.map_4bit, tile_types.WALL, 4, true, true, false)
-    moku.set_autotile(self.map_4bit, tile_types.YELLOW_WALL, 4, true, false, false)
+    moku.set_autotile(self.map_4bit, tile_types.WALL, moku.bits.FOUR, true, true, false)
+    moku.set_autotile(self.map_4bit, tile_types.YELLOW_WALL, moku.bits.FOUR, true, false, false)
 
     self.tiles = {}
 
