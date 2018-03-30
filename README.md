@@ -1,21 +1,21 @@
 # Moku
 Map utility/module for the Defold game engine. 
 
-#### Documentation
+### Documentation
 
 [LDoc generated module documentation](http://htmlpreview.github.io/?https://github.com/Jrayp/Moku/blob/master/doc/index.html)
 
-#### Features: 
+### Features: 
 
 * Bitmask autotiling partially based on the method outlined here: [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673). Supports both 4 and 8-bit tiling. Can be used in conjuction with defold tilemaps, or your own custom maps.
 * Assorted convience functions including cell picking
 
-#### Planned features
+### Planned features
 
 * Efficient AStar pathfinding with support for options such as heavy diagonals etc
 * Other things I haven't put too much thought into yet
 
-#### State
+### State
 
 Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Signatures are bound to change until I reach at least beta. If you have suggestions for structure, or function naming, please create an issue.
 
@@ -23,7 +23,7 @@ Currently in very early, untested alpha. Missing features, probably a bit unwiel
 
 A Moku map is nothing but a two-dimensional table of cells containing number values corresponding to your individual tile types, along with some relevant map data. 
 
-#### Creating a new Moku map
+### Creating a new Moku map
 
 A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)` or built from a Defold tilemap using `moku.new_from_tilemap(tilemap_url, tile_width, tile_height, tile_types)`. 
 
@@ -31,7 +31,7 @@ A new moku map can be created from scratch using `moku.new(width, height, tile_w
 moku_map = moku.new(...)
 ```
 
-#### Tile types
+### Tile types
 
 The `tile_types` argument is a table with the following form:
 
@@ -48,7 +48,7 @@ Where the `number` value should correspond to that tiles tile sheet image id. **
 
 By the way, Moku maps keep a reference of this table as `moku_map.tile_types`.
 
-#### Accessing cells
+### Accessing cells
 
 Moku map cells are accessable using indexers:
 
@@ -58,7 +58,7 @@ Moku map cells are accessable using indexers:
 moku_map[i][j] = moku_map.tile_types.MY_TILE1
 ```
 
-#### Bounds and Dimensions
+### Bounds and Dimensions
 
 Furthermore Moku keeps track of "bounds" and "dimensional" data. Bounds here, is referring to a maps bottom left corner cell coordinate (negative coordinates are fully supported) and the maps width and height in cells. Dimensions on the other hand refer to world space dimensions in pixels, calculated from the bounds data and your entered tile sizes. Dimensional data is used for things such as cell picking etc. 
 
@@ -76,7 +76,7 @@ print(moku_map.dimensions.tile_width, moku_map.dimensions.tile_width)
 print(moku_map.dimensions.world_width, moku_map.dimensions.world_height)
 ```
 
-#### Internal data
+### Internal data
 
 Lastly a Moku map may store information pertaining to the autotiler with `moku_map.tilemap_url` and `moku_map.autotiles` both of which are meant for internal use. (Though there may be obscure reasons for manually changing the `tilemap_url`, which shouldn't cause any issues.)
 
@@ -84,11 +84,11 @@ Lastly a Moku map may store information pertaining to the autotiler with `moku_m
 
 ![](doc/transition.png)
 
-Currently Mokus main function is as an auto tiler.
+Currently Moku functions mainly as an auto tiler.
 
 Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit tiling, but 4-bit tiling works the same way.
 
-#### Tile sheet layout
+### Tile sheet layout
 
 First, your sprite sheet containing your maps tile images must be in a specific layout. In the following tile sheet from the demo project, we have three base tile types: Plains, plateau, and ocean. (This is a modified version of the tile sheet used in the article linked above.) 
 
@@ -100,7 +100,7 @@ Note that you may place your autotiles anywhere on your tilesheet, as long as th
 
 The ocean tile does not require autotile functionality, and can be freely placed anywhere on your tile sheet.
 
-#### Auto tiling a tilemap
+### Auto tiling a tilemap
 
 In defold, add a tilemap to your collection that references a tilesource derived from your tile sheet. Go ahead and draw on it, but be sure to use only the above mentioned base tiles for drawing (that is the first image related to the tile type). 
 
@@ -111,12 +111,10 @@ Now, after importing moku in script, create a table of your tile types as such:
 ```lua
 local moku = require "moku.moku"    
 
-local tile_types = {
-      
+local tile_types = {  
     -- Autotiles
     PLAINS = 1,
     PLATEAU = 49,
-        
     -- Normal Tiles
     OCEAN = 97
 }
