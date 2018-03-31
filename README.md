@@ -13,6 +13,7 @@ Map utility/module for the Defold game engine.
 ### Planned features
 
 * Efficient AStar pathfinding with support for options such as heavy diagonals etc
+* Ability to calculate "move distance/area" based on tile weights 
 * Other things I haven't put too much thought into yet
 
 ### State
