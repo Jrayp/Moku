@@ -691,4 +691,265 @@ function get_type(map, _x, _y)
     end
 end
 
+--o=========================================o
+
+--- Pathfinding.
+-- Functions related to pathfinding
+-- @section Pathfinding
+
+--o=========================================o
+
+local function new_pq()
+    local insert = table.insert
+    local remove = table.remove
+
+    local cmp = function(a, b)
+        if a.F > b.F then
+            return 1
+        elseif a.F < b.F then
+            return - 1
+        end
+        return 0
+    end
+
+    local pq = setmetatable({}, {
+        __index = {
+        size = 0,
+        push = function(self, v)
+            insert(self, v)
+            local next = #self
+            local prev = (next - next%2) / 2
+            while next > 1 and cmp(self[next], self[prev]) do
+                self[next], self[prev] = self[prev], self[next]
+                next = prev
+                prev = (next - next%2) / 2
+            end
+        end,
+        pop = function(self)
+            if #self < 2 then
+                return remove(self)
+            end
+            local root = 1
+            local r = self[root]
+            self[root] = remove(self)
+            local size = #self
+            if size > 1 then
+                local child = 2 * root
+                while child <= size do
+                    if cmp(self[child], self[root]) then
+                        self[root], self[child] = self[child], self[root]
+                        root = child
+                    elseif child + 1 <= size and cmp(self[child + 1], self[root]) then
+                        self[root], self[child + 1] = self[child + 1], self[root]
+                        root = child + 1
+                    else
+                        break
+                    end
+                    child = 2 * root
+                end
+            end
+            return r
+        end,
+        peek = function(self)
+            return self[1]
+        end,
+    }})
+    return pq
+end
+
+
+
+local function new_pf_node()
+    return
+    {
+        F = 0,
+        G = 0,
+        H = 0,
+        x = 0,
+        y = 0,
+        px = 0,
+        py = 0
+    }
+end
+
+local close = {}
+local stop = false
+local horiz = 0
+local allow_diagonals = true
+local heuristic_estimate = 2
+local punish_direction_change = false
+local reopen_close_nodes = false
+local tie_breaker = false
+local heavy_diagonals = false
+local search_limit = 2000
+local hvy_diag_mult = 2.41
+local punish_dir_penalty = 20
+
+function M.find_path(map, start_x, start_y, end_x, end_y)
+
+    print("start")
+
+    local parent_node = new_pf_node()
+
+    local found = false
+
+    stop = false
+
+    local neighbor_checks = 8--allow_diagonals and 8 or 4
+
+    local priority_queue = new_pq()
+
+    --priority_queue.Clear()
+    --close.Clear()
+
+    local direction
+    if allow_diagonals then
+        direction = { {0, - 1}, {1, 0}, {0, 1}, { - 1, 0}, {1, - 1}, {1, 1}, { - 1, 1}, { - 1, - 1}}
+    else
+        direction = { {0, - 1}, {1, 0}, {0, 1}, { - 1, 0}}
+    end
+
+    parent_node.G = 0
+    parent_node.H = heuristic_estimate
+    parent_node.F = parent_node.G + parent_node.H
+    parent_node.x = start_x
+    parent_node.y = start_y
+    parent_node.px = parent_node.x
+    parent_node.py = parent_node.y
+
+    priority_queue:push(parent_node)
+
+    while #priority_queue > 0 and not stop do
+        parent_node = priority_queue:pop()
+
+        if parent_node.x == end_x and parent_node.y == end_y then
+            table.insert(close, parent_node)
+            found = true
+            break
+        end
+
+        if #close > search_limit then
+            return nil
+        end
+
+        if punish_direction_change then
+            horiz = parent_node.x - parent_node.px
+        end
+
+        -- Keep an eye out for anything to do with i, due to lua and 0's
+        for i = 1, neighbor_checks do
+
+            local new_node = new_pf_node()
+            new_node.x = parent_node.x + direction[i][1]
+            new_node.y = parent_node.y + direction[i][2]
+
+            if M.within_bounds(map, new_node.x, new_node.y) then
+
+                local new_g
+                if heavy_diagonals and i > 4 then
+                    new_g = parent_node.G + map[new_node.x][new_node.y] * hvy_diag_mult
+                else
+                    new_g = parent_node.G + map[new_node.x][new_node.y]
+                end
+
+                if new_g ~= parent_node.G then
+
+                    if punish_direction_change then
+                        if new_node.x - parent_node.x ~= 0 then
+                            if horiz == 0 then
+                                new_g = new_g + punish_dir_penalty
+                            end
+                        end
+
+                        if new_node.y - parent_node.y ~= 0 then
+                            if horiz ~= 0 then
+                                new_g = new_g + punish_dir_penalty
+                            end
+                        end
+                    end
+
+                    local found_in_pq_index = -1
+                    -- Keep an eye out for anything to do with j, due to lua and 0's
+                    for j = 1, #priority_queue do
+
+                        if priority_queue[j].x == new_node.x and priority_queue[j].y == new_node.y then
+                            found_in_pq_index = j
+                            break
+                        end
+                    end
+
+                    -- Could have inverted wrong. Take note
+                    if found_in_pq_index == -1 or priority_queue[found_in_pq_index].G > new_g then
+
+                        local found_in_close_index = -1
+                        -- Keep an eye out for anything to do with j, due to lua and 0's
+                        for j = 1, #close do
+                            if close[j].x == new_node.x and close[j].x == new_node.y then
+                                found_in_close_index = j
+                                break
+                            end
+                        end
+
+                        -- Could have inverted wrong. Take note
+                        if found_in_close_index == -1
+                        or (reopen_close_nodes and close[found_in_close_index].G > new_g) then
+
+                            new_node.px = parent_node.x
+                            new_node.py = parent_node.y
+                            new_node.G = new_g
+
+                            --if formula == HeuristicFormula.Manhattan then
+                            new_node.H = heuristic_estimate * (math.abs(new_node.x - end_x)
+                             + math.abs(new_node.y - end_y))
+                            --end
+
+                            if (tie_breaker) then
+                                local dx1 = parent_node.x - end_x
+                                local dy1 = parent_node.y - end_y
+                                local dx2 = start_x - end_x
+                                local dy2 = start_y - end_y
+                                local cross = math.abs(dx1 * dy2 - dx2 * dy1)
+                                -- May need to be floored
+                                new_node.H = new_node.H + cross * 0.001
+                            end
+
+                            new_node.F = new_node.G + new_node.H
+                            -- It is faster if we leave the open node in the priority queue
+                            -- When it is removed, all nodes around will be closed, it will be ignored automatically
+                            -- if (found_in_pq_index ! = -1)
+                            -- priority_queue.RemoveAt(found_in_pq_index)
+                            -- if (found_in_pq_index == -1)
+                            priority_queue:push(new_node)
+                        end
+                    end
+                end
+            end
+        end
+        print("Inserting")
+        table.insert(close, parent_node)
+
+    end
+
+    if (found) then
+        print("yep")
+        local f_node = close[#close]
+        for i = #close, 1, - 1 do
+            if f_node.px == close[i].x and f_node.py == close[i].y or i == #close then
+                f_node = close[i]
+            else
+                table.remove(close, i)
+            end
+        end
+        return close
+    end
+
+    print("nope")
+    return nil
+
+end
+
+--o========================o
+--  Local functions
+--o========================o
+
 return M
