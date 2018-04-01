@@ -241,6 +241,15 @@ animations {
   flip_vertical: 0
 }
 animations {
+  id: "33"
+  start_tile: 33
+  end_tile: 33
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 30
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
   id: "4"
   start_tile: 4
   end_tile: 4

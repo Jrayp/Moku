@@ -741,7 +741,7 @@ function M.init_pathfinder(map, tile_weights)
         punish_direction_change = false,
         punish_dir_penalty = 20,
         tie_breaker = false,
-        heuristic_estimate = 2,
+        heuristic_estimate = 1,
         search_limit = 2000
     }
 
