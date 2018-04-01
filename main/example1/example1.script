@@ -80,7 +80,7 @@ function on_input(self, action_id, action)
 
         if bits == 8 then
             self.map_8bit[tx][ty] = self.map_8bit.tile_types.OCEAN
-            tilemap.set_tile("map_8bit#tilemap", "layer1", tx, ty, self.map_8bit.tile_types.OCEAN)
+            tilemap.set_tile("map_8bit#example1_tm", "layer1", tx, ty, self.map_8bit.tile_types.OCEAN)
             moku.autotile_surrounding(self.map_8bit, tx, ty)
         elseif bits == 4 then
             manipulate_4bit(self, tx, ty, self.map_4bit.tile_types.FLOOR)
@@ -151,7 +151,7 @@ function setup_8bit(self, tile_types_8bit, tile_types_4bit)
         OCEAN = 97
     }
 
-    self.map_8bit = moku.new_from_tilemap("map_8bit#tilemap", 32, 32, tile_types)
+    self.map_8bit = moku.new_from_tilemap("map_8bit#example1_tm", 32, 32, tile_types)
     self.map_8bit_pos = go.get_position("map_8bit")
 
     moku.set_autotile(self.map_8bit, tile_types.PLAINS, moku.bits.EIGHT, true, true, true, {tile_types.PLATEAU})
