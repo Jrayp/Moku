@@ -699,65 +699,71 @@ end
 
 --o=========================================o
 
-local function new_pq()
-    local insert = table.insert
-    local remove = table.remove
+local priority_queue = {}
 
-    local cmp = function(a, b)
-        if a.F > b.F then
-            return 1
-        elseif a.F < b.F then
-            return - 1
-        end
-        return 0
+local function compare_nodes(n1, n2)
+    if n1.F > n2.F then
+        return 1
+    elseif n1.F < n2.F then
+        return - 1
     end
-
-    local pq = setmetatable({}, {
-        __index = {
-        size = 0,
-        push = function(self, v)
-            insert(self, v)
-            local next = #self
-            local prev = (next - next%2) / 2
-            while next > 1 and cmp(self[next], self[prev]) do
-                self[next], self[prev] = self[prev], self[next]
-                next = prev
-                prev = (next - next%2) / 2
-            end
-        end,
-        pop = function(self)
-            if #self < 2 then
-                return remove(self)
-            end
-            local root = 1
-            local r = self[root]
-            self[root] = remove(self)
-            local size = #self
-            if size > 1 then
-                local child = 2 * root
-                while child <= size do
-                    if cmp(self[child], self[root]) then
-                        self[root], self[child] = self[child], self[root]
-                        root = child
-                    elseif child + 1 <= size and cmp(self[child + 1], self[root]) then
-                        self[root], self[child + 1] = self[child + 1], self[root]
-                        root = child + 1
-                    else
-                        break
-                    end
-                    child = 2 * root
-                end
-            end
-            return r
-        end,
-        peek = function(self)
-            return self[1]
-        end,
-    }})
-    return pq
+    return 0
 end
 
+local function on_compare(i, j)
+    return compare_nodes(priority_queue[i], priority_queue[j])
+end
 
+local function switch_nodes(a, b)
+    priority_queue[a], priority_queue[b] = priority_queue[b], priority_queue[a]
+end
+
+local function push(node)
+    local p = #priority_queue + 1
+    local p2
+    table.insert(priority_queue, node)
+    while true do
+        if p == 1 then
+            break
+        end
+        -- need to floor?
+        p2 = math.floor(p / 2)
+        if on_compare(p, p2) < 0 then
+            switch_nodes(p, p2)
+            p = p2
+        else
+            break
+        end
+    end
+
+    return p
+end
+
+local function pop()
+    local result = priority_queue[1]
+    local p = 1
+    local p1
+    local p2
+    local pn
+    priority_queue[1] = priority_queue[#priority_queue]
+    while true do
+        pn = p
+        p1 = 2 * (p - 1) + 2
+        p2 = 2 * (p - 1) + 3
+        if #priority_queue > p1 and on_compare(p, p1) > 0 then
+            p = p1
+        end
+        if #priority_queue > p2 and on_compare(p, p2) > 0 then
+            p = p2
+        end
+        if p == pn then
+            break
+        end
+
+        switch_nodes(p, pn)
+    end
+    return result
+end
 
 local function new_pf_node()
     return
@@ -772,8 +778,19 @@ local function new_pf_node()
     }
 end
 
+-- math.randomseed(os.clock()*100000000000)
+--
+-- for i = 1, 25 do
+--     local n = new_pf_node()
+--     n.F = i + math.random(0, 25)
+--     push(n)
+-- end
+--
+-- for i = 1, 25 do
+--     print(pop().F)
+-- end
+
 local close = {}
-local stop = false
 local horiz = 0
 local allow_diagonals = true
 local heuristic_estimate = 2
@@ -793,11 +810,7 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
 
     local found = false
 
-    stop = false
-
     local neighbor_checks = 8--allow_diagonals and 8 or 4
-
-    local priority_queue = new_pq()
 
     --priority_queue.Clear()
     --close.Clear()
@@ -817,10 +830,10 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
     parent_node.px = parent_node.x
     parent_node.py = parent_node.y
 
-    priority_queue:push(parent_node)
+    push(parent_node)
 
-    while #priority_queue > 0 and not stop do
-        parent_node = priority_queue:pop()
+    while #priority_queue > 0 do
+        parent_node = pop()
 
         if parent_node.x == end_x and parent_node.y == end_y then
             table.insert(close, parent_node)
@@ -871,15 +884,14 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
                     local found_in_pq_index = -1
                     -- Keep an eye out for anything to do with j, due to lua and 0's
                     for j = 1, #priority_queue do
-
                         if priority_queue[j].x == new_node.x and priority_queue[j].y == new_node.y then
                             found_in_pq_index = j
                             break
                         end
                     end
 
-                    -- Could have inverted wrong. Take note
-                    if found_in_pq_index == -1 or priority_queue[found_in_pq_index].G > new_g then
+                    -- Invert instead
+                    if not (found_in_pq_index ~= -1 and priority_queue[found_in_pq_index].G <= new_g) then
 
                         local found_in_close_index = -1
                         -- Keep an eye out for anything to do with j, due to lua and 0's
@@ -890,9 +902,9 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
                             end
                         end
 
-                        -- Could have inverted wrong. Take note
-                        if found_in_close_index == -1
-                        or (reopen_close_nodes and close[found_in_close_index].G > new_g) then
+                        -- Invert instead
+                        if not (found_in_close_index ~= -1
+                        and (reopen_close_nodes or close[found_in_close_index].G <= new_g)) then
 
                             new_node.px = parent_node.x
                             new_node.py = parent_node.y
@@ -919,7 +931,7 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
                             -- if (found_in_pq_index ! = -1)
                             -- priority_queue.RemoveAt(found_in_pq_index)
                             -- if (found_in_pq_index == -1)
-                            priority_queue:push(new_node)
+                            push(new_node)
                         end
                     end
                 end
@@ -948,8 +960,32 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
 
 end
 
---o========================o
---  Local functions
---o========================o
+--o=========================================o
+
+--- Debugging.
+-- Debugging function
+-- @section Debugging
+
+--o=========================================o
+
+-- Add a function for visualizing path
+-- Add a function for showing the tile weights for the pathfinder, as well as for the move distance calculator (when its added) 
+
+--- Prints the maps layout to console.
+-- @tparam map map A moku map
+function M.print_map(map)
+
+    local layout = ""
+
+    for y = map.bounds.y + map.bounds.height - 1, map.bounds.y, -1 do
+        layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
+        for x = map.bounds.x, map.bounds.x + map.bounds.width - 1 do
+            layout = layout..map[x][y]..", "
+        end
+    end
+
+    print(layout)
+
+end
 
 return M

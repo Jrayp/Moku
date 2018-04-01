@@ -21,18 +21,22 @@ function init(self)
     msg.post("camera_go#camera", "acquire_camera_focus")
     msg.post(".", "acquire_input_focus")
 
-
     local pfm = moku.new(10, 10, 32, 32, {}, 1)
 
-    for x, y, v in moku.iterate_map(pfm) do
-        --print(v)
+    pfm[1][2] = 0
+    pfm[2][2] = 0
+    pfm[3][2] = 0
+    pfm[4][2] = 0
+    pfm[5][2] = 0
+    pfm[6][2] = 0
+
+    moku.print_map(pfm)
+
+    local path = moku.find_path(pfm, 1, 1, 9, 9)
+
+    for _, v in ipairs(path) do
+        print(v.x, v.y)
     end
-
-    local path = moku.find_path(pfm, 1, 1, 8, 8)
-
-    --for _, v in ipairs(path) do
-    --    print(v.x, v.y)
-    --end
 
 end
 
