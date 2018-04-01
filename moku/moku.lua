@@ -804,16 +804,14 @@ local punish_dir_penalty = 20
 
 function M.find_path(map, start_x, start_y, end_x, end_y)
 
-    print("start")
-
     local parent_node = new_pf_node()
 
     local found = false
 
     local neighbor_checks = 8--allow_diagonals and 8 or 4
 
-    --priority_queue.Clear()
-    --close.Clear()
+    priority_queue = {}
+    close = {}
 
     local direction
     if allow_diagonals then
@@ -938,13 +936,11 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
                 end
             end
         end
-        print("Inserting")
         table.insert(close, parent_node)
 
     end
 
     if (found) then
-        print("yep")
         local f_node = close[#close]
         for i = #close, 1, - 1 do
             if f_node.px == close[i].x and f_node.py == close[i].y or i == #close then
@@ -956,7 +952,6 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
         return close
     end
 
-    print("nope")
     return nil
 
 end
@@ -973,15 +968,38 @@ end
 -- Add a function for showing the tile weights for the pathfinder, as well as for the move distance calculator (when its added)
 -- Add a function to iterate the map and make sure user is only using valid values?
 
+
+local function get_digits(number)
+    if number == 0 then
+        return 1
+    end
+
+    local count = 0
+    while number >= 1 do
+        number = number / 10
+        count = count + 1
+    end
+    return count
+end
+
 --- Prints the maps layout to console.
 -- @tparam map map A moku map
 function M.print_map(map)
 
+    local max_digits = 1
+
+    -- Not only checking tile table, in case user entered a
+    -- non tile value
+    for _, y, v in M.iterate_map(map) do
+        if get_digits(v) > max_digits then
+            max_digits = v
+        end
+    end
+
     local layout = ""
 
-    -- Find a way to make this work with different digits
-    -- Could iterate and find largest number, then adjust for it
     -- Add row numbers
+    -- Account for numbers with more digits
     for y = map.bounds.y + map.bounds.height - 1, map.bounds.y - 1, - 1 do
         if y ~= map.bounds.y - 1 then
             layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
@@ -1001,16 +1019,6 @@ function M.print_map(map)
 
 end
 
-local function get_digits(number)
-    local count = 0
-    while(number > 1) do
-        number = number / 10
-        count = count + 1
-    end
-    return count
-end
-
-print(get_digits(123))
 
 
 return M

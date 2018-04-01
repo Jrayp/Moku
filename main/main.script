@@ -29,11 +29,13 @@ function init(self)
     pfm[4][2] = 0
     pfm[5][2] = 0
     pfm[6][2] = 0
+    --pfm[4][1] = 200
 
-    --moku.print_map(pfm)
 
-    local path = moku.find_path(pfm, 2, 1, 9, 9)
+    moku.print_map(pfm)
 
+    local path = moku.find_path(pfm, 1, 1, 9, 1)
+    print(#path)
     for _, v in ipairs(path) do
         print(v.x, v.y)
     end
