@@ -842,6 +842,7 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
         end
 
         if #close > search_limit then
+            print("Exceeded search limit.")
             return nil
         end
 
@@ -896,7 +897,7 @@ function M.find_path(map, start_x, start_y, end_x, end_y)
                         local found_in_close_index = -1
                         -- Keep an eye out for anything to do with j, due to lua and 0's
                         for j = 1, #close do
-                            if close[j].x == new_node.x and close[j].x == new_node.y then
+                            if close[j].x == new_node.x and close[j].y == new_node.y then
                                 found_in_close_index = j
                                 break
                             end
@@ -969,7 +970,8 @@ end
 --o=========================================o
 
 -- Add a function for visualizing path
--- Add a function for showing the tile weights for the pathfinder, as well as for the move distance calculator (when its added) 
+-- Add a function for showing the tile weights for the pathfinder, as well as for the move distance calculator (when its added)
+-- Add a function to iterate the map and make sure user is only using valid values?
 
 --- Prints the maps layout to console.
 -- @tparam map map A moku map
@@ -977,15 +979,38 @@ function M.print_map(map)
 
     local layout = ""
 
-    for y = map.bounds.y + map.bounds.height - 1, map.bounds.y, -1 do
-        layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
+    -- Find a way to make this work with different digits
+    -- Could iterate and find largest number, then adjust for it
+    -- Add row numbers
+    for y = map.bounds.y + map.bounds.height - 1, map.bounds.y - 1, - 1 do
+        if y ~= map.bounds.y - 1 then
+            layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
+        else
+            layout = layout.."\nx: "
+        end
         for x = map.bounds.x, map.bounds.x + map.bounds.width - 1 do
-            layout = layout..map[x][y]..", "
+            if y ~= map.bounds.y - 1 then
+                layout = layout..map[x][y]..", "
+            else
+                layout = layout.."c"..x..", "
+            end
         end
     end
 
     print(layout)
 
 end
+
+local function get_digits(number)
+    local count = 0
+    while(number > 1) do
+        number = number / 10
+        count = count + 1
+    end
+    return count
+end
+
+print(get_digits(123))
+
 
 return M

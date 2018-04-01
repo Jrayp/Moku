@@ -30,9 +30,9 @@ function init(self)
     pfm[5][2] = 0
     pfm[6][2] = 0
 
-    moku.print_map(pfm)
+    --moku.print_map(pfm)
 
-    local path = moku.find_path(pfm, 1, 1, 9, 9)
+    local path = moku.find_path(pfm, 2, 1, 9, 9)
 
     for _, v in ipairs(path) do
         print(v.x, v.y)
