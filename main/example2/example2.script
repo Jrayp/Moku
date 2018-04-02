@@ -17,22 +17,6 @@ function init(self)
 
     moku.autotile_map(self.astar_map)
 
-
-    -- Handle initial pathfinding
-    local tile_weights = {
-        [tile_types.WALL] = 0,
-        [tile_types.SLOW_ZONE] = 3,
-        [tile_types.FLOOR] = 1
-    }
-
-    moku.init_pathfinder(self.astar_map, tile_weights)
-
-    self.astar_map.pf_options.heuristic_estimate = 1
-    self.astar_map.pf_options.allow_diagonals = false
-    self.astar_map.pf_options.search_limit = 2000
-
-    self.path = moku.find_path(self.astar_map, 2, 14, 19, 2)
-
     msg.post(".", "acquire_input_focus")
 
     moku.print_map(self.astar_map)

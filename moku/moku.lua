@@ -716,220 +716,7 @@ end
 
 --o=========================================o
 
-local function new_node()
-    return
-    {
-        F = 0,
-        G = 0,
-        H = 0,
-        x = 0,
-        y = 0,
-        px = 0,
-        py = 0
-    }
-end
-
---- Initializes the Moku pathfinder
--- @tparam map map A moku map
--- @tparam table tile_weights A table of tile weights
-function M.init_pathfinder(map, tile_weights)
-
-    map.pf_options = {
-        allow_diagonals = true,
-        heavy_diagonals = false,
-        hvy_diag_mult = 2.41,
-        punish_direction_change = false,
-        punish_dir_penalty = 20,
-        tie_breaker = false,
-        heuristic_estimate = 1,
-        search_limit = 2000
-    }
-
-    -- *Maybe* allow for unentered values, but probably not
-    map.pf_weights = {}
-    for k, v in pairs(tile_weights) do
-        map.pf_weights[k] = v
-    end
-
-    for k, v in pairs(map.tile_types) do
-        if not map.pf_weights[v] then
-            print("No weight entered for: "..k)
-        end
-    end
-
-end
-
---- Finds a path from a starting cell to an ending cell.
--- Must call init_pathfinder(...) once before using this function.
--- @tparam map map A moku map
--- @tparam number start_x x coordinate of starting cell
--- @tparam number start_y y coordinate of starting cell
--- @tparam number end_x x coordinate of ending cell
--- @tparam number end_y y coordinate of ending cell
--- @return A path from the starting cell to the ending cell,
--- in the form of a list of nodes
-function M.find_path(map, start_x, start_y, end_x, end_y)
-
-    if map.pf_options == nil or map.pf_weights == nil then
-        print("Call init_pathfinder once before calling this function.")
-    end
-
-    if not M.within_bounds(map, start_x, start_y) or not M.within_bounds(map, end_x, end_y) then
-        print("Start and end points must be within map bounds, duh.")
-        return nil
-    end
-
-    local found = false
-    local neighbor_checks = map.pf_options.allow_diagonals and 8 or 4
-
-    local direction
-    if map.pf_options.allow_diagonals then
-        direction = dir_all
-    else
-        direction = dir_cardinal
-    end
-
-    -- Unneeded i believe
-    local reopen_close_nodes = false
-    local horiz = 0
-
-    local priority_queue = {}
-    local close = {}
-
-    local p_node = new_node()
-
-    p_node.G = 0
-    p_node.H = map.pf_options.heuristic_estimate
-    p_node.F = p_node.G + p_node.H
-    p_node.x = start_x
-    p_node.y = start_y
-    p_node.px = start_x
-    p_node.py = start_y
-
-    push(priority_queue, p_node)
-
-    while #priority_queue > 0 do
-        p_node = pop(priority_queue)
-
-        if p_node.x == end_x and p_node.y == end_y then
-            table.insert(close, p_node)
-            found = true
-            break
-        end
-
-        if #close > map.pf_options.search_limit then
-            print("Exceeded search limit.")
-            return nil
-        end
-
-        if map.pf_options.punish_direction_change then
-            horiz = p_node.x - p_node.px
-        end
-
-        for i = 1, neighbor_checks do
-
-            local n_node = new_node()
-            n_node.x = p_node.x + direction[i][1]
-            n_node.y = p_node.y + direction[i][2]
-
-            if M.within_bounds(map, n_node.x, n_node.y) then
-
-                local new_g
-                -- *Maybe* allow for unentered values, but probably not
-                if map.pf_options.heavy_diagonals and i > 4 then
-                    new_g = p_node.G + map.pf_weights[map[n_node.x][n_node.y]] * map.pf_options.hvy_diag_mult
-                else
-                    new_g = p_node.G + map.pf_weights[map[n_node.x][n_node.y]]
-                end
-
-                if new_g ~= p_node.G then
-
-                    if map.pf_options.punish_direction_change then
-                        if n_node.x - p_node.x ~= 0 then
-                            if horiz == 0 then
-                                new_g = new_g + map.pf_options.punish_dir_penalty
-                            end
-                        end
-
-                        if n_node.y - p_node.y ~= 0 then
-                            if horiz ~= 0 then
-                                new_g = new_g + map.pf_options.punish_dir_penalty
-                            end
-                        end
-                    end
-
-                    local found_in_pq_index = -1
-                    for j = 1, #priority_queue do
-                        if priority_queue[j].x == n_node.x and priority_queue[j].y == n_node.y then
-                            found_in_pq_index = j
-                            break
-                        end
-                    end
-
-                    -- Invert instead
-                    if not (found_in_pq_index ~= -1 and priority_queue[found_in_pq_index].G <= new_g) then
-
-                        local found_in_close_index = -1
-                        for j = 1, #close do
-                            if close[j].x == n_node.x and close[j].y == n_node.y then
-                                found_in_close_index = j
-                                break
-                            end
-                        end
-
-                        -- Invert instead
-                        if not (found_in_close_index ~= -1
-                        and (reopen_close_nodes or close[found_in_close_index].G <= new_g)) then
-
-                            n_node.px = p_node.x
-                            n_node.py = p_node.y
-                            n_node.G = new_g
-
-                            -- Heuristic
-                            n_node.H = map.pf_options.heuristic_estimate * (math.abs(n_node.x - end_x)
-                             + math.abs(n_node.y - end_y))
-
-                            if (map.pf_options.tie_breaker) then
-                                local dx1 = p_node.x - end_x
-                                local dy1 = p_node.y - end_y
-                                local dx2 = start_x - end_x
-                                local dy2 = start_y - end_y
-                                local cross = math.abs(dx1 * dy2 - dx2 * dy1)
-                                -- May need to be floored
-                                n_node.H = n_node.H + cross * 0.001
-                            end
-
-                            n_node.F = n_node.G + n_node.H
-
-                            push(priority_queue, n_node)
-                        end
-                    end
-                end
-            end
-        end
-
-        if p_node ~= close[1] then
-            table.insert(close, p_node)
-        end
-
-    end
-
-    if (found) then
-        local count = #close
-        local f_node = close[count]
-        for i = count, 1, - 1 do
-            if f_node.px == close[i].x and f_node.py == close[i].y or i == count then
-                f_node = close[i]
-            else
-                table.remove(close, i)
-            end
-        end
-        return close
-    end
-
-    return nil
-
-end
+--
 
 --o=========================================o
 
@@ -943,7 +730,6 @@ end
 -- Add a function for showing the tile weights for the pathfinder,
 -- as well as for the move distance calculator (when its added)
 -- Add a function to iterate the map and make sure user is only using valid values?
-
 
 local function get_digits(number)
     if number == 0 then
@@ -994,11 +780,6 @@ function M.print_map(map)
     print(layout)
 
 end
-
-
-
-
-
 
 --o=================================o
 -- Priority Queue Functions
@@ -1067,11 +848,222 @@ function pop(pq)
     return result
 end
 
-
-
-
-
-
-
-
 return M
+
+
+
+
+-- local function new_node()
+--     return
+--     {
+--         F = 0,
+--         G = 0,
+--         H = 0,
+--         x = 0,
+--         y = 0,
+--         px = 0,
+--         py = 0
+--     }
+-- end
+--
+-- --- Initializes the Moku pathfinder
+-- -- @tparam map map A moku map
+-- -- @tparam table tile_weights A table of tile weights
+-- function M.init_pathfinder(map, tile_weights)
+--
+--     map.pf_options = {
+--         allow_diagonals = true,
+--         heavy_diagonals = false,
+--         hvy_diag_mult = 2.41,
+--         punish_direction_change = false,
+--         punish_dir_penalty = 20,
+--         tie_breaker = false,
+--         heuristic_estimate = 1,
+--         search_limit = 2000
+--     }
+--
+--     -- *Maybe* allow for unentered values, but probably not
+--     map.pf_weights = {}
+--     for k, v in pairs(tile_weights) do
+--         map.pf_weights[k] = v
+--     end
+--
+--     for k, v in pairs(map.tile_types) do
+--         if not map.pf_weights[v] then
+--             print("No weight entered for: "..k)
+--         end
+--     end
+--
+-- end
+--
+-- --- Finds a path from a starting cell to an ending cell.
+-- -- Must call init_pathfinder(...) once before using this function.
+-- -- @tparam map map A moku map
+-- -- @tparam number start_x x coordinate of starting cell
+-- -- @tparam number start_y y coordinate of starting cell
+-- -- @tparam number end_x x coordinate of ending cell
+-- -- @tparam number end_y y coordinate of ending cell
+-- -- @return A path from the starting cell to the ending cell,
+-- -- in the form of a list of nodes
+-- function M.find_path(map, start_x, start_y, end_x, end_y)
+--
+--     if map.pf_options == nil or map.pf_weights == nil then
+--         print("Call init_pathfinder once before calling this function.")
+--     end
+--
+--     if not M.within_bounds(map, start_x, start_y) or not M.within_bounds(map, end_x, end_y) then
+--         print("Start and end points must be within map bounds, duh.")
+--         return nil
+--     end
+--
+--     local found = false
+--     local neighbor_checks = map.pf_options.allow_diagonals and 8 or 4
+--
+--     local direction
+--     if map.pf_options.allow_diagonals then
+--         direction = dir_all
+--     else
+--         direction = dir_cardinal
+--     end
+--
+--     -- Unneeded i believe
+--     local reopen_close_nodes = false
+--     local horiz = 0
+--
+--     local priority_queue = {}
+--     local close = {}
+--
+--     local p_node = new_node()
+--
+--     p_node.G = 0
+--     p_node.H = map.pf_options.heuristic_estimate
+--     p_node.F = p_node.G + p_node.H
+--     p_node.x = start_x
+--     p_node.y = start_y
+--     p_node.px = start_x
+--     p_node.py = start_y
+--
+--     push(priority_queue, p_node)
+--
+--     while #priority_queue > 0 do
+--         p_node = pop(priority_queue)
+--
+--         if p_node.x == end_x and p_node.y == end_y then
+--             table.insert(close, p_node)
+--             found = true
+--             break
+--         end
+--
+--         if #close > map.pf_options.search_limit then
+--             print("Exceeded search limit.")
+--             return nil
+--         end
+--
+--         if map.pf_options.punish_direction_change then
+--             horiz = p_node.x - p_node.px
+--         end
+--
+--         for i = 1, neighbor_checks do
+--
+--             local n_node = new_node()
+--             n_node.x = p_node.x + direction[i][1]
+--             n_node.y = p_node.y + direction[i][2]
+--
+--             if M.within_bounds(map, n_node.x, n_node.y) then
+--
+--                 local new_g
+--                 -- *Maybe* allow for unentered values, but probably not
+--                 if map.pf_options.heavy_diagonals and i > 4 then
+--                     new_g = p_node.G + map.pf_weights[map[n_node.x][n_node.y]] * map.pf_options.hvy_diag_mult
+--                 else
+--                     new_g = p_node.G + map.pf_weights[map[n_node.x][n_node.y]]
+--                 end
+--
+--                 if new_g ~= p_node.G then
+--
+--                     if map.pf_options.punish_direction_change then
+--                         if n_node.x - p_node.x ~= 0 then
+--                             if horiz == 0 then
+--                                 new_g = new_g + map.pf_options.punish_dir_penalty
+--                             end
+--                         end
+--
+--                         if n_node.y - p_node.y ~= 0 then
+--                             if horiz ~= 0 then
+--                                 new_g = new_g + map.pf_options.punish_dir_penalty
+--                             end
+--                         end
+--                     end
+--
+--                     local found_in_pq_index = -1
+--                     for j = 1, #priority_queue do
+--                         if priority_queue[j].x == n_node.x and priority_queue[j].y == n_node.y then
+--                             found_in_pq_index = j
+--                             break
+--                         end
+--                     end
+--
+--                     -- Invert instead
+--                     if not (found_in_pq_index ~= -1 and priority_queue[found_in_pq_index].G <= new_g) then
+--
+--                         local found_in_close_index = -1
+--                         for j = 1, #close do
+--                             if close[j].x == n_node.x and close[j].y == n_node.y then
+--                                 found_in_close_index = j
+--                                 break
+--                             end
+--                         end
+--
+--                         -- Invert instead
+--                         if not (found_in_close_index ~= -1
+--                         and (reopen_close_nodes or close[found_in_close_index].G <= new_g)) then
+--
+--                             n_node.px = p_node.x
+--                             n_node.py = p_node.y
+--                             n_node.G = new_g
+--
+--                             -- Heuristic
+--                             n_node.H = map.pf_options.heuristic_estimate * (math.abs(n_node.x - end_x)
+--                              + math.abs(n_node.y - end_y))
+--
+--                             if (map.pf_options.tie_breaker) then
+--                                 local dx1 = p_node.x - end_x
+--                                 local dy1 = p_node.y - end_y
+--                                 local dx2 = start_x - end_x
+--                                 local dy2 = start_y - end_y
+--                                 local cross = math.abs(dx1 * dy2 - dx2 * dy1)
+--                                 -- May need to be floored
+--                                 n_node.H = n_node.H + cross * 0.001
+--                             end
+--
+--                             n_node.F = n_node.G + n_node.H
+--
+--                             push(priority_queue, n_node)
+--                         end
+--                     end
+--                 end
+--             end
+--         end
+--
+--         if p_node ~= close[1] then
+--             table.insert(close, p_node)
+--         end
+--
+--     end
+--
+--     if (found) then
+--         local count = #close
+--         local f_node = close[count]
+--         for i = count, 1, - 1 do
+--             if f_node.px == close[i].x and f_node.py == close[i].y or i == count then
+--                 f_node = close[i]
+--             else
+--                 table.remove(close, i)
+--             end
+--         end
+--         return close
+--     end
+--
+--     return nil
+--
+-- end
