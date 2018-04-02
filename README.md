@@ -18,7 +18,7 @@ Map utility/module for the Defold game engine.
 
 ### State
 
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Signatures are bound to change until I reach at least beta. If you have suggestions for structure, or function naming, please create an issue.
+Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Things are are bound to undegpo LARGE changes until I reach at least beta. If you have suggestions for structure changes, or function naming, please create an issue.
 
 ## Basics
 
