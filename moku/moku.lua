@@ -322,8 +322,6 @@ end
 -- @return The y coordinate of neighbor
 function M.neighbor_coords(x, y, dir)
 
-
-
     if dir == M.dir.NORTH then
         y = y + 1
     elseif dir == M.dir.NORTH_EAST then
@@ -489,12 +487,13 @@ function M.autotile_id(map, x, y)
     local tile_type = map[x][y]
 
     -- References the appropriate lookup table
-    -- or returns null (0) if not a tilable type
+    -- or returns the original type if not an
+    -- autotile
     local lookup
     if map.autotiles[tile_type] then
         lookup = map.autotiles[tile_type]
     else
-        return null
+        return tile_type
     end
 
     local bits = lookup.bits
@@ -534,9 +533,7 @@ end
 function M.autotile_region(map, x, y, width, height)
 
     for _x, _y, _v in M.iterate_map(map) do
-        if map.autotiles[_v] then
-            M.autotile_cell(map, _x, _y)
-        end
+        M.autotile_cell(map, _x, _y)
     end
 
 end
@@ -574,17 +571,13 @@ function M.tiling_matrix_region(map, x, y, width, height)
 
     local tiling_matrix = {}
 
-    for _x, _y, _v in M.iterate_map(map) do
+    for _x, _y, _v in M.iterate_region(map, x, y, width, height) do
 
         if tiling_matrix[_x] == nil then
             tiling_matrix[_x] = {}
         end
 
-        if map.autotiles[_v] then
-            tiling_matrix[_x][_y] = M.autotile_id(map, _x, _y)
-        else
-            tiling_matrix[_x][_y] = null
-        end
+        tiling_matrix[_x][_y] = M.autotile_id(map, _x, _y)
 
     end
 
@@ -700,9 +693,10 @@ function binary_sum_8bit(map, x, y, tile_type, lookup)
 
 end
 
-function get_type(map, _x, _y)
-    if M.within_bounds(map, _x, _y) and map[_x][_y] then
-        return map[_x][_y]
+-- Gets the type at x, y, returns border (-1) if outside of bounds
+function get_type(map, x, y)
+    if M.within_bounds(map, x, y) and map[x][y] then
+        return map[x][y]
     else
         return border
     end
