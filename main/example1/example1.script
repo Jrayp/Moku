@@ -135,72 +135,77 @@ function setup_4bit(self)
         FLOOR = 33
     }
 
-    self.map_4bit = moku.new(8, 8, 32, 32, tile_types, tile_types.FLOOR)
     self.map_4bit_pos = go.get_position("map_4bit")
-
-    moku.set_autotile(self.map_4bit, tile_types.WALL, moku.bits.FOUR, true, true, false)
-    moku.set_autotile(self.map_4bit, tile_types.YELLOW_WALL, moku.bits.FOUR, true, false, false)
-
     self.tiles = {}
 
-    for x, y, value in moku.iterate_map(self.map_4bit) do
-
-        if self.tiles[x] == nil then
-            self.tiles[x] = {}
+    local function fill_fn(args)
+        if self.tiles[args.x] == nil then
+            self.tiles[args.x] = {}
         end
 
-        local pos_x = (x - 1) * self.map_4bit.dimensions.tile_width + self.map_4bit_pos.x
-        local pos_y = (y - 1) * self.map_4bit.dimensions.tile_height + self.map_4bit_pos.y
+        local pos_x = (args.x - 1) * 32 + self.map_4bit_pos.x
+        local pos_y = (args.y - 1) * 32 + self.map_4bit_pos.y
 
-        self.tiles[x][y] = factory.create("map_4bit#tile_factory", vmath.vector3(pos_x, pos_y, 0))
+        self.tiles[args.x][args.y] = factory.create("map_4bit#tile_factory", vmath.vector3(pos_x, pos_y, 0))
 
-        if moku.on_border(self.map_4bit, x, y) then
-            self.map_4bit[x][y] = tile_types.WALL
-        elseif (x == 4 and y == 4) or (x == 4 and y == 5) or (x == 5 and y == 4) or (x == 5 and y == 5) then
-            self.map_4bit[x][y] = tile_types.YELLOW_WALL
+        if args.on_border then
+            return tile_types.WALL
+        elseif (args.x == 4 and args.y == 4)
+            or (args.x == 4 and args.y == 5)
+            or (args.x == 5 and args.y == 4)
+            or (args.x == 5 and args.y == 5) then
+                return tile_types.YELLOW_WALL
+            else
+                return tile_types.FLOOR
+            end
+        end
+
+        self.map_4bit = moku.new(8, 8, 32, 32, fill_fn)
+
+        self.map_4bit.tile_types = tile_types
+
+        moku.set_autotile(self.map_4bit, tile_types.WALL, moku.bits.FOUR, true, true, false)
+        moku.set_autotile(self.map_4bit, tile_types.YELLOW_WALL, moku.bits.FOUR, true, false, false)
+
+        local tiling_matrix = moku.tiling_matrix_map(self.map_4bit)
+
+        for x, y, value in moku.iterate_map(self.map_4bit) do
+            local sprite_url = msg.url(nil, self.tiles[x][y], "sprite")
+            msg.post(sprite_url, "play_animation", {id = hash(tiling_matrix[x][y])})
         end
 
     end
 
-    local tiling_matrix = moku.tiling_matrix_map(self.map_4bit)
+    function manipulate_4bit(self, x, y, tile_type)
 
-    for x, y, value in moku.iterate_map(self.map_4bit) do
-        local sprite_url = msg.url(nil, self.tiles[x][y], "sprite")
-        msg.post(sprite_url, "play_animation", {id = hash(tiling_matrix[x][y])})
+        self.map_4bit[x][y] = tile_type
+
+        local surrounding_matrix = moku.tiling_matrix_surrounding(self.map_4bit, x, y)
+
+        for _x, _y, value in moku.iterate_surrounding(self.map_4bit, x, y ) do
+            local sprite_url = msg.url(nil, self.tiles[_x][_y], "sprite")
+            msg.post(sprite_url, "play_animation", {id = hash(surrounding_matrix[_x][_y])})
+        end
+
     end
 
-end
+    function pick_cell(self, mx, my)
 
-function manipulate_4bit(self, x, y, tile_type)
+        local cam_pos = go.get_position("camera_go")
+        local wx = mx + cam_pos.x
+        local wy = my + cam_pos.y
 
-    self.map_4bit[x][y] = tile_type
+        local tx, ty = moku.pick_cell(self.map_8bit, self.map_8bit_pos.x, self.map_8bit_pos.y, wx, wy)
 
-    local surrounding_matrix = moku.tiling_matrix_surrounding(self.map_4bit, x, y)
-
-    for _x, _y, value in moku.iterate_surrounding(self.map_4bit, x, y ) do
-        local sprite_url = msg.url(nil, self.tiles[_x][_y], "sprite")
-        msg.post(sprite_url, "play_animation", {id = hash(surrounding_matrix[_x][_y])})
-    end
-
-end
-
-function pick_cell(self, mx, my)
-
-    local cam_pos = go.get_position("camera_go")
-    local wx = mx + cam_pos.x
-    local wy = my + cam_pos.y
-
-    local tx, ty = moku.pick_cell(self.map_8bit, self.map_8bit_pos.x, self.map_8bit_pos.y, wx, wy)
-
-    if tx and ty then
-        return 8, tx, ty
-    else
-        tx, ty = moku.pick_cell(self.map_4bit, self.map_4bit_pos.x, self.map_4bit_pos.y, wx, wy)
         if tx and ty then
-            return 4, tx, ty
+            return 8, tx, ty
         else
-            return 0, 0, 0
+            tx, ty = moku.pick_cell(self.map_4bit, self.map_4bit_pos.x, self.map_4bit_pos.y, wx, wy)
+            if tx and ty then
+                return 4, tx, ty
+            else
+                return 0, 0, 0
+            end
         end
-    end
 
-end
+    end

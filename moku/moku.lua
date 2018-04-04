@@ -118,18 +118,46 @@ local pop
 -- @tparam number fill_type Initial tile type of new cells
 -- @tparam[opt] url tilemap_url Tilemap url
 -- @return A new moku map
-function M.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)
+function M.new(width, height, tile_width, tile_height, fill_fn)
 
     local new_map = {}
 
+    local world_width = width * tile_width
+    local world_height = height * tile_height
+
+    new_map.bounds = {
+        x = 1,
+        y = 1,
+        width = width,
+        height = height
+    }
+
+    new_map.dimensions = {
+        tile_width = tile_width,
+        tile_height = tile_height,
+        world_width = world_width,
+        world_height = world_height,
+    }
+
     for x = 1, width do
-        table.insert(new_map, {})
+        new_map[x] = {}
         for y = 1, height do
-            table.insert(new_map[x], fill_type)
+            new_map[x][y] = fill_fn{
+                x = x,
+                y = y,
+                on_border = M.on_border(new_map, x, y)
+            }
         end
     end
 
-    constructor_helper(new_map, 1, 1, width, height, tile_width, tile_height, tile_types, tilemap_url)
+    new_map.pathfinder_options = nil
+
+    new_map.internal = {}
+    new_map.internal.autotiles = nil
+    new_map.internal.pathfinder_weights = nil
+    new_map.internal.tilemap_url = nil
+    new_map.internal.layer_name = nil
+
 
     return new_map
 
@@ -532,7 +560,7 @@ end
 -- @tparam number height Height of the region
 function M.autotile_region(map, x, y, width, height)
 
-    for _x, _y, _v in M.iterate_map(map) do
+    for _x, _y, _v in M.iterate_region(map, x, y, width, height) do
         M.autotile_cell(map, _x, _y)
     end
 
