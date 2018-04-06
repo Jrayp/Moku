@@ -1,7 +1,27 @@
 name: "main"
+instances {
+  id: "camera_go"
+  prototype: "/main/camera_go.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
 scale_along_z: 0
 embedded_instances {
-  id: "map_8bit"
+  id: "map_complex"
   data: "components {\n"
   "  id: \"example1_tm\"\n"
   "  component: \"/main/example1/example1_tm.tilemap\"\n"
@@ -36,48 +56,7 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "camera_go"
-  data: "embedded_components {\n"
-  "  id: \"camera\"\n"
-  "  type: \"camera\"\n"
-  "  data: \"aspect_ratio: 1.0\\n"
-  "fov: 45.0\\n"
-  "near_z: 0.1\\n"
-  "far_z: 1000.0\\n"
-  "auto_aspect_ratio: 0\\n"
-  "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "map_4bit"
+  id: "map_simple"
   data: "embedded_components {\n"
   "  id: \"tile_factory\"\n"
   "  type: \"factory\"\n"
@@ -210,7 +189,7 @@ embedded_instances {
   "  }\n"
   "}\n"
   "embedded_components {\n"
-  "  id: \"8bit\"\n"
+  "  id: \"complex\"\n"
   "  type: \"label\"\n"
   "  data: \"size {\\n"
   "  x: 128.0\\n"
@@ -247,13 +226,15 @@ embedded_instances {
   "pivot: PIVOT_CENTER\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "line_break: false\\n"
-  "text: \\\"8-bit Tilemap\\\"\\n"
+  "text: \\\"Complex (8-bit)\\\\n"
+  "\\\"\\n"
+  "  \\\"Tilemap\\\"\\n"
   "font: \\\"/main/fonts/vera_24.font\\\"\\n"
   "material: \\\"/builtins/fonts/label.material\\\"\\n"
   "\"\n"
   "  position {\n"
   "    x: 150.0\n"
-  "    y: 380.0\n"
+  "    y: 400.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"
@@ -264,7 +245,7 @@ embedded_instances {
   "  }\n"
   "}\n"
   "embedded_components {\n"
-  "  id: \"4bit\"\n"
+  "  id: \"simple\"\n"
   "  type: \"label\"\n"
   "  data: \"size {\\n"
   "  x: 128.0\\n"
@@ -301,13 +282,15 @@ embedded_instances {
   "pivot: PIVOT_CENTER\\n"
   "blend_mode: BLEND_MODE_ALPHA\\n"
   "line_break: false\\n"
-  "text: \\\"4-bit Custom Map\\\"\\n"
+  "text: \\\"Simple (4-bit) \\\\n"
+  "\\\"\\n"
+  "  \\\"Custom Map\\\"\\n"
   "font: \\\"/main/fonts/vera_24.font\\\"\\n"
   "material: \\\"/builtins/fonts/label.material\\\"\\n"
   "\"\n"
   "  position {\n"
   "    x: 490.0\n"
-  "    y: 380.0\n"
+  "    y: 400.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"

@@ -1,0 +1,56 @@
+local moku = require "moku.moku"
+
+local test_general
+
+function init(self)
+
+    local tile_ids = {
+        PLAINS = 1,
+        PLATEAU = 49,
+        OCEAN = 97
+    }
+
+    self.test_map = moku.new_from_tm("joining_tm#example3_tm", "layer1", 32, 32)
+
+    moku.set_autotile(self.test_map, tile_ids.PLAINS, moku.at_algorithm.COMPLEX, true, true, true, {tile_ids.PLATEAU})
+
+    moku.set_autotile(self.test_map, tile_ids.PLATEAU, moku.at_algorithm.COMPLEX, true, false, false)
+
+    moku.autotile_map(self.test_map)
+
+    msg.post("camera_go#camera", "acquire_camera_focus")
+    msg.post(".", "acquire_input_focus")
+
+    local x, y, w, h = tilemap.get_bounds("joining_tm#example3_tm")
+    print(x, y, w, h)
+
+    test_general(self)
+end
+
+function test_general(self)
+    print("Within bounds -3, 2: ", moku.within_bounds(self.test_map, - 3, 2))
+    print("Within bounds -5, 8: ", moku.within_bounds(self.test_map, - 5, 8))
+
+    print("On edge 5, -2: ", moku.on_edge(self.test_map, 5, - 2))
+    print("On edge 1, 2: ", moku.on_edge(self.test_map, 1, 2))
+
+    print("Within dimensions 900, -32: ", moku.within_dimensions(self.test_map, 0, 0, 900, 32))
+    print("Within dimensions -200, -40: ", moku.within_dimensions(self.test_map, 0, 0, - 200, - 40))
+
+    print("World center of 0, 2: ", moku.cell_center(self.test_map, 0, 0, 0, 2))
+
+    print("NW neighbor coords of 2, -2: ", moku.neighbor_coords(2, - 2, moku.dir.NW))
+
+    print("All neighbor coords of -5, 3: ")
+    for k, v in pairs(moku.all_neighbor_coords(-5, 3)) do
+        print("    ..", v.x, v.y)
+    end
+
+    print("NW neighbor tile id of 2, -2: ", moku.neighbor_cell(self.test_map, 2, - 2, moku.dir.NW).tile_id)
+
+    print("All neighbor tile id's of -5, 3: ")
+    for k, v in pairs(moku.all_neighbor_cells(self.test_map, - 5, 3)) do
+        print("    ..", v.tile_id)
+    end
+
+end

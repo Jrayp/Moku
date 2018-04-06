@@ -3,20 +3,69 @@
 
 local M = {}
 
---o  Local Variables  o--
+--o=========================o
+--o Moku Enums
+--o=========================o
 
-local null = 0
-local border = -1
+M.dir = {
+    N = 1,
+    E = 2,
+    S = 3,
+    W = 4,
+    NE = 5,
+    SE = 6,
+    SW = 7,
+    NW = 8
+}
 
-local dir_all = { {0, - 1}, {1, 0}, {0, 1}, { - 1, 0}, {1, - 1}, {1, 1}, { - 1, 1}, { - 1, - 1}}
-local dir_cardinal = { {0, - 1}, {1, 0}, {0, 1}, { - 1, 0} }
-local dir_inter_cardinal = {{1, - 1}, {1, 1}, { - 1, 1}, { - 1, - 1}}
+M.at_algorithm = {
+    SIMPLE = 4,
+    COMPLEX = 8
+}
 
--- Add a conversion table that accounts
--- for smaller spritesheets, without
--- symmetric tiles.
+--o=========================o
+--o Local Tables
+--o=========================o
 
-local id_conversions = {
+local reserved_ids = {
+    NULL = 0,
+    EDGE = -1
+}
+
+local relative_direction = {
+    ALL = {
+        {0, 1}, {1, 0}, {0, - 1}, { - 1, 0}, {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}
+    },
+
+    CARDINAL = {
+        {0, 1}, {1, 0}, {0, - 1}, { - 1, 0}
+    },
+
+    DIAGONAL = {
+        {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}
+    }
+}
+
+local id_conversions_4bit = {
+    [0] = 0,
+    [1] = 12,
+    [2] = 1,
+    [3] = 13,
+    [4] = 4,
+    [5] = 8,
+    [6] = 5,
+    [7] = 9,
+    [8] = 3,
+    [9] = 15,
+    [10] = 2,
+    [11] = 14,
+    [12] = 7,
+    [13] = 11,
+    [14] = 6,
+    [15] = 10,
+}
+
+local id_conversions_8bit = {
     [2] = 1,
     [8] = 2,
     [10] = 3,
@@ -66,47 +115,97 @@ local id_conversions = {
     [0] = 47
 }
 
---o  Module Variables  o--
+--o=========================o
+--o Forward Declarations
+--o=========================o
 
-M.layer_name = "layer1"
+-- Constructors
+local new_cell
 
---o  Enums  o--
-
-M.dir = {
-    NORTH = 1,
-    NORTH_EAST = 2,
-    EAST = 3,
-    SOUTH_EAST = 4,
-    SOUTH = 5,
-    SOUTH_WEST = 6,
-    WEST = 7,
-    NORTH_WEST = 8
-}
-
-M.bits = {
-    FOUR = 4,
-    EIGHT = 8
-}
-
---o  Forward Declarations  o--
-
-local constructor_helper
-local binary_sum_8bit
-local binary_sum_4bit
+-- Autotiling
+local compute_complex_id
+local compute_simple_id
 local get_type
+
+-- Pathfinding
 local compare_nodes
 local on_compare
 local switch_nodes
 local push
 local pop
 
---o=========================================o
+--o=================================================o
 
 --- Constructors.
--- Functions for creating new moku maps
+-- Functions for creating new moku maps and cells
 -- @section Constructors
 
---o=========================================o
+--o=================================================o
+
+--- Builds and returns a new moku map from a supplied defold tilemap.
+-- Moku maps built this way are automatically linked to the passed
+-- tilemap and layer, and are ready for autotiling.
+-- @tparam url tilemap_url Tilemap url
+-- @tparam string layer_name The name of the layer to build from
+-- @tparam number tile_width Pixel width of your tiles
+-- @tparam number tile_height Pixel height of your tiles
+-- @tparam function on_new_cell A function called on cell creation
+-- @return A new moku map
+function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_cell)
+    local _x, _y, width, height = tilemap.get_bounds(tilemap_url)
+
+    local world_width = width * tile_width
+    local world_height = height * tile_height
+
+    local new_map = {}
+
+    new_map.bounds = {
+        x = _x,
+        y = _y,
+        width = width,
+        height = height
+    }
+
+    new_map.dimensions = {
+        tile_width = tile_width,
+        tile_height = tile_height,
+        world_width = world_width,
+        world_height = world_height,
+    }
+
+    local args = {
+        cell = nil,
+        x = nil,
+        y = nil,
+        on_edge = nil
+    }
+
+    for x = _x, _x + width - 1 do
+        new_map[x] = {}
+        for y = _y, _y + height - 1 do
+            local this_id = tilemap.get_tile(tilemap_url, layer_name, x, y)
+            new_map[x][y] = new_cell(this_id)
+            if on_new_cell then
+                args.cell = new_map[x][y]
+                args.x = x
+                args.y = y
+                args.on_edge = M.on_edge(new_map, x, y)
+                on_new_cell(args)
+            end
+        end
+    end
+
+    new_map.pathfinder = nil
+
+    new_map.internal = {}
+    new_map.internal.tilemap_url = tilemap_url
+    new_map.internal.layer_name = layer_name
+    new_map.internal.autotiles = nil
+    new_map.internal.pathfinder_weights = nil
+    -- ?? new_map.internal.pathfinder_cached_paths -- (With option for max # cached)
+
+    return new_map
+end
 
 
 --- Returns a new moku map from scratch.
@@ -114,16 +213,13 @@ local pop
 -- @tparam number height Height in cells
 -- @tparam number tile_width Pixel width of your tiles
 -- @tparam number tile_height Pixel height of your tiles
--- @tparam table tile_types A table of tile types
--- @tparam number fill_type Initial tile type of new cells
--- @tparam[opt] url tilemap_url Tilemap url
+-- @tparam function on_new_cell A function called on cell creation
 -- @return A new moku map
-function M.new(width, height, tile_width, tile_height, fill_fn)
-
-    local new_map = {}
-
+function M.new(width, height, tile_width, tile_height, on_new_cell)
     local world_width = width * tile_width
     local world_height = height * tile_height
+
+    local new_map = {}
 
     new_map.bounds = {
         x = 1,
@@ -139,82 +235,41 @@ function M.new(width, height, tile_width, tile_height, fill_fn)
         world_height = world_height,
     }
 
+    local args = {
+        x = nil,
+        y = nil,
+        on_edge = nil
+    }
+
     for x = 1, width do
         new_map[x] = {}
         for y = 1, height do
-            new_map[x][y] = fill_fn{
-                x = x,
-                y = y,
-                on_border = M.on_border(new_map, x, y)
-            }
+            new_map[x][y] = new_cell(reserved_ids.NULL)
+            if on_new_cell then
+                args.cell = new_map[x][y]
+                args.x = x
+                args.y = y
+                args.on_edge = M.on_edge(new_map, x, y)
+                on_new_cell(args)
+            end
         end
     end
 
-    new_map.pathfinder_options = nil
+    new_map.pathfinder = nil
 
     new_map.internal = {}
-    new_map.internal.autotiles = nil
-    new_map.internal.pathfinder_weights = nil
     new_map.internal.tilemap_url = nil
     new_map.internal.layer_name = nil
-
-
-    return new_map
-
-end
-
---- Builds and returns a new moku map from a supplied defold tilemap.
--- @tparam url tilemap_url Tilemap url
--- @tparam number tile_width Pixel width of your tiles
--- @tparam number tile_height Pixel height of your tiles
--- @tparam table tile_types A table of tile types
--- @return A new moku map
-function M.new_from_tilemap(tilemap_url, tile_width, tile_height, tile_types)
-
-    local _x, _y, width, height = tilemap.get_bounds(tilemap_url)
-
-    local new_map = {}
-
-    for x = _x, _x + width - 1 do
-        new_map[x] = {}
-        for y = _y, _y + height - 1 do
-            new_map[x][y] = tilemap.get_tile(tilemap_url, M.layer_name, x, y)
-        end
-    end
-
-    constructor_helper(new_map, _x, _y, width, height, tile_width, tile_height, tile_types, tilemap_url)
+    new_map.internal.autotiles = nil
+    new_map.internal.pathfinder_weights = nil
+    -- ?? new_map.internal.pathfinder_cached_paths -- (With option for max # cached)
 
     return new_map
-
 end
 
---o  Constructor Locals  o--
-
-function constructor_helper(new_map, x, y, width, height, tile_width, tile_height, tile_types, tilemap_url)
-
-    local world_width = width * tile_width
-    local world_height = height * tile_height
-
-    new_map.tile_types = tile_types
-    new_map.autotiles = nil
-    new_map.pf_options = nil
-    new_map.pf_weights = nil
-    new_map.tilemap_url = tilemap_url
-
-    new_map.bounds = {
-        x = x,
-        y = y,
-        width = width,
-        height = height
-    }
-
-    new_map.dimensions = {
-        tile_width = tile_width,
-        tile_height = tile_height,
-        world_width = world_width,
-        world_height = world_height,
-    }
-
+-- Returns a new moku cell
+function new_cell(tile_id)
+    return { tile_id = tile_id }
 end
 
 --o=========================================o
@@ -242,23 +297,17 @@ end
 -- @tparam number height Height of the region
 -- @tparam[opt] function fn Filter function
 function M.iterate_region(map, x, y, width, height, fn)
-
     local _v
-
     return coroutine.wrap(
         function()
             for _x = x, x + width - 1 do
                 for _y = y, y + height - 1 do
-
                     if map[_x] and map[_x][_y] then
-
                         _v = map[_x][_y]
                         if fn and fn(_v) or not fn then
                             coroutine.yield(_x, _y, _v)
                         end
-
                     end
-
                 end
             end
         end
@@ -283,7 +332,7 @@ end
 
 --o=========================================o
 
---- Return whether or not a given cell is within the map bounds.
+--- Return whether or not a given map coordinate is within the map bounds.
 -- @tparam map map A moku map
 -- @tparam number x The x coordinate of the given cell
 -- @tparam number y The y coordinate of the given cell
@@ -293,140 +342,98 @@ function M.within_bounds(map, x, y)
     and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
 end
 
-
---- Return whether or not a given cell is a border cell
+--- Return whether or not a given cell is an edge cell
 -- @tparam map map A moku map
 -- @tparam number x The x coordinate of the given cell
 -- @tparam number y The y coordinate of the given cell
--- @return True if on border, false otherwise
-function M.on_border(map, x, y)
+-- @return True if on edge, false otherwise
+function M.on_edge(map, x, y)
     return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
     or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
 end
 
-
---- Return whether or not some world coordinate is within the world dimensions of the map.
+--- Return whether or not a given world coordinate is within the world dimensions of the map.
+-- World dimensions being defined as the area that the map is taking up in world space.
 -- @tparam map map A moku map
 -- @tparam number map_world_x World x of the map
 -- @tparam number map_world_y World y of the map
--- @tparam number test_world_x World x to test
--- @tparam number test_world_y World y to test
+-- @tparam number test_world_x Given world x coordinate
+-- @tparam number test_world_y Given world y coordinate
 -- @return True if within bounds, false otherwise
 function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_world_y)
-
     local map_shift_x = map_world_x + (map.bounds.x - 1) * map.dimensions.tile_width
     local map_shift_y = map_world_y + (map.bounds.y - 1) * map.dimensions.tile_height
-
     return test_world_x >= map_shift_x and test_world_x < map_shift_x + map.dimensions.world_width
     and test_world_y >= map_shift_y and test_world_y < map_shift_y + map.dimensions.world_height
-
 end
 
---- Return pixel coordinates of a given cells center.
+--- Return world coordinates of a given cells center.
 -- @tparam map map A moku map
 -- @tparam number map_world_x World x of the map
 -- @tparam number map_world_y World y of the map
 -- @tparam number x The x coordinate of the given cell
 -- @tparam number y The y coordinate of the given cell
--- @return Pixel x of cells center
--- @return Pixel y of cells center
+-- @return World x of cells center
+-- @return World y of cells center
 function M.cell_center(map, map_world_x, map_world_y, x, y)
-
-    local ox, oy
-
-    ox = map_world_x + (x - 1) * map.dimensions.tile_width + map.dimensions.tile_width / 2
-    oy = map_world_y + (y - 1) * map.dimensions.tile_height + map.dimensions.tile_height / 2
-
-    return ox, oy
-
+    local cx, cy
+    cx = map_world_x + (x - 1) * map.dimensions.tile_width + map.dimensions.tile_width / 2
+    cy = map_world_y + (y - 1) * map.dimensions.tile_height + map.dimensions.tile_height / 2
+    return cx, cy
 end
-
 
 --- Return coordinates of a cell neighboring a given cell.
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @tparam moku.dir dir Direction of neighbor coordinates to return
+-- @tparam moku.dir dir Direction of neighbor
 -- @return The x coordinate of neighbor
 -- @return The y coordinate of neighbor
 function M.neighbor_coords(x, y, dir)
-
-    if dir == M.dir.NORTH then
-        y = y + 1
-    elseif dir == M.dir.NORTH_EAST then
-        x = x + 1
-        y = y + 1
-    elseif dir == M.dir.EAST then
-        x = x + 1
-    elseif dir == M.dir.SOUTH_EAST then
-        x = x + 1
-        y = y - 1
-    elseif dir == M.dir.SOUTH then
-        y = y - 1
-    elseif dir == M.dir.SOUTH_WEST then
-        x = x - 1
-        y = y - 1
-    elseif dir == M.dir.WEST then
-        x = x - 1
-    elseif dir == M.dir.NORTH_WEST then
-        x = x - 1
-        y = y + 1
-    end
-
-    return x, y
-
+    return x + relative_direction.ALL[dir][1], y + relative_direction.ALL[dir][2]
 end
 
 --- Return a list of all coordinates neighboring a given cell.
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return A list of neighbor coordinates in the form { {n1x, n1y}, {n2x, n2y}, ... }
+-- @return A list of neighbor coordinates in the form
+-- { {Nx, Ny}, {Ex, Ey}, {Sx, Sy}, {Wx, Wy}, {NEx, NEy}, {SEx, SEy}, {SWx, SWy}, {NWx, NWy} }
 function M.all_neighbor_coords(x, y)
-
     local nc = {}
     local nx
     local ny
-
     for i = 1, 8 do
         nx, ny = M.neighbor_coords(x, y, i)
-        nc[i] = {nx, ny}
+        nc[i] = {x = nx, y = ny}
     end
-
     return nc
-
 end
 
---- Return the value of a cell neighboring a given cell.
+--- Return the neighbor cell of a given cell.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @tparam moku.dir dir Direction of neighbor value to return
--- @return The value. Nil if outside of bounds
-function M.neighbor_value(map, x, y, dir)
-
-    local nv = M.neighbor_coords(x, y, dir)
-
-    if M.within_bounds(map, nv.x, nv.y) then
-        return map[nv.x][nv.y]
+-- @tparam moku.dir dir Direction of neighbor
+-- @return Neighbor cell. Nil if outside of bounds (or the neighbor is nil)
+function M.neighbor_cell(map, x, y, dir)
+    local nx, ny = M.neighbor_coords(x, y, dir)
+    if M.within_bounds(map, nx, ny) then
+        return map[nx][ny]
     else return nil
     end
-
 end
 
---- Return a list of all values contained in cells neighboring a given cell.
+--- Return a list of all cells neighboring a given cell.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return A list of neighbor values
-function M.all_neighbor_values(map, x, y)
-
-    local nv = {}
-
+-- @return A list of neighbor cells in the form
+-- { N, E, S, W, NE, SE, SW, NW }
+function M.all_neighbor_cells(map, x, y)
+    local nc = {}
     for i = 1, 8 do
-        nv[i] = M.neighbor_value(map, x, y, i)
+        nc[i] = M.neighbor_cell(map, x, y, i)
     end
-
-    return nv
-
+    return nc
 end
 
 --o=========================================o
@@ -445,8 +452,7 @@ end
 -- @tparam number pick_world_y Given world y
 -- @return x coordinate of cell at given world coordinates. Nil if out of map bounds
 -- @return y coordinate of cell at given world coordinates. Nil if out of map bounds
-function M.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
-
+function M.pick_coords(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
     if M.within_dimensions(map, map_world_x, map_world_y, pick_world_x, pick_world_y) then
         pick_world_x = pick_world_x - map_world_x
         pick_world_y = pick_world_y - map_world_y
@@ -456,7 +462,22 @@ function M.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
     else
         return
     end
+end
 
+--- Returns the cell at given world coordinates
+-- @tparam map map A moku map
+-- @tparam number map_world_x World x of the map
+-- @tparam number map_world_y World y of the map
+-- @tparam number pick_world_x Given world x
+-- @tparam number pick_world_y Given world y
+-- @return Cell at given world coordinates. Nil if out of map bounds (or the cell is nil)
+function M.pick_cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
+    local cx, cy = M.pick_coords(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
+    if cx and cy then
+        return map[cx][cy]
+    else
+        return
+    end
 end
 
 --o=========================================o
@@ -467,89 +488,95 @@ end
 
 --o=========================================o
 
---- Designates a tile type as as an autotile.
+--- Links a tilemap and layer to a moku map.
 -- @tparam map map A moku map
--- @tparam number tile_type The tile type to be designated as an autotile
--- @tparam moku.bits bits The autotiling algorithm to be used
+-- @tparam url tilemap_url Tilemap url
+-- @tparam string layer_name Name of layer
+function M.link_tilemap(map, tilemap_url, layer_name)
+    map.internal.tilemap_url = tilemap_url
+    map.internal.layer_name = layer_name
+end
+
+--- Designates a tile id as as an autotile.
+-- @tparam map map A moku map
+-- @tparam number tile_id The tile id to be designated as an autotile
+-- @tparam moku.at_algorithm algorithm The autotiling algorithm to be used
 -- @tparam bool join_self Whether tiles of the same type act as joining tiles
 -- @tparam bool join_edge Whether the edge ofthe map acts as a joining tile
 -- @tparam bool join_nil Whether empty cells act as joining tiles
--- @tparam table joining_types Additional tile types to act as joining tiles
-function M.set_autotile(map, tile_type, bits, join_self, join_edge, join_nil, joining_types)
-
-    if map.autotiles == nil then
-        map.autotiles = {}
+-- @tparam table joining_ids Additional tile id's to act as joining tiles
+function M.set_autotile(map, tile_id, algorithm, join_self, join_edge, join_nil, joining_ids)
+    if map.internal.autotiles == nil then
+        map.internal.autotiles = {}
     end
 
-    map.autotiles[tile_type] = {}
-    map.autotiles[tile_type].bits = bits
+    map.internal.autotiles[tile_id] = {}
+    map.internal.autotiles[tile_id].algorithm = algorithm
 
     if join_self then
-        map.autotiles[tile_type][tile_type] = true
+        map.internal.autotiles[tile_id][tile_id] = true
     end
 
     if join_edge then
-        map.autotiles[tile_type][border] = true
+        map.internal.autotiles[tile_id][reserved_ids.EDGE] = true
     end
 
     if join_nil then
-        map.autotiles[tile_type][null] = true
+        map.internal.autotiles[tile_id][reserved_ids.NULL] = true
     end
 
-    if joining_types then
-        for i, v in ipairs(joining_types) do
-            map.autotiles[tile_type][v] = true
+    if joining_ids then
+        for i, v in ipairs(joining_ids) do
+            map.internal.autotiles[tile_id][v] = true
         end
     end
-
 end
 
---- Calculates a given cells autotile id
+--- Calculates a given cells autotile id/sum
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
 -- @return The autotile id
-function M.autotile_id(map, x, y)
-
-    -- Tile type of this cell
-    local tile_type = map[x][y]
+function M.calc_autotile_id(map, x, y)
+    -- Tile id of this cell
+    local tile_id = map[x][y].tile_id
 
     -- References the appropriate lookup table
     -- or returns the original type if not an
     -- autotile
     local lookup
-    if map.autotiles[tile_type] then
-        lookup = map.autotiles[tile_type]
+    if map.internal.autotiles[tile_id] then
+        lookup = map.internal.autotiles[tile_id]
     else
-        return tile_type
+        return tile_id
     end
 
-    local bits = lookup.bits
+    local algorithm = lookup.algorithm
     local sum
 
-    if bits == 4 then
-        sum = binary_sum_4bit(map, x, y, tile_type, lookup)
-    elseif bits == 8 then
-        sum = binary_sum_8bit(map, x, y, tile_type, lookup)
+    if algorithm == 4 then
+        sum = compute_simple_id(map, x, y, tile_id, lookup)
+    elseif algorithm == 8 then
+        sum = compute_complex_id(map, x, y, tile_id, lookup)
     end
 
     -- Return sum
     return sum
-
 end
 
---- Autotiles a given cell. Returns the cells autotile id
+--- Autotiles a given cell.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return The autotile id
 function M.autotile_cell(map, x, y)
+    if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
+        print("MOKU ERROR: You must link a tilemap and a layer to use autotiling. "..
+        "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
+        return
+    end
 
-    local sum = M.autotile_id(map, x, y)
-    tilemap.set_tile(map.tilemap_url, M.layer_name, x, y, sum)
-
-    return sum
-
+    local sum = M.calc_autotile_id(map, x, y)
+    tilemap.set_tile(map.internal.tilemap_url, map.internal.layer_name, x, y, sum)
 end
 
 --- Autotiles a rectangular region of a moku map.
@@ -559,11 +586,15 @@ end
 -- @tparam number width Width of the region
 -- @tparam number height Height of the region
 function M.autotile_region(map, x, y, width, height)
+    if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
+        print("MOKU ERROR: You must link a tilemap and a layer to use autotiling. "..
+        "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
+        return
+    end
 
     for _x, _y, _v in M.iterate_region(map, x, y, width, height) do
         M.autotile_cell(map, _x, _y)
     end
-
 end
 
 --- Autotiles an entire moku map.
@@ -596,21 +627,14 @@ end
 -- @tparam number width Width of the region
 -- @tparam number height Height of the region
 function M.tiling_matrix_region(map, x, y, width, height)
-
     local tiling_matrix = {}
-
     for _x, _y, _v in M.iterate_region(map, x, y, width, height) do
-
         if tiling_matrix[_x] == nil then
             tiling_matrix[_x] = {}
         end
-
-        tiling_matrix[_x][_y] = M.autotile_id(map, _x, _y)
-
+        tiling_matrix[_x][_y] = M.calc_autotile_id(map, _x, _y)
     end
-
     return tiling_matrix
-
 end
 
 --- Returns a tiling matrix for an entire moku map.
@@ -627,10 +651,8 @@ function M.tiling_matrix_surrounding(map, x, y)
     return M.tiling_matrix_region(map, x - 1, y - 1, 3, 3)
 end
 
---o  Autotile Locals  o--
-
-function binary_sum_4bit(map, x, y, tile_type, lookup)
-
+-- Simple (4bit) autotiling algorithm
+function compute_simple_id(map, x, y, tile_type, lookup)
     local n = get_type(map, x, y + 1)
     local w = get_type(map, x - 1, y)
     local e = get_type(map, x + 1, y)
@@ -642,24 +664,23 @@ function binary_sum_4bit(map, x, y, tile_type, lookup)
         sum = sum + 1
     end
 
-    if lookup[w] == true then
+    if lookup[e] == true then
         sum = sum + 2
     end
 
-    if lookup[e] == true then
+    if lookup[s] == true then
         sum = sum + 4
     end
 
-    if lookup[s] == true then
+    if lookup[w] == true then
         sum = sum + 8
     end
 
-    return sum + tile_type
-
+    return id_conversions_4bit[sum] + tile_type
 end
 
-function binary_sum_8bit(map, x, y, tile_type, lookup)
-
+-- Complex (8bit) autotiling algorithm
+function compute_complex_id(map, x, y, tile_type, lookup)
     local nw = get_type(map, x - 1, y + 1 )
     local n = get_type(map, x, y + 1)
     local ne = get_type(map, x + 1, y + 1)
@@ -711,22 +732,15 @@ function binary_sum_8bit(map, x, y, tile_type, lookup)
         end
     end
 
-    -- Convert binary sum and add the tile types index.
-    -- This allows for multiple tilable types on the same
-    -- tile source, as long as the following 47 tiles are
-    -- correctly ordered. There is a hidden +1 here as well
-    -- since lua.
-    -- converted_sum = (id_conversions[sum] + 1) + (tile_type - 1)
-    return id_conversions[sum] + tile_type
-
+    return id_conversions_8bit[sum] + tile_type
 end
 
 -- Gets the type at x, y, returns border (-1) if outside of bounds
 function get_type(map, x, y)
     if M.within_bounds(map, x, y) and map[x][y] then
-        return map[x][y]
+        return map[x][y].tile_id
     else
-        return border
+        return reserved_ids.EDGE
     end
 end
 
