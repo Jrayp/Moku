@@ -30,10 +30,6 @@ function init(self)
 
     self.path = path
 
-    for k, v in pairs(path) do
-        print(v.moku_x, v.moku_y)
-    end
-
 end
 
 function on_input(self, action_id, action)

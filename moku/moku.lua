@@ -23,6 +23,12 @@ M.at_algorithm = {
     COMPLEX = 8
 }
 
+M.dir_tables = {
+    ALL = {{0, 1}, {1, 0}, {0, - 1}, { - 1, 0}, {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}},
+    CARDINAL = {{0, 1}, {1, 0}, {0, - 1}, { - 1, 0}},
+    DIAGONAL = {{1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}}
+}
+
 --o=========================o
 --o Local Tables
 --o=========================o
@@ -30,20 +36,6 @@ M.at_algorithm = {
 local reserved_ids = {
     NULL = 0,
     EDGE = -1
-}
-
-local relative_direction = {
-    ALL = {
-        {0, 1}, {1, 0}, {0, - 1}, { - 1, 0}, {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}
-    },
-
-    CARDINAL = {
-        {0, 1}, {1, 0}, {0, - 1}, { - 1, 0}
-    },
-
-    DIAGONAL = {
-        {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}
-    }
 }
 
 local id_conversions_4bit = {
@@ -128,13 +120,13 @@ local compute_simple_id
 local get_type
 
 -- Priority Queue
-local contains
-local swim
-local sink
-local min_child
-local put
-local pop
-local init_pq
+local pq_contains
+local pq_swim
+local pq_sink
+local pq_min_child
+local pq_put
+local pq_pop
+local pq_init
 
 --o=================================================o
 
@@ -391,7 +383,7 @@ end
 -- @return The x coordinate of neighbor
 -- @return The y coordinate of neighbor
 function M.neighbor_coords(x, y, dir)
-    return x + relative_direction.ALL[dir][1], y + relative_direction.ALL[dir][2]
+    return x + M.dir_tables.ALL[dir][1], y + M.dir_tables.ALL[dir][2]
 end
 
 --- Return a list of all coordinates neighboring a given cell.
@@ -769,6 +761,15 @@ function M.init_pathfinder(map)
         v.moku_y = y
     end
 
+    map.pathfinder = {
+        search_limit = -1,
+        allowed_directions = M.dir_tables.ALL,
+        punish_direction_change = false,
+        punish_direction_change_penalty = 20
+
+
+    }
+
     map.internal.pathfinder_weights = {
         [1] = -1,
         [17] = 10,
@@ -784,18 +785,36 @@ function M.find_path_coords(map, start_x, start_y, end_x, end_y)
     return M.find_path(map, map[start_x][start_y], map[end_x][end_y])
 end
 
+local function cl_init(lc)
+    lc.current_size = 0
+end
+
+local function cl_add(lc, k, v)
+    lc[k] = v
+    lc.current_size = lc.current_size + 1
+end
+
 function M.find_path(map, start_cell, end_cell)
     assert(start_cell ~= end_cell, "Start and end cell must be different.")
+
+    local options = map.pathfinder
+    local weights = map.internal.pathfinder_weights
 
     local open = {}
     local cost_lookup = {} -- Doubles as closed, I think
     local parent_lookup = {}
 
-    init_pq(open)
-    put(open, start_cell, 0)
-    cost_lookup[start_cell] = 0
+    pq_init(open)
+    pq_put(open, start_cell, 0)
+
+    cl_init(cost_lookup)
+    cl_add(cost_lookup, start_cell, 0)
+
+    parent_lookup[start_cell] = start_cell
 
     local found = false
+    local use_search_limit = options.search_limit > 0 or false
+    local horiz
 
     -- Variable promotion for the miniscule performance increase
     local current_cell
@@ -807,32 +826,56 @@ function M.find_path(map, start_cell, end_cell)
     local priority
 
     while open.current_size > 0 do
-        current_cell = pop(open)
+        current_cell = pq_pop(open)
 
         if current_cell == end_cell then
             found = true
             break
         end
 
-        for i = 1, 4 do
-            nx = current_cell.moku_x + relative_direction.ALL[i][1]
-            ny = current_cell.moku_y + relative_direction.ALL[i][2]
+        if use_search_limit and cost_lookup.current_size > options.search_limit then
+            found = false
+            print("Search limit exceeded")
+            break
+        end
+
+        if options.punish_direction_change then
+            horiz = current_cell.moku_x - parent_lookup[current_cell].moku_x
+        end
+
+        for _, d in pairs(options.allowed_directions) do
+            nx = current_cell.moku_x + d[1]
+            ny = current_cell.moku_y + d[2]
 
             if map[nx] and map[nx][ny] then
                 neighbor_cell = map[nx][ny]
 
                 -- Does this act as a substitute for removing from open?
-                if not contains(open, neighbor_cell) then
+                if not pq_contains(open, neighbor_cell) then
 
-                    neighbor_cost = map.internal.pathfinder_weights[neighbor_cell.tile_id]
+                    neighbor_cost = weights[neighbor_cell.tile_id]
 
                     if neighbor_cost >= 0 then
                         new_cost = cost_lookup[current_cell] + neighbor_cost
 
+                        -- Handle punish direction change
+                        if options.punish_direction_change then
+                            if nx - current_cell.moku_x ~= 0 then
+                                if horiz == 0 then
+                                    new_cost = new_cost + options.punish_direction_change_penalty
+                                end
+                            end
+                            if ny - current_cell.moku_y ~= 0 then
+                                if horiz ~= 0 then
+                                    new_cost = new_cost + options.punish_direction_change_penalty
+                                end
+                            end
+                        end
+
                         if not cost_lookup[neighbor_cell] or new_cost < cost_lookup[neighbor_cell] then
-                            cost_lookup[neighbor_cell] = new_cost
+                            cl_add(cost_lookup, neighbor_cell, new_cost)
                             priority = new_cost + manhatten(end_cell, neighbor_cell)
-                            put(open, neighbor_cell, priority)
+                            pq_put(open, neighbor_cell, priority)
                             parent_lookup[neighbor_cell] = current_cell
                         end
                     end
@@ -856,25 +899,41 @@ function M.find_path(map, start_cell, end_cell)
             path[i] = cell
             cell = parent_lookup[cell]
         end
+        print(path_length)
         return path
     end
 
     return nil
 
+    -- Maybe use messaging system:
+    -- "found", path
+    -- "search limit exceeded", nil
+    -- "no path", nil
+
+    -- Return total cost
+    -- cost_lookup[end_cell]
+
+    -- Or just the cost table
+    -- return path, cost_lookup
+
 end
 
+
+
+
+
 --o=================================o
--- Priority Queue
--- (from: https://gist.github.com/LukeMS/89dc587abd786f92d60886f4977b1953)
+-- Pathfinder utility functions
+-- (PQ based on: https://gist.github.com/LukeMS/89dc587abd786f92d60886f4977b1953)
 --o=================================o
 
-function init_pq(pq)
+function pq_init(pq)
     pq.heap = {}
     pq.contains = {}
     pq.current_size = 0
 end
 
-function swim(pq)
+function pq_swim(pq)
     local heap = pq.heap
     local floor = math.floor
     local i = pq.current_size
@@ -888,24 +947,24 @@ function swim(pq)
     end
 end
 
-function contains(pq, v)
+function pq_contains(pq, v)
     return pq.contains[v]
 end
 
-function put(pq, v, p)
+function pq_put(pq, v, p)
     pq.heap[pq.current_size + 1] = {v, p}
     pq.current_size = pq.current_size + 1
     pq.contains[v] = true
-    swim(pq)
+    pq_swim(pq)
 end
 
-function sink(pq)
+function pq_sink(pq)
     local size = pq.current_size
     local heap = pq.heap
     local i = 1
 
     while (i * 2) <= size do
-        local mc = min_child(pq, i)
+        local mc = pq_min_child(pq, i)
         if heap[i][2] > heap[mc][2] then
             heap[i], heap[mc] = heap[mc], heap[i]
         end
@@ -913,7 +972,7 @@ function sink(pq)
     end
 end
 
-function min_child(pq, i)
+function pq_min_child(pq, i)
     if (i * 2) + 1 > pq.current_size then
         return i * 2
     else
@@ -925,80 +984,16 @@ function min_child(pq, i)
     end
 end
 
-function pop(pq)
+function pq_pop(pq)
     local heap = pq.heap
     local retval = heap[1][1]
     heap[1] = heap[pq.current_size]
     heap[pq.current_size] = nil
     pq.current_size = pq.current_size - 1
-    sink(pq)
+    pq_sink(pq)
     pq.contains[retval] = nil
     return retval
 end
-
--- function compare_nodes(n1, n2)
---     if n1.moku_cost > n2.moku_cost then
---         return 1
---     elseif n1.moku_cost < n2.moku_cost then
---         return - 1
---     end
---     return 0
--- end
---
--- function on_compare(pq, i, j)
---     return compare_nodes(pq[i], pq[j])
--- end
---
--- function switch_nodes(pq, a, b)
---     pq[a], pq[b] = pq[b], pq[a]
--- end
---
--- function push(pq, node)
---     local p = #pq + 1
---     local p2
---     table.insert(pq, node)
---     while true do
---         if p == 1 then
---             break
---         end
---         p2 = math.floor(p / 2)
---         if on_compare(pq, p, p2) < 0 then
---             switch_nodes(pq, p, p2)
---             p = p2
---         else
---             break
---         end
---     end
---
---     return p
--- end
---
--- function pop(pq)
---     local result = pq[1]
---     local p = 1
---     local p1
---     local p2
---     local pn
---     local pq_count = #pq
---     pq[1] = pq[pq_count]
---     while true do
---         pn = p
---         p1 = 2 * (p - 1) + 2
---         p2 = 2 * (p - 1) + 3
---         if pq_count > p1 and on_compare(pq, p, p1) > 0 then
---             p = p1
---         end
---         if pq_count > p2 and on_compare(pq, p, p2) > 0 then
---             p = p2
---         end
---         if p == pn then
---             break
---         end
---         switch_nodes(pq, p, pn)
---     end
---     return result
--- end
-
 
 --o=========================================o
 
