@@ -121,7 +121,7 @@ First, your sprite sheet containing your maps tile images must be in a specific 
 
 ![](main/images/autotiles_8bit.png)
 
-Since the plains and plateau types will be designated 8-bit autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate a complex autotile must have 48 images reserved on your tile sheet in _exactly_ this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
+Since the plains and plateau types will be designated complex autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate a complex autotile must have 48 images reserved on your tile sheet in _exactly_ this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
 
 Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. 
 
@@ -129,7 +129,7 @@ The ocean tile does not require autotile functionality, and can be freely placed
 
 Also note that if we were using simple tiling that everything would work the same, except that we would only require a much more managable 16 images per autotile. Following is the (much nicer) layout of a simple autotile tilesheet:
 
-![](main/images/simple_layout.png)
+![](doc/simple_layout.png)
 
 ### Auto tiling a tilemap
 
@@ -140,9 +140,9 @@ In defold, add a tilemap to your collection that references a tilesource derived
 Now, after importing moku in script, create a table of your tile types as such:
 
 ```lua
-local moku = require "moku.moku"    
+local moku = require "moku/moku"    
 
-local tile_types = {  
+local moku_ids = {  
     -- Autotiles
     PLAINS = 1,
     PLATEAU = 49,
@@ -153,25 +153,25 @@ local tile_types = {
 
 It is recommended to give your tile types simple descriptive names (keys). The value associated with the type is a reference to that types base tile position on the tile sheet. Here the `PLAINS` types base tile occupies position `1` on the tile sheet, the `PLATEAU` type position `49`, and the `OCEAN` type position `97`. 
 
-Create a Moku map from your defold tilemap. Assuming your tilemap is named `my_tilemap` and is attached to the gameobject `map_go`:
+Create a Moku map from your defold tilemap. Assuming your tilemap is named `my_tilemap` with layer named `layer1`, and is attached to the gameobject `map_go`:
 
 ```lua
-my_new_map = moku.new_from_tilemap("map_go#my_tilemap", 32, 32, tile_types)
+my_new_map = moku.new_from_tilemap("map_go#my_tilemap", "layer1" 32, 32)
 ```
 
-Where `32` is the pixel width and height of the individual tile images. (This is used in calculations such as cell picking etc.)
+Where `32` is the pixel width and height of the individual tile images.
 
 Now we tell moku to designate the `PLAINS` and `PLATEAU` types as autotiles:
 
 ```lua
-moku.set_autotile(my_new_map, tile_types.PLAINS, moku.bits.EIGHT, true, true, true, {tile_types.PLATEAU})
-moku.set_autotile(my_new_map, tile_types.PLATEAU, moku.bits.EIGHT, true, true, true)
+moku.set_autotile(my_new_map, moku_ids.PLAINS, at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
+moku.set_autotile(my_new_map, moku_ids.PLATEAU, at_algorithm.COMPLEX, true, true, true)
 ```
 
 Lets take a look at this functions parameters
 1. Just takes a moku map
 2. The type you want to designate an autotile
-3. What tiling algorithm to use, in this case we use 8-bit
+3. What tiling algorithm to use, in this case we use complex 
 4. Whether or not this tile interacts/joins with tiles of its own type, usually true
 5. Whether or not this tile interacts/joins with the edge of the map
 6. Whether or not this tile interacts/joins with empty cells (these are supported)
@@ -190,9 +190,9 @@ moku.autotile_map(my_new_map)
 Thats it. Much more can be done, but this guide should be enough to at least get an idea of how Moku autotiling works, and should be sufficient for the vast majority of use cases. Following is the complete example code:
 
 ```lua
-local moku = require "moku.moku"    
+local moku = require "moku/moku"    
 
-local tile_types = {
+local moku_ids = {
     -- Autotiles
     PLAINS = 1,
     PLATEAU = 49,
@@ -200,10 +200,10 @@ local tile_types = {
     OCEAN = 97
 }
 
-my_new_map = moku.new_from_tilemap("map_go#my_tilemap", 32, 32, tile_types)
+my_new_map = moku.new_from_tilemap("map_go#my_tilemap", "layer1", 32, 32, tile_types)
 
-moku.set_autotile(my_new_map, tile_types.PLAINS, moku.bits.EIGHT, true, true, true, {tile_types.PLATEAU})
-moku.set_autotile(my_new_map, tile_types.PLATEAU, moku.bits.EIGHT, true, true, true)
+moku.set_autotile(my_new_map, moku_ids.PLAINS, at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
+moku.set_autotile(my_new_map, moku_ids.PLATEAU, at_algorithm.COMPLEX, true, true, true)
 
 moku.autotile_map(my_new_map)
 ```
