@@ -1,99 +1,107 @@
 local moku = require "moku.moku"
 
-local get_coords
+--o=========================o
+--o Forward Declarations
+--o=========================o
+
+local cost_fn
+local set_start
+local set_end
+local setup_map
+local set_id
+
+--o=========================o
+--o Script Functions
+--o=========================o
 
 function init(self)
 
-    msg.post("@render:", "clear_color", { color = vmath.vector4(.5, .5, .5, 0) } )
+    -- We want the background to stand out from the map
+    msg.post("@render:", "clear_color", { color = vmath.vector4(.5, .5, .75, 0) } )
 
-    -- Handle initial map and autotiling
-    local tile_ids = {
-        WALL = 1,
-        SLOW_ZONE = 17,
-        FLOOR = 33
+    -- Setup the map
+    setup_map(self)
+
+    -- Tile cost bookkeeping
+    local tile_costs = {
+        [self.astar_map.moku_ids.FLOOR] = 1,
+        [self.astar_map.moku_ids.SLOW_ZONE] = 10,
+        [self.astar_map.moku_ids.WALL] = -1, -- Negative values count as impassble
+        [0] = -1 -- nill tiles have moku_id = 0
     }
 
-    self.astar_map = moku.new_from_tm("astar_map#example2_tm", "layer1", 32, 32)
+    -- Add the tile_costs table to the map for easy access later
+    self.astar_map.tile_costs = tile_costs
 
-    moku.set_autotile(self.astar_map, tile_ids.WALL, moku.at_algorithm.SIMPLE, true, false, false)
-    moku.set_autotile(self.astar_map, tile_ids.SLOW_ZONE, moku.at_algorithm.SIMPLE, true, false, true)
-
-    self.astar_map.tile_ids = tile_ids
-
-    moku.autotile_map(self.astar_map)
-
-    msg.post(".", "acquire_input_focus")
-
-    moku.init_pathfinder(self.astar_map)
-
-    self.start_cell = self.astar_map[ - 18][ - 13]
+    -- Set the initial start and end cells
+    self.start_cell = self.astar_map[ 2][ 2]
+    local cx, cy = moku.cell_center(self.astar_map, 0, 0, 2, 2)
+    go.set_position(vmath.vector3(cx, cy, 1), "start")
     self.end_cell = self.astar_map[19][14]
+    cx, cy = moku.cell_center(self.astar_map, 0, 0, 19, 14)
+    go.set_position(vmath.vector3(cx, cy, 1), "end")
 
-    self.astar_map.pathfinder = {
-        search_limit = -1,
-        allowed_directions = moku.dir_tables.ALL,
-        punish_direction_change = true,
-        punish_direction_change_penalty = 5,
-        heavy_diagonals = true,
-        heavy_diagonals_multiplier = 2.41
-    }
+    -- Set the pathfinder options
+    -- (these are the defaults, and only shown for reference)
+    self.astar_map.pathfinder.search_limit = -1
+    self.astar_map.pathfinder.allowed_directions = moku.dir_tables.ALL
+    self.astar_map.pathfinder.punish_direction_change = false
+    self.astar_map.pathfinder.punish_direction_change_penalty = 5
+    self.astar_map.pathfinder.heavy_diagonals = false
+    self.astar_map.pathfinder.heavy_diagonals_multiplier = 2.41
+    self.astar_map.pathfinder.heuristic = moku.heuristic.MANHATTEN
 
-    local path, _ = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+    -- Calculate the initial path
+    self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
 
-    self.path = path
-
+    -- Stuff
+    msg.post(".", "acquire_input_focus")
 end
 
 function on_input(self, action_id, action)
     if action_id == hash("left_click") then
-        local cx, cy = get_coords(self, action.x, action.y)
+        local cx, cy = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
         if cx and cy then
-            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.WALL
-            moku.autotile_surrounding(self.astar_map, cx, cy)
-            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+            set_id(self, cx, cy, self.astar_map.moku_ids.WALL)
         end
     elseif action_id == hash("ctrl") then
-        local cx, cy = get_coords(self, action.x, action.y)
+        local cx, cy = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
         if cx and cy then
-            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.FLOOR
-            moku.autotile_surrounding(self.astar_map, cx, cy)
-            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+            set_id(self, cx, cy, self.astar_map.moku_ids.FLOOR)
         end
     elseif action_id == hash("shift") then
-        local cx, cy = get_coords(self, action.x, action.y)
+        local cx, cy = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
         if cx and cy then
-            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.SLOW_ZONE
-            moku.autotile_surrounding(self.astar_map, cx, cy)
-            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+            set_id(self, cx, cy, self.astar_map.moku_ids.SLOW_ZONE)
         end
     elseif action_id == hash("s") then
-        local cx, cy = get_coords(self, action.x, action.y)
+        local cx, cy = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
         if cx and cy then
-            self.start_cell = self.astar_map[cx][cy]
-            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+            set_start(self, cx, cy)
         end
     elseif action_id == hash("e") then
-        local cx, cy = get_coords(self, action.x, action.y)
+        local cx, cy = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
         if cx and cy then
-            self.end_cell = self.astar_map[cx][cy]
-            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+            set_end(self, cx, cy)
         end
+    elseif action_id == hash("d") and action.pressed then
+        if self.astar_map.pathfinder.allowed_directions == moku.dir_tables.ALL then
+            self.astar_map.pathfinder.allowed_directions = moku.dir_tables.CARDINAL
+        else
+            self.astar_map.pathfinder.allowed_directions = moku.dir_tables.ALL
+        end
+        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
+    elseif action_id == hash("h") and action.pressed then
+        self.astar_map.pathfinder.heavy_diagonals = not self.astar_map.pathfinder.heavy_diagonals
+        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
+    elseif action_id == hash("p") and action.pressed then
+        self.astar_map.pathfinder.punish_direction_change = not self.astar_map.pathfinder.punish_direction_change
+        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
     end
 end
 
-function get_coords(self, mx, my)
-    -- Get the camera position
-    local cam_pos = go.get_position("camera_go")
-
-    -- Calculate the relative world coords
-    local wx = mx + cam_pos.x
-    local wy = my + cam_pos.y
-
-    return moku.pick_coords(self.astar_map, 0, 0, wx, wy)
-end
-
+-- Draw the path when it exists
 function update(self, dt)
-
     if self.path then
         for i = 1, #self.path - 1 do
             local cc = self.path[i]
@@ -106,5 +114,69 @@ function update(self, dt)
             msg.post("@render:", "draw_line", { start_point = s, end_point = e, color = vmath.vector4(1, .3, 0, 0) } )
         end
     end
+end
 
+--o=========================o
+--o Local Functions
+--o=========================o
+
+-- This function determines the cost for "entering" a given cell.
+-- It is called by the pathfinder. This function is powerful, but
+-- should be used carefully, as going apeshit may lead to unexpected
+-- results.
+-- In general, treat this as a lookup table for tile entering costs
+-- and modify these costs as needed (say when an enemy blocks a tile,
+-- or a spell causes the tile to slow down the player.)
+-- In this example we use it as a lookup table, except when the end cell
+-- is a slow zone. Then we allow paths to cross over nil tiles.
+function cost_fn(args)
+    if args.to_cell.moku_id == 0 and args.end_cell.moku_id == args.map.moku_ids.SLOW_ZONE then
+        return 1
+    else
+        return args.map.tile_costs[args.to_cell.moku_id]
+    end
+end
+
+-- Sets a cells id
+function set_id(self, x, y, id)
+    self.astar_map[x][y].moku_id = id
+    moku.autotile_surrounding(self.astar_map, x, y)
+    self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
+end
+
+-- Handles the map setup
+function setup_map(self)
+    -- Tile id bookkeeping
+    local moku_ids = {
+        WALL = 1,
+        SLOW_ZONE = 17,
+        FLOOR = 33
+    }
+
+    -- Build the moku map from the defold tilemap
+    self.astar_map = moku.new_from_tm("astar_map#example2_tm", "layer1", 32, 32)
+
+    -- Add the tile id table to the map
+    self.astar_map.moku_ids = moku_ids
+
+    -- Designate autotiles.
+    moku.set_autotile(self.astar_map, moku_ids.WALL, moku.at_algorithm.SIMPLE, true, false, false)
+    moku.set_autotile(self.astar_map, moku_ids.SLOW_ZONE, moku.at_algorithm.SIMPLE, true, false, false)
+
+    -- Autotile the map
+    moku.autotile_map(self.astar_map)
+end
+
+function set_start(self, x, y)
+    self.start_cell = self.astar_map[x][y]
+    local cx, cy = moku.cell_center(self.astar_map, 0, 0, x, y)
+    go.set_position(vmath.vector3(cx, cy, 1), "start")
+    self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
+end
+
+function set_end(self, x, y)
+    self.end_cell = self.astar_map[x][y]
+    local cx, cy = moku.cell_center(self.astar_map, 0, 0, x, y)
+    go.set_position(vmath.vector3(cx, cy, 1), "end")
+    self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
 end

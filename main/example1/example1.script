@@ -32,14 +32,14 @@ end
 --o  Local functions
 --o===================o
 
--- Setup the simple and easy 8bit tilemap
+-- Setup the complex 8bit tilemap
 function setup_complex(self)
 
     -- Store the map objects world position for cell picking
     self.map_complex_pos = go.get_position("map_complex")
 
     -- Tile id bookkeeping
-    local tile_ids = {
+    local moku_ids = {
         -- Autotiles
         PLAINS = 1,
         PLATEAU = 49,
@@ -50,25 +50,26 @@ function setup_complex(self)
     -- Build the moku map from the defold tilemap
     self.map_complex = moku.new_from_tm("map_complex#example1_tm", "layer1", 32, 32)
 
-    -- Add the tile id table to the map, for easy and logical access
-    self.map_complex.tile_ids = tile_ids
+    -- Add the tile id table to the map, for easy and logical access.
+    -- *This is not required, but probably good practice
+    self.map_complex.moku_ids = moku_ids
 
     -- Designate the PLAINS and PLATEAU tile ids as autotiles.
-    moku.set_autotile(self.map_complex, tile_ids.PLAINS, moku.at_algorithm.COMPLEX, true, true, true, {tile_ids.PLATEAU})
-    moku.set_autotile(self.map_complex, tile_ids.PLATEAU, moku.at_algorithm.COMPLEX, true, true, true)
+    moku.set_autotile(self.map_complex, moku_ids.PLAINS, moku.at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
+    moku.set_autotile(self.map_complex, moku_ids.PLATEAU, moku.at_algorithm.COMPLEX, true, true, true)
 
     -- Autotile the map
     moku.autotile_map(self.map_complex)
 end
 
--- Setup the horrible mess 4bit custom map.
+-- Setup the horrible mess "simple" custom map. (Simple here refers to the algorithm used. I missed the irony while designing this example.)
 function setup_simple(self)
 
     -- Store the map objects world position for cell picking
     self.map_simple_pos = go.get_position("map_simple")
 
     -- Tile id bookkeeping
-    local tile_ids = {
+    local moku_ids = {
         --Autotiles
         WALL = 1,
         YELLOW_WALL = 17,
@@ -79,7 +80,7 @@ function setup_simple(self)
     -- Mokus constructor functions allow the passing of a function thats called
     -- every time a new cell is created. This function is meant for altering
     -- the cell in any way you see fit. Note that nothing is keeping you from
-    -- iterating over the map later, for more complex alteration.
+    -- iterating over the map later, for more complex or real-time alteration.
 
     -- In this example we are setting the tile id based on map coords, creating
     -- and storing the tiles associated game object, as well as storing the tiles
@@ -89,11 +90,11 @@ function setup_simple(self)
         local pos_y = (args.y - 1) * 32 + self.map_simple_pos.y
 
         if args.on_edge then
-            args.cell.tile_id = tile_ids.WALL
+            args.cell.moku_id = moku_ids.WALL
         elseif (args.x == 4 and args.y == 4) or (args.x == 4 and args.y == 5) or (args.x == 5 and args.y == 4) or (args.x == 5 and args.y == 5) then
-            args.cell.tile_id = tile_ids.YELLOW_WALL
+            args.cell.moku_id = moku_ids.YELLOW_WALL
         else
-            args.cell.tile_id = tile_ids.FLOOR
+            args.cell.moku_id = moku_ids.FLOOR
         end
 
         args.cell.go = factory.create("map_simple#tile_factory", vmath.vector3(pos_x, pos_y, 0))
@@ -106,11 +107,11 @@ function setup_simple(self)
     self.map_simple = moku.new(8, 8, 32, 32, on_new_cell)
 
     -- Add the tile id table to the map, for easy and logical access
-    self.map_simple.tile_ids = tile_ids
+    self.map_simple.moku_ids = moku_ids
 
     -- Designate the WALL and YELLOW_WALL tile ids as autotiles.
-    moku.set_autotile(self.map_simple, tile_ids.WALL, moku.at_algorithm.SIMPLE, true, true, false)
-    moku.set_autotile(self.map_simple, tile_ids.YELLOW_WALL, moku.at_algorithm.SIMPLE, true, false, false)
+    moku.set_autotile(self.map_simple, moku_ids.WALL, moku.at_algorithm.SIMPLE, true, true, false)
+    moku.set_autotile(self.map_simple, moku_ids.YELLOW_WALL, moku.at_algorithm.SIMPLE, true, false, false)
 
     -- Since this is a custom map, we can not actually "auto"-tile, as
     -- moku has no way of knowing how we are doing things. In this case
@@ -153,27 +154,28 @@ end
 
 -- Sets a cells tile id
 function set_cell_id(self, action_id, action)
+    -- Get the map and coords
     local map, cx, cy = get_map_and_coords(self, action.screen_x, action.screen_y)
-    local tile_id
+    local moku_id
     if map == "complex" then
         if action_id == hash("left_click") then
-            tile_id = self.map_complex.tile_ids.PLAINS
+            moku_id = self.map_complex.moku_ids.PLAINS
         elseif action_id == hash("ctrl") then
-            tile_id = self.map_complex.tile_ids.OCEAN
+            moku_id = self.map_complex.moku_ids.OCEAN
         else
-            tile_id = self.map_complex.tile_ids.PLATEAU
+            moku_id = self.map_complex.moku_ids.PLATEAU
         end
-        self.map_complex[cx][cy].tile_id = tile_id
+        self.map_complex[cx][cy].moku_id = moku_id
         moku.autotile_surrounding(self.map_complex, cx, cy)
     elseif map == "simple" then
         if action_id == hash("left_click") then
-            tile_id = self.map_simple.tile_ids.WALL
+            moku_id = self.map_simple.moku_ids.WALL
         elseif action_id == hash("ctrl") then
-            tile_id = self.map_simple.tile_ids.FLOOR
+            moku_id = self.map_simple.moku_ids.FLOOR
         else
-            tile_id = self.map_simple.tile_ids.YELLOW_WALL
+            moku_id = self.map_simple.moku_ids.YELLOW_WALL
         end
-        self.map_simple[cx][cy].tile_id = tile_id
+        self.map_simple[cx][cy].moku_id = moku_id
         -- Since custom maps cant use true autotiling we use the tiling matrix workaround
         local surrounding_matrix = moku.tiling_matrix_surrounding(self.map_simple, cx, cy)
         for _x, _y, value in moku.iterate_surrounding(self.map_simple, cx, cy ) do

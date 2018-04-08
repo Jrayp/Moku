@@ -29,6 +29,12 @@ M.dir_tables = {
     DIAGONAL = {{1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}}
 }
 
+M.heuristic = {
+    MANHATTEN = function(a, b)
+        return math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
+    end
+}
+
 --o=========================o
 --o Local Tables
 --o=========================o
@@ -179,7 +185,7 @@ function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_
         new_map[x] = {}
         for y = _y, _y + height - 1 do
             local this_id = tilemap.get_tile(tilemap_url, layer_name, x, y)
-            new_map[x][y] = new_cell(this_id)
+            new_map[x][y] = new_cell(x, y, this_id)
             if on_new_cell then
                 args.cell = new_map[x][y]
                 args.x = x
@@ -190,7 +196,15 @@ function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_
         end
     end
 
-    new_map.pathfinder = nil
+    new_map.pathfinder = {
+        search_limit = -1,
+        allowed_directions = M.dir_tables.ALL,
+        punish_direction_change = false,
+        punish_direction_change_penalty = 5,
+        heavy_diagonals = false,
+        heavy_diagonals_multiplier = 2.41,
+        heuristic = M.heuristic.MANHATTEN
+    }
 
     new_map.internal = {}
     new_map.internal.tilemap_url = tilemap_url
@@ -239,7 +253,7 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
     for x = 1, width do
         new_map[x] = {}
         for y = 1, height do
-            new_map[x][y] = new_cell(reserved_ids.NULL)
+            new_map[x][y] = new_cell(x, y, reserved_ids.NULL)
             if on_new_cell then
                 args.cell = new_map[x][y]
                 args.x = x
@@ -250,7 +264,15 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
         end
     end
 
-    new_map.pathfinder = nil
+    new_map.pathfinder = {
+        search_limit = -1,
+        allowed_directions = M.dir_tables.ALL,
+        punish_direction_change = false,
+        punish_direction_change_penalty = 5,
+        heavy_diagonals = false,
+        heavy_diagonals_multiplier = 2.41,
+        heuristic = M.heuristic.MANHATTEN
+    }
 
     new_map.internal = {}
     new_map.internal.tilemap_url = nil
@@ -263,8 +285,14 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
 end
 
 -- Returns a new moku cell
-function new_cell(tile_id)
-    return { tile_id = tile_id }
+function new_cell(x, y, moku_id)
+    return
+    {
+        moku_x = x,
+        moku_y = y,
+        moku_id = moku_id
+    }
+
 end
 
 --o=========================================o
@@ -494,35 +522,35 @@ end
 
 --- Designates a tile id as as an autotile.
 -- @tparam map map A moku map
--- @tparam number tile_id The tile id to be designated as an autotile
+-- @tparam number moku_id The tile id to be designated as an autotile
 -- @tparam moku.at_algorithm algorithm The autotiling algorithm to be used
 -- @tparam bool join_self Whether tiles of the same type act as joining tiles
 -- @tparam bool join_edge Whether the edge ofthe map acts as a joining tile
 -- @tparam bool join_nil Whether empty cells act as joining tiles
 -- @tparam table joining_ids Additional tile id's to act as joining tiles
-function M.set_autotile(map, tile_id, algorithm, join_self, join_edge, join_nil, joining_ids)
+function M.set_autotile(map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)
     if map.internal.autotiles == nil then
         map.internal.autotiles = {}
     end
 
-    map.internal.autotiles[tile_id] = {}
-    map.internal.autotiles[tile_id].algorithm = algorithm
+    map.internal.autotiles[moku_id] = {}
+    map.internal.autotiles[moku_id].algorithm = algorithm
 
     if join_self then
-        map.internal.autotiles[tile_id][tile_id] = true
+        map.internal.autotiles[moku_id][moku_id] = true
     end
 
     if join_edge then
-        map.internal.autotiles[tile_id][reserved_ids.EDGE] = true
+        map.internal.autotiles[moku_id][reserved_ids.EDGE] = true
     end
 
     if join_nil then
-        map.internal.autotiles[tile_id][reserved_ids.NULL] = true
+        map.internal.autotiles[moku_id][reserved_ids.NULL] = true
     end
 
     if joining_ids then
         for i, v in ipairs(joining_ids) do
-            map.internal.autotiles[tile_id][v] = true
+            map.internal.autotiles[moku_id][v] = true
         end
     end
 end
@@ -534,25 +562,25 @@ end
 -- @return The autotile id
 function M.calc_autotile_id(map, x, y)
     -- Tile id of this cell
-    local tile_id = map[x][y].tile_id
+    local moku_id = map[x][y].moku_id
 
     -- References the appropriate lookup table
     -- or returns the original type if not an
     -- autotile
     local lookup
-    if map.internal.autotiles[tile_id] then
-        lookup = map.internal.autotiles[tile_id]
+    if map.internal.autotiles[moku_id] then
+        lookup = map.internal.autotiles[moku_id]
     else
-        return tile_id
+        return moku_id
     end
 
     local algorithm = lookup.algorithm
     local sum
 
     if algorithm == 4 then
-        sum = compute_simple_id(map, x, y, tile_id, lookup)
+        sum = compute_simple_id(map, x, y, moku_id, lookup)
     elseif algorithm == 8 then
-        sum = compute_complex_id(map, x, y, tile_id, lookup)
+        sum = compute_complex_id(map, x, y, moku_id, lookup)
     end
 
     -- Return sum
@@ -737,7 +765,7 @@ end
 -- Gets the type at x, y, returns border (-1) if outside of bounds
 function get_type(map, x, y)
     if M.within_bounds(map, x, y) and map[x][y] then
-        return map[x][y].tile_id
+        return map[x][y].moku_id
     else
         return reserved_ids.EDGE
     end
@@ -751,49 +779,24 @@ end
 
 --o=========================================o
 
--------------------------------------------------------------------------------------
--- IMPORTANT!!!
--- MUST ALSO BE ABLE TO MANIPULATE COSTS ARBITRARILY! THINK MONSTERS OR SPELL EFFECTS!
--------------------------------------------------------------------------------------
-
-function M.init_pathfinder(map)
-    for x, y, v in M.iterate_map(map) do
-        v.moku_x = x
-        v.moku_y = y
+--- Computes, and returns a path from a given start cell, to a given end cell.
+-- Takes a cost function for tile weights. Negative weights designate the cell as
+-- impassible. See example project or readme for details.
+-- @tparam map map A moku map
+-- @tparam cell start_cell Given start cell
+-- @tparam cell end_cell Given end cell
+-- @tparam function cost_fn Cost function
+-- @return An array of cells, in order from start to end cell. Nill if no path found.
+-- @return A table of cell costs. If no path is found a string is returned with a reason.
+function M.find_path(map, start_cell, end_cell, cost_fn)
+    if start_cell == end_cell then
+        return nil, "Start and end cell, are the same."
     end
 
-    map.pathfinder = {
-        search_limit = -1,
-        allowed_directions = M.dir_tables.ALL,
-        punish_direction_change = false,
-        punish_direction_change_penalty = 5,
-        heavy_diagonals = false,
-        heavy_diagonals_multiplier = 2.41
-    }
-
-    map.internal.pathfinder_weights = {
-        [17] = 10,
-        [33] = 1,
-        [0] = 100
-    }
-end
-
-local function manhatten(a, b)
-    return math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
-end
-
-function M.find_path_coords(map, start_x, start_y, end_x, end_y)
-    return M.find_path(map, map[start_x][start_y], map[end_x][end_y])
-end
-
-function M.find_path(map, start_cell, end_cell)
-    assert(start_cell ~= end_cell, "Start and end cell must be different.")
-
     local options = map.pathfinder
-    local weights = map.internal.pathfinder_weights
 
     local open = {}
-    local cost_lookup = {} -- Doubles as closed, I think
+    local cost_lookup = {}
     local parent_lookup = {}
 
     pq_init(open)
@@ -804,12 +807,20 @@ function M.find_path(map, start_cell, end_cell)
 
     parent_lookup[start_cell] = start_cell
 
+    local cost_args = {
+        map = map,
+        from_cell = nil,
+        to_cell = nil,
+        start_cell = start_cell,
+        end_cell = end_cell
+    }
+
     local found = false
 
     local use_search_limit = options.search_limit > 0 or false
     local horiz
 
-    -- Variable promotion for the miniscule performance increase
+    -- Variable promotion for miniscule performance increase
     local current_cell
     local nx
     local ny
@@ -846,7 +857,16 @@ function M.find_path(map, start_cell, end_cell)
             if map[nx] and map[nx][ny] then
                 neighbor_cell = map[nx][ny]
 
-                neighbor_cost = weights[neighbor_cell.tile_id] or - 1
+                -- Update the cost argument table for use in the
+                -- cost function
+                cost_args.map = map
+                cost_args.from_cell = current_cell
+                cost_args.to_cell = neighbor_cell
+                cost_args.start_cell = start_cell
+                cost_args.end_cell = end_cell
+
+                -- Get the cost of this cell from user
+                neighbor_cost = cost_fn(cost_args)
 
                 if neighbor_cost >= 0 then
 
@@ -874,7 +894,7 @@ function M.find_path(map, start_cell, end_cell)
                     if not cost_lookup[neighbor_cell] or new_cost < cost_lookup[neighbor_cell] then
                         cl_add(cost_lookup, neighbor_cell, new_cost)
 
-                        priority = new_cost + manhatten(end_cell, neighbor_cell)
+                        priority = new_cost + options.heuristic(end_cell, neighbor_cell)
                         pq_put(open, neighbor_cell, priority)
 
                         parent_lookup[neighbor_cell] = current_cell
@@ -994,59 +1014,59 @@ end
 
 --o=========================================o
 
--- Add a function for visualizing path
--- Add a function for showing the tile weights for the pathfinder,
--- as well as for the move distance calculator (when its added)
--- Add a function to iterate the map and make sure user is only using valid values?
-
-local function get_digits(number)
-    if number == 0 then
-        return 1
-    end
-
-    local count = 0
-    while number >= 1 do
-        number = number / 10
-        count = count + 1
-    end
-    return count
-end
-
---- Prints the maps layout to console.
--- @tparam map map A moku map
-function M.print_map(map)
-
-    local max_digits = 1
-
-    -- Not only checking tile table, in case user entered a
-    -- non tile value
-    for _, y, v in M.iterate_map(map) do
-        if get_digits(v) > max_digits then
-            max_digits = v
-        end
-    end
-
-    local layout = ""
-
-    -- Add row numbers
-    -- Account for numbers with more digits
-    for y = map.bounds.y + map.bounds.height - 1, map.bounds.y - 1, - 1 do
-        if y ~= map.bounds.y - 1 then
-            layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
-        else
-            layout = layout.."\nx: "
-        end
-        for x = map.bounds.x, map.bounds.x + map.bounds.width - 1 do
-            if y ~= map.bounds.y - 1 then
-                layout = layout..map[x][y]..", "
-            else
-                layout = layout.."c"..x..", "
-            end
-        end
-    end
-
-    print(layout)
-
-end
+-- -- Add a function for visualizing path
+-- -- Add a function for showing the tile weights for the pathfinder,
+-- -- as well as for the move distance calculator (when its added)
+-- -- Add a function to iterate the map and make sure user is only using valid values?
+--
+-- local function get_digits(number)
+--     if number == 0 then
+--         return 1
+--     end
+--
+--     local count = 0
+--     while number >= 1 do
+--         number = number / 10
+--         count = count + 1
+--     end
+--     return count
+-- end
+--
+-- --- Prints the maps layout to console.
+-- -- @tparam map map A moku map
+-- function M.print_map(map)
+--
+--     local max_digits = 1
+--
+--     -- Not only checking tile table, in case user entered a
+--     -- non tile value
+--     for _, y, v in M.iterate_map(map) do
+--         if get_digits(v) > max_digits then
+--             max_digits = v
+--         end
+--     end
+--
+--     local layout = ""
+--
+--     -- Add row numbers
+--     -- Account for numbers with more digits
+--     for y = map.bounds.y + map.bounds.height - 1, map.bounds.y - 1, - 1 do
+--         if y ~= map.bounds.y - 1 then
+--             layout = layout.."\n"..(y % 2 == 0 and "o: " or "e: ")
+--         else
+--             layout = layout.."\nx: "
+--         end
+--         for x = map.bounds.x, map.bounds.x + map.bounds.width - 1 do
+--             if y ~= map.bounds.y - 1 then
+--                 layout = layout..map[x][y]..", "
+--             else
+--                 layout = layout.."c"..x..", "
+--             end
+--         end
+--     end
+--
+--     print(layout)
+--
+-- end
 
 return M

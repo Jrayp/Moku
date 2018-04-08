@@ -38,7 +38,23 @@ key_trigger {
   input: KEY_E
   action: "e"
 }
+key_trigger {
+  input: KEY_H
+  action: "h"
+}
+key_trigger {
+  input: KEY_D
+  action: "d"
+}
+key_trigger {
+  input: KEY_P
+  action: "p"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "left_click"
+}
+touch_trigger {
+  input: TOUCH_MULTI
+  action: "touched"
 }

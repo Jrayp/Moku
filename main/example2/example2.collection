@@ -1,52 +1,4 @@
 name: "default"
-instances {
-  id: "camera_go"
-  prototype: "/main/camera_go.go"
-  position {
-    x: -640.0
-    y: -480.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  component_properties {
-    id: "camera_script"
-    properties {
-      id: "right"
-      value: "0.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "left"
-      value: "-640.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "up"
-      value: "0.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "down"
-      value: "-480.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "speed"
-      value: "8.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
 scale_along_z: 0
 embedded_instances {
   id: "astar_map"
@@ -178,8 +130,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: -932.0
-    y: 234.0
+    x: -1000.0
+    y: 100.0
     z: 1.0
   }
   rotation {
@@ -254,9 +206,97 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: -931.0
-    y: 170.0
+    x: -1000.0
+    y: 0.0
     z: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "text"
+  data: "embedded_components {\n"
+  "  id: \"controls\"\n"
+  "  type: \"label\"\n"
+  "  data: \"size {\\n"
+  "  x: 128.0\\n"
+  "  y: 32.0\\n"
+  "  z: 0.0\\n"
+  "  w: 0.0\\n"
+  "}\\n"
+  "scale {\\n"
+  "  x: 1.0\\n"
+  "  y: 1.0\\n"
+  "  z: 1.0\\n"
+  "  w: 0.0\\n"
+  "}\\n"
+  "color {\\n"
+  "  x: 0.8\\n"
+  "  y: 1.0\\n"
+  "  z: 1.0\\n"
+  "  w: 1.0\\n"
+  "}\\n"
+  "outline {\\n"
+  "  x: 0.0\\n"
+  "  y: 0.0\\n"
+  "  z: 0.0\\n"
+  "  w: 1.0\\n"
+  "}\\n"
+  "shadow {\\n"
+  "  x: 0.0\\n"
+  "  y: 0.0\\n"
+  "  z: 0.0\\n"
+  "  w: 1.0\\n"
+  "}\\n"
+  "leading: 1.0\\n"
+  "tracking: 0.0\\n"
+  "pivot: PIVOT_W\\n"
+  "blend_mode: BLEND_MODE_ALPHA\\n"
+  "line_break: false\\n"
+  "text: \\\"Controls:\\\\n"
+  "\\\"\\n"
+  "  \\\"Left click, hold shift, or hold ctrl to edit the map.\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\\\\\'s\\\\\\\' and \\\\\\\'e\\\\\\\' to change start and end cells\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\\\\\'d\\\\\\\' to toggle diagonals on/off\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\\\\\'h\\\\\\\' for heavy diagonals\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\\\\\'p\\\\\\\' to punish direction change\\\\n"
+  "\\\"\\n"
+  "  \\\"1-2 to switch examples\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\"\\n"
+  "font: \\\"/main/fonts/vera_8.font\\\"\\n"
+  "material: \\\"/builtins/fonts/label.material\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 10.0
+    y: 430.0
+    z: 0.0
   }
   rotation {
     x: 0.0
