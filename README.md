@@ -33,10 +33,6 @@ moku_cell = {
 
 Of course there is nothing stopping you from adding elements to this table. Just be sure to not overwrite the coordinates or bad things will happen. 
 
-### Creating a new Moku map
-
-A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, on_new_cell)` or built from a Defold tilemap using `new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_cell)`. 
-
 ### Moku Id's
 
 The `moku_id` element of a moku cell is a reference to that cells tile "type" (ie walls, floors, forests, mountains). It is good practice to create a bookkeeping table of your tile types, as such:
@@ -64,6 +60,32 @@ This allows one to easily and safely change Moku id's as such:
 -- Moku cells are accessable using indexers
 moku_map[i][j].moku_id = moku_map.moku_ids.WALL
 ```
+
+### Creating a new Moku map
+
+A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, on_new_cell)` or built from a Defold tilemap using `new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_cell)`. 
+
+The optional `on_new_cell` parameter takes a function that is called once for every Moku cell. This can be used to initialize the map to your liking by manipulating the Moku cells as you require. When `on_new_cell` is called, it passes an argument table with some useful information. An example follows
+
+```lua
+-- Sets all edge cells to the wall id
+local function on_new_cell(args)
+    -- The args table contains the following information
+    -- args.cell, the current cell
+    -- args.x, the current cells x coordinate
+    -- args.y, the current cells y coordinate
+    -- args.on_edge, whether or not the current cell is an edge cell
+
+    if args.on_edge then
+        args.cell.moku_id = moku_ids.WALL
+    end
+end
+   
+-- Create new moku map, and pass the on_new_cell function
+my_moku_map = moku.new(8, 8, 32, 32, on_new_cell)
+```
+
+Note that there is no reason to set a cells `moku_x` or `moku_y` in the `on_new_cell` function. Moku does this before the function is even called.
 
 ### Bounds and Dimensions
 
