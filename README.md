@@ -8,60 +8,66 @@ Map utility/module for the Defold game engine.
 ### Features: 
 
 * Bitmask autotiling partially based on the method outlined here: [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673). Supports both 4 and 8-bit tiling. Can be used in conjuction with defold tilemaps, or your own custom maps.
+* AStar pathfinding with support for options such as heavy diagonals, different heuristics, etc
 * Assorted convience functions including cell picking
 
 ### Planned features
 
-* Efficient AStar pathfinding with support for options such as heavy diagonals etc
 * Ability to calculate "move distance/area" based on tile weights 
-* Other things I haven't put too much thought into yet
 
 ### State
 
-Currently in very early, untested alpha. Missing features, probably a bit unwieldy, unintuitive, and busted. Things are are bound to undergo LARGE changes until I reach at least beta. If you have suggestions for structure changes, or function naming, please create an issue.
+Currently in alpha. Missing some features, and probably buggy. Things are still bound to change.
 
 ## Basics
 
-A Moku map is nothing but a two-dimensional table of cells containing number values corresponding to your individual tile types, along with some relevant map data. 
+A Moku map is nothing but a two-dimensional table of moku cells. A moku cell is a table of the form
+
+```lua
+moku_cell = {
+    moku_x = i, -- x coordinate of cell
+    moku_y = j, -- y coordinate of cell
+    moku_id = k -- tile id of cell
+}
+```
+
+Of course there is nothing stopping you from adding elements to this table. Just be sure to not overwrite the coordinates or bad things will happen. 
 
 ### Creating a new Moku map
 
-A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, tile_types, fill_type, tilemap_url)` or built from a Defold tilemap using `moku.new_from_tilemap(tilemap_url, tile_width, tile_height, tile_types)`. 
+A new moku map can be created from scratch using `moku.new(width, height, tile_width, tile_height, on_new_cell)` or built from a Defold tilemap using `new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_cell)`. 
+
+### Moku Id's
+
+The `moku_id` element of a moku cell is a reference to that cells tile "type" (ie walls, floors, forests, mountains). It is good practice to create a bookkeeping table of your tile types, as such:
 
 ```lua
-moku_map = moku.new(...)
-```
-
-### Tile types
-
-The `tile_types` argument is a table with the following form:
-
-```lua
-local tile_types = {
-    MY_TILE1 = 1,
-    MY_TILE2 = 2,
-    MY_TILE3 = 3,
+local moku_ids = {
+    WALL = 1,
+    FLOOR = 2,
+    WATER = 3,
     -- etc
 }
 ```
 
-Where the `number` value should correspond to that tiles tile sheet image id. **Your Moku maps cells should generally only contain values that are also found in your tile_types table!**
+Where the `number` value should correspond to that tiles tile sheet image id (In the above example, the tilesheets first image would be a wall, and so on). When working with auto-tiles, it is important you use the correct image id. This is explained in the auto-tiling section, below.
 
-By the way, Moku maps keep a reference of this table as `moku_map.tile_types`.
+**NOTE: Your Moku maps cells should generally only have moku_id values that are also found in your moku_ids table!**
 
-### Accessing cells
+That is, given the above set of Moku id's, no cell in a moku map should have `moku_id` other than 1, 2 or 3.
 
-Moku map cells are accessable using indexers:
+By the way, it may also be good practice to keep a reference of the `moku_ids` table on your moku map: `my_moku_map.moku_ids = moku_ids`.
+
+This allows one to easily and safely change Moku id's as such:
 
 ```lua
--- Assuming moku_map was created with one of the above constructor functions,
--- the cell at coordinate i, j will be changed to the MY_TILE1 type
-moku_map[i][j] = moku_map.tile_types.MY_TILE1
+-- Moku cells are accessable using indexers
+moku_map[i][j].moku_id = moku_map.moku_ids.WALL
 ```
 
 ### Bounds and Dimensions
 
-Furthermore Moku keeps track of "bounds" and "dimensional" data. Bounds here, is referring to a maps bottom left corner cell coordinate (negative coordinates are fully supported) and the maps width and height in cells. Dimensions on the other hand refer to world space dimensions in pixels, calculated from the bounds data and your entered tile sizes. Dimensional data is used for things such as cell picking etc. 
+Moku keeps track of "bounds" and "dimensional" data. Bounds here, is referring to a maps bottom left corner cell coordinate (negative coordinates are fully supported) and the maps width and height in cells. Dimensions on the other hand refer to world space dimensions in pixels, calculated from the bounds data and your entered tile sizes. Dimensional data is used for things such as cell picking etc. 
 
 ```lua
 -- Prints the bottom left cells x, y coordinates
@@ -79,15 +85,13 @@ print(moku_map.dimensions.world_width, moku_map.dimensions.world_height)
 
 ### Internal data
 
-Lastly a Moku map may store information pertaining to the autotiler with `moku_map.tilemap_url` and `moku_map.autotiles` both of which are meant for internal use. (Though there may be obscure reasons for manually changing the `tilemap_url`, which shouldn't cause any issues.)
+Lastly Moku maps have an element 'moku_map.internal' which is meant for internal use (duh). Don't mess with it :P
 
 ## Using the auto tiler
 
 ![](doc/transition.png)
 
-Currently Moku functions mainly as an auto tiler.
-
-Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit tiling, but 4-bit tiling works the same way.
+Moku auto-tiling can be very easy to use, depending on use case. More involved needs will require more involved setup. However, for simple defold tilemap autotiling, very little work is required. Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. For this guide we will use 8-bit (Complex) tiling, but 4-bit (Simple) tiling works mostly the same way.
 
 ### Tile sheet layout
 
@@ -95,11 +99,15 @@ First, your sprite sheet containing your maps tile images must be in a specific 
 
 ![](main/images/autotiles_8bit.png)
 
-Since the plains and plateau types will be designated 8-bit autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate an autotile must have 48 images reserved on your tile sheet in EXACTLY this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
+Since the plains and plateau types will be designated 8-bit autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate a complex autotile must have 48 images reserved on your tile sheet in _exactly_ this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile).
 
-Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. Also note that if we were using 4-bit tiling that everything would work the same, except that we would only require a much more managable 16 images per autotile.
+Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. 
 
 The ocean tile does not require autotile functionality, and can be freely placed anywhere on your tile sheet.
+
+Also note that if we were using simple tiling that everything would work the same, except that we would only require a much more managable 16 images per autotile. Following is the (much nicer) layout of a simple autotile tilesheet:
+
+![](main/images/simple_layout.png)
 
 ### Auto tiling a tilemap
 
