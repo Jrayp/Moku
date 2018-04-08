@@ -1,5 +1,5 @@
 # Moku
-Map utility/module for the Defold game engine. 
+Map utility/module for the Defold game engine. (Big thanks to Axel Hammerback for the Hero image and thumbnail.)
 
 ### Documentation
 
