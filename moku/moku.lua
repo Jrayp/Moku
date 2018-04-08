@@ -805,8 +805,8 @@ end
 -- @tparam cell start_cell Given start cell
 -- @tparam cell end_cell Given end cell
 -- @tparam function cost_fn Cost function
--- @return An array of cells, in order from start to end cell. Nill if no path found.
--- @return A table of cell costs. If no path is found a string is returned with a reason.
+-- @return An array of cells, in order from start to end cell. Nil if no path found.
+-- @return A table of cell costs. If no path is found a string is giving a reason.
 function M.find_path(map, start_cell, end_cell, cost_fn)
     if start_cell == end_cell then
         return nil, "Start and end cell, are the same."

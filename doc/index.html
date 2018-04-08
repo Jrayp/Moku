@@ -35,7 +35,7 @@
 <li><a href="#Cell_Picking">Cell Picking </a></li>
 <li><a href="#Auto_Tiling">Auto-Tiling </a></li>
 <li><a href="#Tiling_Matrices">Tiling Matrices </a></li>
-<li><a href="#Debugging">Debugging </a></li>
+<li><a href="#Pathfinding">Pathfinding </a></li>
 </ul>
 
 
@@ -132,7 +132,7 @@
 	<td class="summary">Links a tilemap and layer to a moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_autotile">set_autotile (map, tile_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
+	<td class="name" nowrap><a href="#set_autotile">set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
 	<td class="summary">Designates a tile id as as an autotile.</td>
 	</tr>
 	<tr>
@@ -144,12 +144,12 @@
 	<td class="summary">Autotiles a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#autotile_region">autotile_region (map, x, y, width, height)</a></td>
-	<td class="summary">Autotiles a rectangular region of a moku map.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#autotile_map">autotile_map (map)</a></td>
 	<td class="summary">Autotiles an entire moku map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#autotile_region">autotile_region (map, x, y, width, height)</a></td>
+	<td class="summary">Autotiles a rectangular region of a moku map.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#autotile_surrounding">autotile_surrounding (map, x, y)</a></td>
@@ -159,23 +159,23 @@
 <h2><a href="#Tiling_Matrices">Tiling Matrices </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#tiling_matrix_region">tiling_matrix_region (map, x, y, width, height)</a></td>
-	<td class="summary">Returns a rectangular tiling matrix.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#tiling_matrix_map">tiling_matrix_map (map)</a></td>
 	<td class="summary">Returns a tiling matrix for an entire moku map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tiling_matrix_region">tiling_matrix_region (map, x, y, width, height)</a></td>
+	<td class="summary">Returns a rectangular tiling matrix.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#tiling_matrix_surrounding">tiling_matrix_surrounding (map, x, y)</a></td>
 	<td class="summary">Returns a tiling matrix for a given cell and its surrounding cells.</td>
 	</tr>
 </table>
-<h2><a href="#Debugging">Debugging </a></h2>
+<h2><a href="#Pathfinding">Pathfinding </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#print_map">print_map (map)</a></td>
-	<td class="summary">Prints the maps layout to console.</td>
+	<td class="name" nowrap><a href="#find_path">find_path (map, start_cell, end_cell, cost_fn)</a></td>
+	<td class="summary">Computes, and returns a path from a given start cell, to a given end cell.</td>
 	</tr>
 </table>
 
@@ -825,7 +825,7 @@
 </dd>
     <dt>
     <a name = "set_autotile"></a>
-    <strong>set_autotile (map, tile_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
+    <strong>set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
     </dt>
     <dd>
     Designates a tile id as as an autotile.
@@ -837,7 +837,7 @@
             <span class="types"><span class="type">map</span></span>
          A moku map
         </li>
-        <li><span class="parameter">tile_id</span>
+        <li><span class="parameter">moku_id</span>
             <span class="types"><span class="type">number</span></span>
          The tile id to be designated as an autotile
         </li>
@@ -932,6 +932,27 @@
 
 </dd>
     <dt>
+    <a name = "autotile_map"></a>
+    <strong>autotile_map (map)</strong>
+    </dt>
+    <dd>
+    Autotiles an entire moku map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
     <a name = "autotile_region"></a>
     <strong>autotile_region (map, x, y, width, height)</strong>
     </dt>
@@ -960,27 +981,6 @@
         <li><span class="parameter">height</span>
             <span class="types"><span class="type">number</span></span>
          Height of the region
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "autotile_map"></a>
-    <strong>autotile_map (map)</strong>
-    </dt>
-    <dd>
-    Autotiles an entire moku map.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
-         A moku map
         </li>
     </ul>
 
@@ -1027,6 +1027,27 @@
           </div>
     <dl class="function">
     <dt>
+    <a name = "tiling_matrix_map"></a>
+    <strong>tiling_matrix_map (map)</strong>
+    </dt>
+    <dd>
+    Returns a tiling matrix for an entire moku map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
     <a name = "tiling_matrix_region"></a>
     <strong>tiling_matrix_region (map, x, y, width, height)</strong>
     </dt>
@@ -1055,27 +1076,6 @@
         <li><span class="parameter">height</span>
             <span class="types"><span class="type">number</span></span>
          Height of the region
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "tiling_matrix_map"></a>
-    <strong>tiling_matrix_map (map)</strong>
-    </dt>
-    <dd>
-    Returns a tiling matrix for an entire moku map.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
-         A moku map
         </li>
     </ul>
 
@@ -1114,19 +1114,21 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Debugging"></a>Debugging </h2>
+    <h2 class="section-header has-description"><a name="Pathfinding"></a>Pathfinding </h2>
 
           <div class="section-description">
 
- Debugging function
+ Functions related to pathfinding
           </div>
     <dl class="function">
     <dt>
-    <a name = "print_map"></a>
-    <strong>print_map (map)</strong>
+    <a name = "find_path"></a>
+    <strong>find_path (map, start_cell, end_cell, cost_fn)</strong>
     </dt>
     <dd>
-    Prints the maps layout to console.
+    Computes, and returns a path from a given start cell, to a given end cell.
+ Takes a cost function for tile weights. Negative weights designate the cell as
+ impassible. See example project or readme for details.
 
 
     <h3>Parameters:</h3>
@@ -1135,8 +1137,27 @@
             <span class="types"><span class="type">map</span></span>
          A moku map
         </li>
+        <li><span class="parameter">start_cell</span>
+            <span class="types"><span class="type">cell</span></span>
+         Given start cell
+        </li>
+        <li><span class="parameter">end_cell</span>
+            <span class="types"><span class="type">cell</span></span>
+         Given end cell
+        </li>
+        <li><span class="parameter">cost_fn</span>
+            <span class="types"><span class="type">function</span></span>
+         Cost function
+        </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        An array of cells, in order from start to end cell. Nil if no path found.</li>
+        <li>
+        A table of cell costs. If no path is found a string is giving a reason.</li>
+    </ol>
 
 
 
@@ -1149,7 +1170,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2018-04-06 00:39:17 </i>
+<i style="float:right;">Last updated 2018-04-08 02:28:28 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
