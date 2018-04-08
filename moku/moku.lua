@@ -127,12 +127,14 @@ local compute_complex_id
 local compute_simple_id
 local get_type
 
--- Pathfinding
-local compare_nodes
-local on_compare
-local switch_nodes
-local push
+-- Priority Queue
+local contains
+local swim
+local sink
+local min_child
+local put
 local pop
+local init_pq
 
 --o=================================================o
 
@@ -579,6 +581,12 @@ function M.autotile_cell(map, x, y)
     tilemap.set_tile(map.internal.tilemap_url, map.internal.layer_name, x, y, sum)
 end
 
+--- Autotiles an entire moku map.
+-- @tparam map map A moku map
+function M.autotile_map(map)
+    return M.autotile_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
+end
+
 --- Autotiles a rectangular region of a moku map.
 -- @tparam map map A moku map
 -- @tparam number x Lower left x coordinate of region
@@ -595,12 +603,6 @@ function M.autotile_region(map, x, y, width, height)
     for _x, _y, _v in M.iterate_region(map, x, y, width, height) do
         M.autotile_cell(map, _x, _y)
     end
-end
-
---- Autotiles an entire moku map.
--- @tparam map map A moku map
-function M.autotile_map(map)
-    return M.autotile_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
 end
 
 --- Autotiles a given cell and its surrounding cells.
@@ -620,6 +622,12 @@ end
 
 --o=========================================o
 
+--- Returns a tiling matrix for an entire moku map.
+-- @tparam map map A moku map
+function M.tiling_matrix_map(map)
+    return M.tiling_matrix_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
+end
+
 --- Returns a rectangular tiling matrix.
 -- @tparam map map A moku map
 -- @tparam number x Lower left x coordinate of region
@@ -637,12 +645,6 @@ function M.tiling_matrix_region(map, x, y, width, height)
     return tiling_matrix
 end
 
---- Returns a tiling matrix for an entire moku map.
--- @tparam map map A moku map
-function M.tiling_matrix_map(map)
-    return M.tiling_matrix_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
-end
-
 --- Returns a tiling matrix for a given cell and its surrounding cells.
 -- @tparam map map A moku map
 -- @tparam number x The x coordinate of the given cell
@@ -650,6 +652,10 @@ end
 function M.tiling_matrix_surrounding(map, x, y)
     return M.tiling_matrix_region(map, x - 1, y - 1, 3, 3)
 end
+
+--o=========================o
+--o Local Autotiling Algs
+--o=========================o
 
 -- Simple (4bit) autotiling algorithm
 function compute_simple_id(map, x, y, tile_type, lookup)
@@ -752,7 +758,247 @@ end
 
 --o=========================================o
 
+-------------------------------------------------------------------------------------
+-- IMPORTANT!!!
+-- MUST ALSO BE ABLE TO MANIPULATE COSTS ARBITRARILY! THINK MONSTERS OR SPELL EFFECTS!
+-------------------------------------------------------------------------------------
+
+function M.init_pathfinder(map)
+    for x, y, v in M.iterate_map(map) do
+        v.moku_x = x
+        v.moku_y = y
+    end
+
+    map.internal.pathfinder_weights = {
+        [1] = -1,
+        [17] = 10,
+        [33] = 1
+    }
+end
+
+local function manhatten(a, b)
+    return math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
+end
+
+function M.find_path_coords(map, start_x, start_y, end_x, end_y)
+    return M.find_path(map, map[start_x][start_y], map[end_x][end_y])
+end
+
+function M.find_path(map, start_cell, end_cell)
+    assert(start_cell ~= end_cell, "Start and end cell must be different.")
+
+    local open = {}
+    local cost_lookup = {} -- Doubles as closed, I think
+    local parent_lookup = {}
+
+    init_pq(open)
+    put(open, start_cell, 0)
+    cost_lookup[start_cell] = 0
+
+    local found = false
+
+    -- Variable promotion for the miniscule performance increase
+    local current_cell
+    local nx
+    local ny
+    local neighbor_cell
+    local neighbor_cost
+    local new_cost
+    local priority
+
+    while open.current_size > 0 do
+        current_cell = pop(open)
+
+        if current_cell == end_cell then
+            found = true
+            break
+        end
+
+        for i = 1, 4 do
+            nx = current_cell.moku_x + relative_direction.ALL[i][1]
+            ny = current_cell.moku_y + relative_direction.ALL[i][2]
+
+            if map[nx] and map[nx][ny] then
+                neighbor_cell = map[nx][ny]
+
+                -- Does this act as a substitute for removing from open?
+                if not contains(open, neighbor_cell) then
+
+                    neighbor_cost = map.internal.pathfinder_weights[neighbor_cell.tile_id]
+
+                    if neighbor_cost >= 0 then
+                        new_cost = cost_lookup[current_cell] + neighbor_cost
+
+                        if not cost_lookup[neighbor_cell] or new_cost < cost_lookup[neighbor_cell] then
+                            cost_lookup[neighbor_cell] = new_cost
+                            priority = new_cost + manhatten(end_cell, neighbor_cell)
+                            put(open, neighbor_cell, priority)
+                            parent_lookup[neighbor_cell] = current_cell
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if found then
+        local path_length = 1
+        local cell = end_cell
+        while cell ~= start_cell do
+            path_length = path_length + 1
+            cell = parent_lookup[cell]
+        end
+
+        local path = {}
+
+        cell = end_cell
+        for i = path_length, 1, - 1 do
+            path[i] = cell
+            cell = parent_lookup[cell]
+        end
+        return path
+    end
+
+    return nil
+
+end
+
+--o=================================o
+-- Priority Queue
+-- (from: https://gist.github.com/LukeMS/89dc587abd786f92d60886f4977b1953)
+--o=================================o
+
+function init_pq(pq)
+    pq.heap = {}
+    pq.contains = {}
+    pq.current_size = 0
+end
+
+function swim(pq)
+    local heap = pq.heap
+    local floor = math.floor
+    local i = pq.current_size
+
+    while floor(i / 2) > 0 do
+        local half = floor(i / 2)
+        if heap[i][2] < heap[half][2] then
+            heap[i], heap[half] = heap[half], heap[i]
+        end
+        i = half
+    end
+end
+
+function contains(pq, v)
+    return pq.contains[v]
+end
+
+function put(pq, v, p)
+    pq.heap[pq.current_size + 1] = {v, p}
+    pq.current_size = pq.current_size + 1
+    pq.contains[v] = true
+    swim(pq)
+end
+
+function sink(pq)
+    local size = pq.current_size
+    local heap = pq.heap
+    local i = 1
+
+    while (i * 2) <= size do
+        local mc = min_child(pq, i)
+        if heap[i][2] > heap[mc][2] then
+            heap[i], heap[mc] = heap[mc], heap[i]
+        end
+        i = mc
+    end
+end
+
+function min_child(pq, i)
+    if (i * 2) + 1 > pq.current_size then
+        return i * 2
+    else
+        if pq.heap[i * 2][2] < pq.heap[i * 2 + 1][2] then
+            return i * 2
+        else
+            return i * 2 + 1
+        end
+    end
+end
+
+function pop(pq)
+    local heap = pq.heap
+    local retval = heap[1][1]
+    heap[1] = heap[pq.current_size]
+    heap[pq.current_size] = nil
+    pq.current_size = pq.current_size - 1
+    sink(pq)
+    pq.contains[retval] = nil
+    return retval
+end
+
+-- function compare_nodes(n1, n2)
+--     if n1.moku_cost > n2.moku_cost then
+--         return 1
+--     elseif n1.moku_cost < n2.moku_cost then
+--         return - 1
+--     end
+--     return 0
+-- end
 --
+-- function on_compare(pq, i, j)
+--     return compare_nodes(pq[i], pq[j])
+-- end
+--
+-- function switch_nodes(pq, a, b)
+--     pq[a], pq[b] = pq[b], pq[a]
+-- end
+--
+-- function push(pq, node)
+--     local p = #pq + 1
+--     local p2
+--     table.insert(pq, node)
+--     while true do
+--         if p == 1 then
+--             break
+--         end
+--         p2 = math.floor(p / 2)
+--         if on_compare(pq, p, p2) < 0 then
+--             switch_nodes(pq, p, p2)
+--             p = p2
+--         else
+--             break
+--         end
+--     end
+--
+--     return p
+-- end
+--
+-- function pop(pq)
+--     local result = pq[1]
+--     local p = 1
+--     local p1
+--     local p2
+--     local pn
+--     local pq_count = #pq
+--     pq[1] = pq[pq_count]
+--     while true do
+--         pn = p
+--         p1 = 2 * (p - 1) + 2
+--         p2 = 2 * (p - 1) + 3
+--         if pq_count > p1 and on_compare(pq, p, p1) > 0 then
+--             p = p1
+--         end
+--         if pq_count > p2 and on_compare(pq, p, p2) > 0 then
+--             p = p2
+--         end
+--         if p == pn then
+--             break
+--         end
+--         switch_nodes(pq, p, pn)
+--     end
+--     return result
+-- end
+
 
 --o=========================================o
 
@@ -817,77 +1063,7 @@ function M.print_map(map)
 
 end
 
---o=================================o
--- Priority Queue Functions
---o=================================o
-
-function compare_nodes(n1, n2)
-    if n1.F > n2.F then
-        return 1
-    elseif n1.F < n2.F then
-        return - 1
-    end
-    return 0
-end
-
-function on_compare(pq, i, j)
-    return compare_nodes(pq[i], pq[j])
-end
-
-function switch_nodes(pq, a, b)
-    pq[a], pq[b] = pq[b], pq[a]
-end
-
-function push(pq, node)
-    local p = #pq + 1
-    local p2
-    table.insert(pq, node)
-    while true do
-        if p == 1 then
-            break
-        end
-        p2 = math.floor(p / 2)
-        if on_compare(pq, p, p2) < 0 then
-            switch_nodes(pq, p, p2)
-            p = p2
-        else
-            break
-        end
-    end
-
-    return p
-end
-
-function pop(pq)
-    local result = pq[1]
-    local p = 1
-    local p1
-    local p2
-    local pn
-    local pq_count = #pq
-    pq[1] = pq[pq_count]
-    while true do
-        pn = p
-        p1 = 2 * (p - 1) + 2
-        p2 = 2 * (p - 1) + 3
-        if pq_count > p1 and on_compare(pq, p, p1) > 0 then
-            p = p1
-        end
-        if pq_count > p2 and on_compare(pq, p, p2) > 0 then
-            p = p2
-        end
-        if p == pn then
-            break
-        end
-        switch_nodes(pq, p, pn)
-    end
-    return result
-end
-
 return M
-
-
-
 
 -- local function new_node()
 --     return

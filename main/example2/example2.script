@@ -4,51 +4,77 @@ local moku = require "moku.moku"
 function init(self)
 
     -- Handle initial map and autotiling
-    local tile_types = {
+    local tile_ids = {
         WALL = 1,
         SLOW_ZONE = 17,
         FLOOR = 33
     }
 
-    self.astar_map = moku.new_from_tilemap("astar_map#example2_tm", "layer1", 32, 32)
+    self.astar_map = moku.new_from_tm("astar_map#example2_tm", "layer1", 32, 32)
 
-    moku.set_autotile(self.astar_map, tile_types.WALL, moku.at_algorithm.NO_CORNERS, true, true, true)
-    moku.set_autotile(self.astar_map, tile_types.SLOW_ZONE, moku.at_algorithm.NO_CORNERS, true, true, true)
+    moku.set_autotile(self.astar_map, tile_ids.WALL, moku.at_algorithm.SIMPLE, true, false, true)
+    moku.set_autotile(self.astar_map, tile_ids.SLOW_ZONE, moku.at_algorithm.SIMPLE, true, true, true)
+
+    self.astar_map.tile_ids = tile_ids
 
     moku.autotile_map(self.astar_map)
 
     msg.post(".", "acquire_input_focus")
 
-    --moku.print_map(self.astar_map)
+    moku.init_pathfinder(self.astar_map)
+
+    self.start_cell = self.astar_map[4][4]
+    self.end_cell = self.astar_map[14][14]
+
+    local path, _ = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+
+    self.path = path
+
+    for k, v in pairs(path) do
+        print(v.moku_x, v.moku_y)
+    end
 
 end
 
 function on_input(self, action_id, action)
-    -- if action_id == hash("left_click") then
-    --     local tx, ty = moku.pick_cell(self.astar_map, 0, 0, action.screen_x, action.screen_y)
-    --     self.astar_map[tx][ty] = self.astar_map.tile_types.WALL
-    --     moku.autotile_surrounding(self.astar_map, tx, ty)
-    --     self.path = moku.find_path(self.astar_map, 2, 14, 19, 2)
-    -- elseif action_id == hash("ctrl") then
-    --     local tx, ty = moku.pick_cell(self.astar_map, 0, 0, action.screen_x, action.screen_y)
-    --     self.astar_map[tx][ty] = self.astar_map.tile_types.FLOOR
-    --     tilemap.set_tile("astar_map#example2_tm", "layer1", tx, ty, self.astar_map.tile_types.FLOOR)
-    --     moku.autotile_surrounding(self.astar_map, tx, ty)
-    --     self.path = moku.find_path(self.astar_map, 2, 14, 19, 2)
-    -- end
+    if action_id == hash("left_click") then
+        local tx, ty = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
+        self.astar_map[tx][ty].tile_id = self.astar_map.tile_ids.WALL
+        moku.autotile_surrounding(self.astar_map, tx, ty)
+        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+    elseif action_id == hash("ctrl") then
+        local tx, ty = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
+        self.astar_map[tx][ty].tile_id = self.astar_map.tile_ids.FLOOR
+        moku.autotile_surrounding(self.astar_map, tx, ty)
+        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+    elseif action_id == hash("s") then
+        local start = moku.pick_cell(self.astar_map, 0, 0, action.x, action.y)
+        if start then
+            self.start_cell = start
+            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        end
+    elseif action_id == hash("e") then
+        local endc = moku.pick_cell(self.astar_map, 0, 0, action.x, action.y)
+        if endc then
+            self.end_cell = endc
+            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        end
+    end
 end
 
 function update(self, dt)
 
-    -- if self.path then
-    --     for k, v in pairs(self.path) do
-    --         local ex, ey = moku.cell_center(self.astar_map, 0, 0, v.x, v.y)
-    --         local sx, sy = moku.cell_center(self.astar_map, 0, 0, v.px, v.py)
-    --         local s = vmath.vector3(sx, sy, - 1)
-    --         local e = vmath.vector3(ex, ey, - 1)
-    --
-    --         msg.post("@render:", "draw_line", { start_point = s, end_point = e, color = vmath.vector4(1, .3, 0, 0) } )
-    --     end
-    -- end
+    if self.path then
+        for i = 1, #self.path - 1 do
+            local cc = self.path[i]
+            local nc = self.path[i + 1]
+            local sx, sy = moku.cell_center(self.astar_map, 0, 0, cc.moku_x, cc.moku_y)
+            local ex, ey = moku.cell_center(self.astar_map, 0, 0, nc.moku_x, nc.moku_y)
+            local s = vmath.vector3(sx, sy, - 1)
+            local e = vmath.vector3(ex, ey, - 1)
+
+            msg.post("@render:", "draw_line", { start_point = s, end_point = e, color = vmath.vector4(1, .3, 0, 0) } )
+        end
+    end
 
 end
