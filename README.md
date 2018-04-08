@@ -19,7 +19,7 @@ Big thanks to Axel Hammerback for the Hero image and thumbnail :)
 
 ### State
 
-Currently in alpha. Missing some features, and probably buggy. Things are still bound to change.
+Currently in alpha. Missing some features, and probably buggy. Things are still bound to change. Use at own risk.
 
 ## Basics
 
