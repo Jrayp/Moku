@@ -30,8 +30,25 @@ M.dir_tables = {
 }
 
 M.heuristic = {
-    MANHATTEN = function(a, b)
-        return math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
+    NONE = function(a, b, h)
+        return 0
+    end,
+    MANHATTEN = function(a, b, h)
+        return h * (math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y))
+    end,
+    MAX_DXDY = function(a, b, h)
+        return h * math.max(math.abs(a.moku_x - b.moku_x), math.abs(a.moku_y - b.moku_y))
+    end,
+    DIAGONAL_SHORTCUT = function(a, b, h)
+        local h_diag = math.min(math.abs(a.moku_x - b.moku_x), math.abs(a.moku_y - b.moku_y))
+        local h_straight = math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
+        return 2 * h * h_diag + h * (h_straight - 2 * h_diag)
+    end,
+    EUCLIDEAN = function(a, b, h)
+        return h * math.sqrt(math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
+    end,
+    EUCLIDEAN_NO_SQR = function(a, b, h)
+        return math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2)
     end
 }
 
@@ -44,7 +61,7 @@ local reserved_ids = {
     EDGE = -1
 }
 
-local id_conversions_4bit = {
+local id_conversions_simple = {
     [0] = 0,
     [1] = 12,
     [2] = 1,
@@ -63,7 +80,7 @@ local id_conversions_4bit = {
     [15] = 10,
 }
 
-local id_conversions_8bit = {
+local id_conversions_complex = {
     [2] = 1,
     [8] = 2,
     [10] = 3,
@@ -202,15 +219,16 @@ function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_
         punish_direction_change = false,
         punish_direction_change_penalty = 5,
         heavy_diagonals = false,
-        heavy_diagonals_multiplier = 2.41,
-        heuristic = M.heuristic.MANHATTEN
+        heavy_diagonals_mult = 2.41,
+        heuristic = M.heuristic.MANHATTEN,
+        heuristic_mult = 1
     }
 
     new_map.internal = {}
     new_map.internal.tilemap_url = tilemap_url
     new_map.internal.layer_name = layer_name
     new_map.internal.autotiles = nil
-    new_map.internal.pathfinder_weights = nil
+    -- ?? new_map.internal.pathfinder_weights = nil
     -- ?? new_map.internal.pathfinder_cached_paths -- (With option for max # cached)
 
     return new_map
@@ -271,14 +289,15 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
         punish_direction_change_penalty = 5,
         heavy_diagonals = false,
         heavy_diagonals_multiplier = 2.41,
-        heuristic = M.heuristic.MANHATTEN
+        heuristic = M.heuristic.MANHATTEN,
+        heuristic_mult = 1
     }
 
     new_map.internal = {}
     new_map.internal.tilemap_url = nil
     new_map.internal.layer_name = nil
     new_map.internal.autotiles = nil
-    new_map.internal.pathfinder_weights = nil
+    -- ?? new_map.internal.pathfinder_weights = nil
     -- ?? new_map.internal.pathfinder_cached_paths -- (With option for max # cached)
 
     return new_map
@@ -703,7 +722,7 @@ function compute_simple_id(map, x, y, tile_type, lookup)
         sum = sum + 8
     end
 
-    return id_conversions_4bit[sum] + tile_type
+    return id_conversions_simple[sum] + tile_type
 end
 
 -- Complex (8bit) autotiling algorithm
@@ -759,7 +778,7 @@ function compute_complex_id(map, x, y, tile_type, lookup)
         end
     end
 
-    return id_conversions_8bit[sum] + tile_type
+    return id_conversions_complex[sum] + tile_type
 end
 
 -- Gets the type at x, y, returns border (-1) if outside of bounds
@@ -894,7 +913,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
                     if not cost_lookup[neighbor_cell] or new_cost < cost_lookup[neighbor_cell] then
                         cl_add(cost_lookup, neighbor_cell, new_cost)
 
-                        priority = new_cost + options.heuristic(end_cell, neighbor_cell)
+                        priority = new_cost + options.heuristic(end_cell, neighbor_cell, options.heuristic_mult)
                         pq_put(open, neighbor_cell, priority)
 
                         parent_lookup[neighbor_cell] = current_cell

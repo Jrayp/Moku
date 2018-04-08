@@ -3,7 +3,7 @@ title = Moku
 version = Alpha_v1.0
 
 [bootstrap]
-main_collection = /main/example2/example2.collectionc
+main_collection = /main/main.collectionc
 
 [input]
 game_binding = /input/game.input_bindingc

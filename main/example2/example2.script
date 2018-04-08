@@ -1,4 +1,4 @@
-local moku = require "moku.moku"
+local moku = require "moku/moku"
 
 --o=========================o
 --o Forward Declarations
@@ -49,7 +49,8 @@ function init(self)
     self.astar_map.pathfinder.punish_direction_change_penalty = 5
     self.astar_map.pathfinder.heavy_diagonals = false
     self.astar_map.pathfinder.heavy_diagonals_multiplier = 2.41
-    self.astar_map.pathfinder.heuristic = moku.heuristic.MANHATTEN
+    self.astar_map.pathfinder.heuristic = moku.heuristic.EUCLIDEAN
+    self.astar_map.pathfinder.heuristic_mult = 1
 
     -- Calculate the initial path
     self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
@@ -97,6 +98,8 @@ function on_input(self, action_id, action)
     elseif action_id == hash("p") and action.pressed then
         self.astar_map.pathfinder.punish_direction_change = not self.astar_map.pathfinder.punish_direction_change
         self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell, cost_fn)
+    elseif action_id == hash("1") and action.pressed then
+        msg.post("main:/manager#main", "change_proxy", {proxy = "proxys#example1" })
     end
 end
 

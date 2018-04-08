@@ -1,4 +1,4 @@
-name: "default"
+name: "example2"
 scale_along_z: 0
 embedded_instances {
   id: "astar_map"
@@ -266,15 +266,15 @@ embedded_instances {
   "\\\"\\n"
   "  \\\"Left click, hold shift, or hold ctrl to edit the map.\\\\n"
   "\\\"\\n"
-  "  \\\"\\\\\\\'s\\\\\\\' and \\\\\\\'e\\\\\\\' to change start and end cells\\\\n"
+  "  \\\"\\\\\\\'s\\\\\\\' and \\\\\\\'e\\\\\\\' to change start and end cells.\\\\n"
   "\\\"\\n"
-  "  \\\"\\\\\\\'d\\\\\\\' to toggle diagonals on/off\\\\n"
+  "  \\\"\\\\\\\'d\\\\\\\' to toggle diagonals on/off.\\\\n"
   "\\\"\\n"
-  "  \\\"\\\\\\\'h\\\\\\\' for heavy diagonals\\\\n"
+  "  \\\"\\\\\\\'h\\\\\\\' for heavy diagonals.\\\\n"
   "\\\"\\n"
-  "  \\\"\\\\\\\'p\\\\\\\' to punish direction change\\\\n"
+  "  \\\"\\\\\\\'p\\\\\\\' to punish direction change.\\\\n"
   "\\\"\\n"
-  "  \\\"1-2 to switch examples\\\\n"
+  "  \\\"\\\\\\\'1\\\\\\\' to switch to example 1.\\\\n"
   "\\\"\\n"
   "  \\\"\\\"\\n"
   "font: \\\"/main/fonts/vera_8.font\\\"\\n"
@@ -295,7 +295,7 @@ embedded_instances {
   ""
   position {
     x: 10.0
-    y: 430.0
+    y: 425.0
     z: 0.0
   }
   rotation {

@@ -50,6 +50,14 @@ key_trigger {
   input: KEY_P
   action: "p"
 }
+key_trigger {
+  input: KEY_1
+  action: "1"
+}
+key_trigger {
+  input: KEY_2
+  action: "2"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "left_click"

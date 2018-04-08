@@ -1,4 +1,4 @@
-name: "main"
+name: "example1"
 instances {
   id: "camera_go"
   prototype: "/main/camera_go.go"
@@ -180,7 +180,9 @@ embedded_instances {
   "\\\"\\n"
   "  \\\"Left click, hold shift, or hold ctrl to edit the maps.\\\\n"
   "\\\"\\n"
-  "  \\\"Arrow keys to move camera.\\\"\\n"
+  "  \\\"Arrow keys to move camera.\\\\n"
+  "\\\"\\n"
+  "  \\\"\\\\\\\'2\\\\\\\' to switch to example 2.\\\"\\n"
   "font: \\\"/main/fonts/vera_8.font\\\"\\n"
   "material: \\\"/builtins/fonts/label.material\\\"\\n"
   "\"\n"

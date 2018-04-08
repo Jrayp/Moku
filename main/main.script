@@ -1,0 +1,24 @@
+function init(self)
+
+    self.current_proxy = "proxys#example1"
+    msg.post(self.current_proxy, "load")
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("proxy_loaded") then
+        msg.post(sender, "init")
+        msg.post(sender, "enable")
+        msg.post(sender, "acquire_input_focus")
+    elseif message_id == hash("change_proxy") then
+        msg.post(self.current_proxy, "unload")
+
+        if message.proxy == "" then
+            print("reset proxy")
+        else
+            self.current_proxy = message.proxy
+        end
+    elseif message_id == hash("proxy_unloaded") then
+        msg.post(sender, "release_input_focus")
+        msg.post(self.current_proxy, "load")
+    end
+end
