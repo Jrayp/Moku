@@ -207,3 +207,6 @@ moku.set_autotile(my_new_map, moku_ids.PLATEAU, at_algorithm.COMPLEX, true, true
 
 moku.autotile_map(my_new_map)
 ```
+## Using the pathfinder
+
+For now refer to the demo project. Pathfinding is fairly easy to use. Just make sure you understand the on_cost parameter.
