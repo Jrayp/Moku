@@ -1,0 +1,38 @@
+go.property("right", 150)
+go.property("left", -150)
+go.property("up", 80)
+go.property("down", -80)
+go.property("speed", 4)
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+    msg.post("camera_go#camera", "acquire_camera_focus")
+end
+
+function on_input(self, action_id, action)
+    if action_id == hash("right") then
+        local cam_pos = go.get_position(".")
+        if cam_pos.x < self.right then
+            cam_pos.x = cam_pos.x + self.speed
+            go.set_position(cam_pos, ".")
+        end
+    elseif action_id == hash("left") then
+        local cam_pos = go.get_position(".")
+        if cam_pos.x > self.left then
+            cam_pos.x = cam_pos.x - self.speed
+            go.set_position(cam_pos, ".")
+        end
+    elseif action_id == hash("up") then
+        local cam_pos = go.get_position(".")
+        if cam_pos.y < self.up then
+            cam_pos.y = cam_pos.y + self.speed
+            go.set_position(cam_pos, ".")
+        end
+    elseif action_id == hash("down") then
+        local cam_pos = go.get_position(".")
+        if cam_pos.y > self.down then
+            cam_pos.y = cam_pos.y - self.speed
+            go.set_position(cam_pos, ".")
+        end
+    end
+end

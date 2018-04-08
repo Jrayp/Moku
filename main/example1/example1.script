@@ -19,37 +19,12 @@ function init(self)
     setup_simple(self)
     setup_complex(self)
 
-    msg.post("camera_go#camera", "acquire_camera_focus")
     msg.post(".", "acquire_input_focus")
 end
 
 function on_input(self, action_id, action)
     if action_id == hash("left_click") or action_id == hash("ctrl") or action_id == hash("shift") then
         set_cell_id(self, action_id, action)
-    elseif action_id == hash("right") then
-        local cam_pos = go.get_position("camera_go#camera")
-        if cam_pos.x < 150 then
-            cam_pos.x = cam_pos.x + 4
-            go.set_position(cam_pos, "camera_go#camera")
-        end
-    elseif action_id == hash("left") then
-        local cam_pos = go.get_position("camera_go#camera")
-        if cam_pos.x > - 150 then
-            cam_pos.x = cam_pos.x - 4
-            go.set_position(cam_pos, "camera_go#camera")
-        end
-    elseif action_id == hash("up") then
-        local cam_pos = go.get_position("camera_go#camera")
-        if cam_pos.y < 80 then
-            cam_pos.y = cam_pos.y + 4
-            go.set_position(cam_pos, "camera_go#camera")
-        end
-    elseif action_id == hash("down") then
-        local cam_pos = go.get_position("camera_go#camera")
-        if cam_pos.y > - 80 then
-            cam_pos.y = cam_pos.y - 4
-            go.set_position(cam_pos, "camera_go#camera")
-        end
     end
 end
 

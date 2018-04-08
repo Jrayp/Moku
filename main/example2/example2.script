@@ -1,7 +1,10 @@
 local moku = require "moku.moku"
 
+local get_coords
 
 function init(self)
+
+    msg.post("@render:", "clear_color", { color = vmath.vector4(.5, .5, .5, 0) } )
 
     -- Handle initial map and autotiling
     local tile_ids = {
@@ -12,8 +15,8 @@ function init(self)
 
     self.astar_map = moku.new_from_tm("astar_map#example2_tm", "layer1", 32, 32)
 
-    moku.set_autotile(self.astar_map, tile_ids.WALL, moku.at_algorithm.SIMPLE, true, false, true)
-    moku.set_autotile(self.astar_map, tile_ids.SLOW_ZONE, moku.at_algorithm.SIMPLE, true, true, true)
+    moku.set_autotile(self.astar_map, tile_ids.WALL, moku.at_algorithm.SIMPLE, true, false, false)
+    moku.set_autotile(self.astar_map, tile_ids.SLOW_ZONE, moku.at_algorithm.SIMPLE, true, false, true)
 
     self.astar_map.tile_ids = tile_ids
 
@@ -23,8 +26,17 @@ function init(self)
 
     moku.init_pathfinder(self.astar_map)
 
-    self.start_cell = self.astar_map[4][4]
-    self.end_cell = self.astar_map[14][14]
+    self.start_cell = self.astar_map[ - 18][ - 13]
+    self.end_cell = self.astar_map[19][14]
+
+    self.astar_map.pathfinder = {
+        search_limit = -1,
+        allowed_directions = moku.dir_tables.ALL,
+        punish_direction_change = true,
+        punish_direction_change_penalty = 5,
+        heavy_diagonals = true,
+        heavy_diagonals_multiplier = 2.41
+    }
 
     local path, _ = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
 
@@ -34,28 +46,50 @@ end
 
 function on_input(self, action_id, action)
     if action_id == hash("left_click") then
-        local tx, ty = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
-        self.astar_map[tx][ty].tile_id = self.astar_map.tile_ids.WALL
-        moku.autotile_surrounding(self.astar_map, tx, ty)
-        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        local cx, cy = get_coords(self, action.x, action.y)
+        if cx and cy then
+            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.WALL
+            moku.autotile_surrounding(self.astar_map, cx, cy)
+            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        end
     elseif action_id == hash("ctrl") then
-        local tx, ty = moku.pick_coords(self.astar_map, 0, 0, action.x, action.y)
-        self.astar_map[tx][ty].tile_id = self.astar_map.tile_ids.FLOOR
-        moku.autotile_surrounding(self.astar_map, tx, ty)
-        self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        local cx, cy = get_coords(self, action.x, action.y)
+        if cx and cy then
+            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.FLOOR
+            moku.autotile_surrounding(self.astar_map, cx, cy)
+            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        end
+    elseif action_id == hash("shift") then
+        local cx, cy = get_coords(self, action.x, action.y)
+        if cx and cy then
+            self.astar_map[cx][cy].tile_id = self.astar_map.tile_ids.SLOW_ZONE
+            moku.autotile_surrounding(self.astar_map, cx, cy)
+            self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
+        end
     elseif action_id == hash("s") then
-        local start = moku.pick_cell(self.astar_map, 0, 0, action.x, action.y)
-        if start then
-            self.start_cell = start
+        local cx, cy = get_coords(self, action.x, action.y)
+        if cx and cy then
+            self.start_cell = self.astar_map[cx][cy]
             self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
         end
     elseif action_id == hash("e") then
-        local endc = moku.pick_cell(self.astar_map, 0, 0, action.x, action.y)
-        if endc then
-            self.end_cell = endc
+        local cx, cy = get_coords(self, action.x, action.y)
+        if cx and cy then
+            self.end_cell = self.astar_map[cx][cy]
             self.path = moku.find_path(self.astar_map, self.start_cell, self.end_cell)
         end
     end
+end
+
+function get_coords(self, mx, my)
+    -- Get the camera position
+    local cam_pos = go.get_position("camera_go")
+
+    -- Calculate the relative world coords
+    local wx = mx + cam_pos.x
+    local wy = my + cam_pos.y
+
+    return moku.pick_coords(self.astar_map, 0, 0, wx, wy)
 end
 
 function update(self, dt)
