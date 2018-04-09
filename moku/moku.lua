@@ -48,7 +48,7 @@ M.heuristic = {
         return h * math.sqrt(math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
     end,
     EUCLIDEAN_NO_SQR = function(a, b, h)
-        return math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2)
+        return h * (math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
     end
 }
 
@@ -288,7 +288,7 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
         punish_direction_change = false,
         punish_direction_change_penalty = 5,
         heavy_diagonals = false,
-        heavy_diagonals_multiplier = 2.41,
+        heavy_diagonals_mult = 2.41,
         heuristic = M.heuristic.MANHATTEN,
         heuristic_mult = 1
     }
@@ -781,7 +781,7 @@ function compute_complex_id(map, x, y, tile_type, lookup)
     return id_conversions_complex[sum] + tile_type
 end
 
--- Gets the type at x, y, returns border (-1) if outside of bounds
+-- Gets the type at x, y, returns edge (-1) if outside of bounds
 function get_type(map, x, y)
     if M.within_bounds(map, x, y) and map[x][y] then
         return map[x][y].moku_id
@@ -806,10 +806,10 @@ end
 -- @tparam cell end_cell Given end cell
 -- @tparam function cost_fn Cost function
 -- @return An array of cells, in order from start to end cell. Nil if no path found.
--- @return A table of cell costs. If no path is found a string is giving a reason.
+-- @return A table of cell costs. If no path is found a string is returned giving a reason.
 function M.find_path(map, start_cell, end_cell, cost_fn)
     if start_cell == end_cell then
-        return nil, "Start and end cell, are the same."
+        return nil, "Start and end cell must be different."
     end
 
     local options = map.pathfinder
@@ -891,7 +891,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
 
                     -- Handle heavy diagonals
                     if options.heavy_diagonals and (d[1] - d[2]) % 2 == 0 then
-                        new_cost = cost_lookup[current_cell] + neighbor_cost * options.heavy_diagonals_multiplier
+                        new_cost = cost_lookup[current_cell] + neighbor_cost * options.heavy_diagonals_mult
                     else
                         new_cost = cost_lookup[current_cell] + neighbor_cost
                     end

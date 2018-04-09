@@ -43,13 +43,13 @@ function init(self)
 
     -- Set the pathfinder options
     -- (these are the defaults, and only shown for reference)
-    self.astar_map.pathfinder.search_limit = -1
+    self.astar_map.pathfinder.search_limit = -1 -- Negative values mean no limit
     self.astar_map.pathfinder.allowed_directions = moku.dir_tables.ALL
     self.astar_map.pathfinder.punish_direction_change = false
     self.astar_map.pathfinder.punish_direction_change_penalty = 5
     self.astar_map.pathfinder.heavy_diagonals = false
-    self.astar_map.pathfinder.heavy_diagonals_multiplier = 2.41
-    self.astar_map.pathfinder.heuristic = moku.heuristic.EUCLIDEAN
+    self.astar_map.pathfinder.heavy_diagonals_mult = 2.41
+    self.astar_map.pathfinder.heuristic = moku.heuristic.MANHATTEN
     self.astar_map.pathfinder.heuristic_mult = 1
 
     -- Calculate the initial path
