@@ -164,7 +164,7 @@ It is recommended to give your tile types simple descriptive names (keys). The v
 Create a Moku map from your defold tilemap. Assuming your tilemap is named `my_tilemap` with layer named `layer1`, and is attached to the gameobject `map_go`:
 
 ```lua
--- We will not be using the optional on_new_cell paramater, so its left blank
+-- We will not be using the optional on_new_cell parameter, so its left blank
 -- 32 is the width and height of our tile images
 my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1" 32, 32) 
 ```
@@ -209,7 +209,7 @@ local moku_ids = {
     OCEAN = 97
 }
 
--- We will not be using the optional on_new_cell paramater, so its left blank
+-- We will not be using the optional on_new_cell parameter, so its left blank
 -- 32 is the width and height of our tile images
 my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1" 32, 32) 
 
