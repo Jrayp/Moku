@@ -9,3 +9,4 @@ build
 builtins
 .internal
 ldoc.bat
+.idea

@@ -33,7 +33,7 @@ M.heuristic = {
     NONE = function(a, b, h)
         return 0
     end,
-    MANHATTEN = function(a, b, h)
+    MANHATTAN = function(a, b, h)
         return h * (math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y))
     end,
     MAX_DXDY = function(a, b, h)
@@ -162,7 +162,7 @@ local cl_add
 
 --- Builds and returns a new moku map from a supplied defold tilemap.
 -- Moku maps built this way are automatically linked to the passed
--- tilemap and layer, and are ready for autotiling.
+-- tilemap and layer, and are ready for auto-tiling.
 -- @tparam url tilemap_url Tilemap url
 -- @tparam string layer_name The name of the layer to build from
 -- @tparam number tile_width Pixel width of your tiles
@@ -220,7 +220,7 @@ function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_
         punish_direction_change_penalty = 5,
         heavy_diagonals = false,
         heavy_diagonals_mult = 2.41,
-        heuristic = M.heuristic.MANHATTEN,
+        heuristic = M.heuristic.MANHATTAN,
         heuristic_mult = 1
     }
 
@@ -289,7 +289,7 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
         punish_direction_change_penalty = 5,
         heavy_diagonals = false,
         heavy_diagonals_mult = 2.41,
-        heuristic = M.heuristic.MANHATTEN,
+        heuristic = M.heuristic.MANHATTAN,
         heuristic_mult = 1
     }
 
@@ -539,12 +539,12 @@ function M.link_tilemap(map, tilemap_url, layer_name)
     map.internal.layer_name = layer_name
 end
 
---- Designates a tile id as as an autotile.
+--- Designates a tile id as as an auto-tile.
 -- @tparam map map A moku map
--- @tparam number moku_id The tile id to be designated as an autotile
--- @tparam moku.at_algorithm algorithm The autotiling algorithm to be used
+-- @tparam number moku_id The tile id to be designated as an auto-tile
+-- @tparam moku.at_algorithm algorithm The auto-tiling algorithm to be used
 -- @tparam bool join_self Whether tiles of the same type act as joining tiles
--- @tparam bool join_edge Whether the edge ofthe map acts as a joining tile
+-- @tparam bool join_edge Whether the edge of the map acts as a joining tile
 -- @tparam bool join_nil Whether empty cells act as joining tiles
 -- @tparam table joining_ids Additional tile id's to act as joining tiles
 function M.set_autotile(map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)
@@ -574,18 +574,18 @@ function M.set_autotile(map, moku_id, algorithm, join_self, join_edge, join_nil,
     end
 end
 
---- Calculates a given cells autotile id/sum
+--- Calculates a given cells auto-tile id/sum
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return The autotile id
+-- @return The auto-tile id
 function M.calc_autotile_id(map, x, y)
     -- Tile id of this cell
     local moku_id = map[x][y].moku_id
 
     -- References the appropriate lookup table
     -- or returns the original type if not an
-    -- autotile
+    -- auto-tile
     local lookup
     if map.internal.autotiles[moku_id] then
         lookup = map.internal.autotiles[moku_id]
@@ -606,13 +606,13 @@ function M.calc_autotile_id(map, x, y)
     return sum
 end
 
---- Autotiles a given cell.
+--- Auto-tiles a given cell.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
 function M.autotile_cell(map, x, y)
     if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
-        print("MOKU ERROR: You must link a tilemap and a layer to use autotiling. "..
+        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. "..
         "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
         return
     end
@@ -621,13 +621,13 @@ function M.autotile_cell(map, x, y)
     tilemap.set_tile(map.internal.tilemap_url, map.internal.layer_name, x, y, sum)
 end
 
---- Autotiles an entire moku map.
+--- Auto-tiles an entire moku map.
 -- @tparam map map A moku map
 function M.autotile_map(map)
     return M.autotile_region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
 end
 
---- Autotiles a rectangular region of a moku map.
+--- Auto-tiles a rectangular region of a moku map.
 -- @tparam map map A moku map
 -- @tparam number x Lower left x coordinate of region
 -- @tparam number y Lower left y coordinate of region
@@ -635,7 +635,7 @@ end
 -- @tparam number height Height of the region
 function M.autotile_region(map, x, y, width, height)
     if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
-        print("MOKU ERROR: You must link a tilemap and a layer to use autotiling. "..
+        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. "..
         "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
         return
     end
@@ -645,7 +645,7 @@ function M.autotile_region(map, x, y, width, height)
     end
 end
 
---- Autotiles a given cell and its surrounding cells.
+--- Auto-tiles a given cell and its surrounding cells.
 -- @tparam map map A moku map
 -- @tparam number x The x coordinate of the given cell
 -- @tparam number y The y coordinate of the given cell
@@ -693,12 +693,12 @@ function M.tiling_matrix_surrounding(map, x, y)
     return M.tiling_matrix_region(map, x - 1, y - 1, 3, 3)
 end
 
---o=========================o
---o Local Autotiling Algs
---o=========================o
+--o===============================o
+--o Local Auto-tiling Algorithms
+--o===============================o
 
--- Simple (4bit) autotiling algorithm
-function compute_simple_id(map, x, y, tile_type, lookup)
+-- Simple (4bit) auto-tiling algorithm
+function compute_simple_id(map, x, y, moku_id, lookup)
     local n = get_type(map, x, y + 1)
     local w = get_type(map, x - 1, y)
     local e = get_type(map, x + 1, y)
@@ -722,11 +722,11 @@ function compute_simple_id(map, x, y, tile_type, lookup)
         sum = sum + 8
     end
 
-    return id_conversions_simple[sum] + tile_type
+    return id_conversions_simple[sum] + moku_id
 end
 
--- Complex (8bit) autotiling algorithm
-function compute_complex_id(map, x, y, tile_type, lookup)
+-- Complex (8bit) auto-tiling algorithm
+function compute_complex_id(map, x, y, moku_id, lookup)
     local nw = get_type(map, x - 1, y + 1 )
     local n = get_type(map, x, y + 1)
     local ne = get_type(map, x + 1, y + 1)
@@ -778,7 +778,7 @@ function compute_complex_id(map, x, y, tile_type, lookup)
         end
     end
 
-    return id_conversions_complex[sum] + tile_type
+    return id_conversions_complex[sum] + moku_id
 end
 
 -- Gets the type at x, y, returns edge (-1) if outside of bounds
@@ -792,9 +792,9 @@ end
 
 --o=========================================o
 
---- Pathfinding.
--- Functions related to pathfinding
--- @section Pathfinding
+--- Path-finding.
+-- Functions related to path-finding
+-- @section Path-finding
 
 --o=========================================o
 
@@ -805,9 +805,10 @@ end
 -- @tparam cell start_cell Given start cell
 -- @tparam cell end_cell Given end cell
 -- @tparam function cost_fn Cost function
+-- @tparam cost_fn_arg any Optional parameter added to the cost_fn argument table
 -- @return An array of cells, in order from start to end cell. Nil if no path found.
 -- @return A table of cell costs. If no path is found a string is returned giving a reason.
-function M.find_path(map, start_cell, end_cell, cost_fn)
+function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
     if start_cell == end_cell then
         return nil, "Start and end cell must be different."
     end
@@ -826,12 +827,13 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
 
     parent_lookup[start_cell] = start_cell
 
-    local cost_args = {
+    local default_cost_fn_args = {
         map = map,
         from_cell = nil,
         to_cell = nil,
         start_cell = start_cell,
-        end_cell = end_cell
+        end_cell = end_cell,
+        user = cost_fn_arg
     }
 
     local found = false
@@ -839,7 +841,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
     local use_search_limit = options.search_limit > 0 or false
     local horiz
 
-    -- Variable promotion for miniscule performance increase
+    -- Variable promotion for minuscule performance increase
     local current_cell
     local nx
     local ny
@@ -857,7 +859,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
             break
         end
 
-        -- Check if weve exceeded the search limit
+        -- Check if we've exceeded the search limit
         if use_search_limit and cost_lookup.current_size > options.search_limit then
             -- Return nil and a reason
             return nil, "Search limit exceeded."
@@ -878,14 +880,11 @@ function M.find_path(map, start_cell, end_cell, cost_fn)
 
                 -- Update the cost argument table for use in the
                 -- cost function
-                cost_args.map = map
-                cost_args.from_cell = current_cell
-                cost_args.to_cell = neighbor_cell
-                cost_args.start_cell = start_cell
-                cost_args.end_cell = end_cell
+                default_cost_fn_args.from_cell = current_cell
+                default_cost_fn_args.to_cell = neighbor_cell
 
                 -- Get the cost of this cell from user
-                neighbor_cost = cost_fn(cost_args)
+                neighbor_cost = cost_fn(default_cost_fn_args)
 
                 if neighbor_cost >= 0 then
 
