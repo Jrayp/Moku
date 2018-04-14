@@ -20,6 +20,7 @@ Big thanks to Axel Hammerback for the Hero image and thumbnail :)
 ### Planned features
 
 * Ability to calculate movement range based on tile weights (think tbs, or srpg's unit movement ranges) 
+* _Possibly_ support for animating Defold tile maps
 
 ### State
 
@@ -61,7 +62,7 @@ For example, given the above set of Moku id's, no cell in your moku map would ha
 By the way, I recommend making it convention to keep a reference of the `moku_ids` table on your moku map as such: `my_moku_map.moku_ids = moku_ids`, and to religiously use it as a way for setting Moku id's:
 
 ```lua
--- Moku cells are accessable using indexers
+-- Moku cells are accessible using indexers
 moku_map[i][j].moku_id = moku_map.moku_ids.WALL
 ```
 
@@ -119,7 +120,7 @@ Lastly Moku maps have an element 'moku_map.internal' which is meant for internal
 
 For this guide we will use 8-bit (Complex) tiling, but 4-bit (Simple) tiling works mostly the same way.
 
-Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as mokus autotiler is based on that article. 
+Please refer to [How to Use Tile Bitmasking to Auto-Tile Your Level Layouts](https://gamedevelopment.tutsplus.com/tutorials/how-to-use-tile-bitmasking-to-auto-tile-your-level-layouts--cms-25673) if in doubt, as Mokus auto-tiler is based on that article. 
 
 This guide is fairly in-depth, but Moku auto-tiling is actually very simple (though fairly powerful) for most use cases. The biggest issue will likely be dealing with the tilesheet.
 
@@ -129,19 +130,19 @@ First, your sprite sheet containing your maps tile images must be in a specific 
 
 ![](main/images/autotiles_8bit.png)
 
-Since the plains and plateau types will be designated complex autotiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate a complex autotile must have 48 images reserved on your tile sheet in _exactly_ this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile). 
+Since the plains and plateau types will be designated complex auto-tiles, they consist of a total of 48 individual images, each corresponding to a particular border configuration. Any tile you wish to designate a complex auto-tile must have 48 images reserved on your tile sheet in _exactly_ this order, beginning with what I will call the tiles "base image" (the image of a completely surrounded tile). 
 
-Note that you may place your autotiles anywhere on your tilesheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. 
+Note that you may place your auto-tiles anywhere on your tile-sheet, as long as the following 47 images are in the correct order. Mokus incredibly advanced AI can handle this. 
 
-The ocean tile does not require autotile functionality, and can be freely placed anywhere on your tile sheet.
+The ocean tile does not require auto-tile functionality, and can be freely placed anywhere on your tile sheet.
 
-Also note that if we were using simple tiling that everything would work the same, except that we would only require a more managable 16 images per autotile. Following is the (much nicer) layout of a simple autotile tilesheet for reference:
+Also note that if we were using simple tiling that everything would work the same, except that we would only require a more manageable 16 images per auto-tile. Following is the (much nicer) layout of a simple auto-tile tile-sheet for reference:
 
 ![](doc/simple_layout.png)
 
 ### Auto tiling a tilemap
 
-In defold, add a tilemap to your collection that references a tilesource derived from your tile sheet. Go ahead and draw on it, but be sure to use only the above mentioned base tiles for drawing (that is the first image related to the tile type). 
+In defold, add a tilemap to your collection that references a tile-source derived from your tile sheet. Go ahead and draw on it, but be sure to use only the above mentioned base tiles for drawing (that is the first image related to the tile type). 
 
 ![](doc/before.PNG)
 
@@ -166,10 +167,10 @@ Create a Moku map from your defold tilemap. Assuming your tilemap is named `my_t
 ```lua
 -- We will not be using the optional on_new_cell parameter, so its left blank
 -- 32 is the width and height of our tile images
-my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1" 32, 32) 
+my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1", 32, 32) 
 ```
 
-Now we tell moku to designate the `PLAINS` and `PLATEAU` types as autotiles:
+Now we tell moku to designate the `PLAINS` and `PLATEAU` types as auto-tiles:
 
 ```lua
 -- moku.at_algorithm acts as an enum, and contains a reference to all auto-tiling algorithms
@@ -179,12 +180,12 @@ moku.set_autotile(my_new_map, moku_ids.PLATEAU, moku.at_algorithm.COMPLEX, true,
 
 Lets take a look at this functions parameters
 1. Just takes the Moku map
-2. The moku id you want to designate an autotile
+2. The moku id you want to designate an auto-tile
 3. What tiling algorithm to use, in this case we use complex 
 4. Whether or not this tile interacts/joins with tiles of its own type, usually true
 5. Whether or not this tile interacts/joins with the edge of the map
 6. Whether or not this tile interacts/joins with empty cells (these are supported)
-7. An optional list of other tile types that the autotile will interact/join to 
+7. An optional list of other tile types that the auto-tile will interact/join to 
 
 So in our example, the `PLAINS` type will interact/join with everything except `OCEAN` tiles; and the `PLATEAU` type will interact with everything except `OCEAN` and `PLAINS` tiles.
 
@@ -196,7 +197,7 @@ moku.autotile_map(my_new_map)
 
 ![](doc/after.PNG)
 
-Thats it. Much more can be done, but this guide should be enough to at least get an idea of how Moku autotiling works, and should be sufficient for the vast majority of use cases. Refer to the demo project for advanced functionality. Following is the complete example code:
+That's it. Much more can be done, but this guide should be enough to at least get an idea of how Moku auto-tiling works, and should be sufficient for the vast majority of use cases. Refer to the demo project for advanced functionality. Following is the complete example code:
 
 ```lua
 local moku = require "moku/moku"    
@@ -211,7 +212,7 @@ local moku_ids = {
 
 -- We will not be using the optional on_new_cell parameter, so its left blank
 -- 32 is the width and height of our tile images
-my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1" 32, 32) 
+my_new_map = moku.new_from_tm("map_go#my_tilemap", "layer1", 32, 32) 
 
 -- moku.at_algorithm acts as an enum, and contains a reference to all auto-tiling algorithms
 moku.set_autotile(my_new_map, moku_ids.PLAINS, moku.at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
@@ -219,6 +220,75 @@ moku.set_autotile(my_new_map, moku_ids.PLATEAU, moku.at_algorithm.COMPLEX, true,
 
 moku.autotile_map(my_new_map)
 ```
-## Using the pathfinder
+## Using the path finder
 
-For now refer to the demo project. Pathfinding is fairly easy to use. Just make sure you understand the `cost_fn` parameter, and the options. (Both explained in the demo project, example2 comments)
+To use the path finder, simply call `local my_path = moku.find_path(map, start_cell, end_cell, cost_fn, cost_fn_args)`. This returns a list from the start, to the end cell, or nil if no path was found. The `cost_fn` argument is called every time the cost from moving one tile to another is required. When called, a table parameter named `args` is passed along with it, containing useful information. The `cost_fn_arg` argument is an optional argument you can pass, that will be added to the aforementioned `args` table (usually `self` references, I would assume). That's kind of a mouthful, so following is an example:
+```lua
+-- Tile cost bookkeeping
+local tile_costs = {
+    [moku_ids.FLOOR] = 1,
+    [moku_ids.SLOW_ZONE] = 10, -- Higher values "cost" more to pass
+    [moku_ids.WALL] = -1, -- Negative values count as impassable
+    [0] = -1 -- nil tiles have moku_id = 0
+    }
+
+-- This function will simply return the value in the above table,
+-- unless the end cell happens to fall in a "slow zone".
+-- In that case we make nil tiles passable (at cost 1).
+local function my_cost_fn(args)
+
+    -- The args parameter contains following information
+    --args.map --- The map passed to find_path
+    --args.from_cell --- The cell being "left"
+    --args.to_cell --- The cell being "entered"
+    --args.start_cell --- The start cell passed to find_path
+    --args.end_cell --- The end cell passed to find_path
+    --args.user --- Whatever the user passed to cost_fn_args
+
+    if args.to_cell.moku_id == 0 and args.end_cell.moku_id == args.map.moku_ids.SLOW_ZONE then
+        return 1
+    else
+        return args.user[args.to_cell.moku_id]
+    end
+
+    return 
+
+ end
+
+-- Assuming my_map is a Moku map. 
+-- (I would just add the tile_costs table to the moku map, but this is 
+-- to demonstrate what the cost_fn_arg parameter can be used for)
+local my_path = moku.find_path(my_path, some_cell, some_other_cell, my_cost_fn, tile_costs)
+
+-- Prints the path coordinates and Moku id from start to end
+if my_path then
+    for _, cell in pairs(my_path) do
+        print(cell.moku_x, cell.moku_y, cell.moku_id)
+    end
+end 
+```
+
+Additionally, it is possible to change some options that can dramatically affect the way the path finder works. These are accessed using `moku_map.pathfinder.OPTION` as follows:
+
+```lua
+-- The maximum number of cells to be searched. Negative values mean no bound.
+moku_map.pathfinder.search_limit = -1
+
+-- The directions that can be searched. Defaults to all 8 directions. moku.dir_tables has references to 
+-- 3 "sensible" direction tables (ALL, CARDINAL, DIAGONAL), but you can add any table you want. 
+moku_map.pathfinder.allowed_directions = moku.dir_tables.ALL
+
+-- This punishes direction change by the amount given in the punish_direction_change_penalty
+-- option. This can lead to straighter, less ugly paths under some conditions.
+moku_map.pathfinder.punish_direction_change = false
+moku_map.pathfinder.punish_direction_change_penalty = 5
+
+-- Multiplies the cost of diagonal movement by the amount given in the heavy_diagonals_mult option. 
+moku_map.pathfinder.heavy_diagonals = false
+moku_map.pathfinder.heavy_diagonals_mult = 2.41
+
+-- The heuristic used in the calculation. Moku offers a few built in under moku.heuristic.HEURISTIC
+-- But you can add your own. This value is multiplies by the amount given in the heuristic_mult option
+moku_map.pathfinder.heuristic = moku.heuristic.MANHATTAN
+moku_map.pathfinder.heuristic_mult = 1
+```

@@ -24,31 +24,31 @@ M.at_algorithm = {
 }
 
 M.dir_tables = {
-    ALL = {{0, 1}, {1, 0}, {0, - 1}, { - 1, 0}, {1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}},
-    CARDINAL = {{0, 1}, {1, 0}, {0, - 1}, { - 1, 0}},
-    DIAGONAL = {{1, 1}, {1, - 1}, { - 1, - 1}, { - 1, 1}}
+    ALL = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } },
+    CARDINAL = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } },
+    DIAGONAL = { { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } }
 }
 
 M.heuristic = {
     NONE = function(a, b, h)
         return 0
     end,
-    MANHATTAN = function(a, b, h)
-        return h * (math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y))
+    MANHATTAN = function(a, b)
+        return math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
     end,
-    MAX_DXDY = function(a, b, h)
-        return h * math.max(math.abs(a.moku_x - b.moku_x), math.abs(a.moku_y - b.moku_y))
+    MAX_DXDY = function(a, b)
+        return math.max(math.abs(a.moku_x - b.moku_x), math.abs(a.moku_y - b.moku_y))
     end,
-    DIAGONAL_SHORTCUT = function(a, b, h)
+    DIAGONAL_SHORTCUT = function(a, b)
         local h_diag = math.min(math.abs(a.moku_x - b.moku_x), math.abs(a.moku_y - b.moku_y))
         local h_straight = math.abs(a.moku_x - b.moku_x) + math.abs(a.moku_y - b.moku_y)
-        return 2 * h * h_diag + h * (h_straight - 2 * h_diag)
+        return 2 * h_diag + (h_straight - 2 * h_diag)
     end,
-    EUCLIDEAN = function(a, b, h)
-        return h * math.sqrt(math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
+    EUCLIDEAN = function(a, b)
+        return math.sqrt(math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
     end,
-    EUCLIDEAN_NO_SQR = function(a, b, h)
-        return h * (math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2))
+    EUCLIDEAN_NO_SQR = function(a, b)
+        return math.pow(a.moku_x - b.moku_x, 2) + math.pow(a.moku_y - b.moku_y, 2)
     end
 }
 
@@ -167,7 +167,7 @@ local cl_add
 -- @tparam string layer_name The name of the layer to build from
 -- @tparam number tile_width Pixel width of your tiles
 -- @tparam number tile_height Pixel height of your tiles
--- @tparam function on_new_cell A function called on cell creation
+-- @tparam[opt] function on_new_cell A function called on cell creation
 -- @return A new moku map
 function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_cell)
     local _x, _y, width, height = tilemap.get_bounds(tilemap_url)
@@ -240,7 +240,7 @@ end
 -- @tparam number height Height in cells
 -- @tparam number tile_width Pixel width of your tiles
 -- @tparam number tile_height Pixel height of your tiles
--- @tparam function on_new_cell A function called on cell creation
+-- @tparam[opt] function on_new_cell A function called on cell creation
 -- @return A new moku map
 function M.new(width, height, tile_width, tile_height, on_new_cell)
     local world_width = width * tile_width
@@ -341,18 +341,18 @@ end
 function M.iterate_region(map, x, y, width, height, fn)
     local _v
     return coroutine.wrap(
-        function()
-            for _x = x, x + width - 1 do
-                for _y = y, y + height - 1 do
-                    if map[_x] and map[_x][_y] then
-                        _v = map[_x][_y]
-                        if fn and fn(_v) or not fn then
-                            coroutine.yield(_x, _y, _v)
+            function()
+                for _x = x, x + width - 1 do
+                    for _y = y, y + height - 1 do
+                        if map[_x] and map[_x][_y] then
+                            _v = map[_x][_y]
+                            if fn and fn(_v) or not fn then
+                                coroutine.yield(_x, _y, _v)
+                            end
                         end
                     end
                 end
             end
-        end
     )
 end
 
@@ -381,7 +381,7 @@ end
 -- @return True if in bounds, false otherwise
 function M.within_bounds(map, x, y)
     return x >= map.bounds.x and x < map.bounds.x + map.bounds.width
-    and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
+            and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
 end
 
 --- Return whether or not a given cell is an edge cell
@@ -391,7 +391,7 @@ end
 -- @return True if on edge, false otherwise
 function M.on_edge(map, x, y)
     return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
-    or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
+            or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
 end
 
 --- Return whether or not a given world coordinate is within the world dimensions of the map.
@@ -406,7 +406,7 @@ function M.within_dimensions(map, map_world_x, map_world_y, test_world_x, test_w
     local map_shift_x = map_world_x + (map.bounds.x - 1) * map.dimensions.tile_width
     local map_shift_y = map_world_y + (map.bounds.y - 1) * map.dimensions.tile_height
     return test_world_x >= map_shift_x and test_world_x < map_shift_x + map.dimensions.world_width
-    and test_world_y >= map_shift_y and test_world_y < map_shift_y + map.dimensions.world_height
+            and test_world_y >= map_shift_y and test_world_y < map_shift_y + map.dimensions.world_height
 end
 
 --- Return world coordinates of a given cells center.
@@ -445,7 +445,7 @@ function M.all_neighbor_coords(x, y)
     local ny
     for i = 1, 8 do
         nx, ny = M.neighbor_coords(x, y, i)
-        nc[i] = {x = nx, y = ny}
+        nc[i] = { x = nx, y = ny }
     end
     return nc
 end
@@ -460,7 +460,8 @@ function M.neighbor_cell(map, x, y, dir)
     local nx, ny = M.neighbor_coords(x, y, dir)
     if M.within_bounds(map, nx, ny) then
         return map[nx][ny]
-    else return nil
+    else
+        return nil
     end
 end
 
@@ -612,8 +613,8 @@ end
 -- @tparam number y The x coordinate of the given cell
 function M.autotile_cell(map, x, y)
     if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
-        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. "..
-        "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
+        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. " ..
+                "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
         return
     end
 
@@ -635,8 +636,8 @@ end
 -- @tparam number height Height of the region
 function M.autotile_region(map, x, y, width, height)
     if map.internal.tilemap_url == nil or map.internal.layer_name == nil then
-        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. "..
-        "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
+        print("MOKU ERROR: You must link a tilemap and a layer to use auto-tiling. " ..
+                "Either call link_tilemap(map, tilemap_url, layer_name), or use a tiling matrix.")
         return
     end
 
@@ -727,7 +728,7 @@ end
 
 -- Complex (8bit) auto-tiling algorithm
 function compute_complex_id(map, x, y, moku_id, lookup)
-    local nw = get_type(map, x - 1, y + 1 )
+    local nw = get_type(map, x - 1, y + 1)
     local n = get_type(map, x, y + 1)
     local ne = get_type(map, x + 1, y + 1)
     local e = get_type(map, x + 1, y)
@@ -805,7 +806,7 @@ end
 -- @tparam cell start_cell Given start cell
 -- @tparam cell end_cell Given end cell
 -- @tparam function cost_fn Cost function
--- @tparam cost_fn_arg any Optional parameter added to the cost_fn argument table
+-- @tparam[opt] cost_fn_arg any Added to the cost_fn argument table under "user"
 -- @return An array of cells, in order from start to end cell. Nil if no path found.
 -- @return A table of cell costs. If no path is found a string is returned giving a reason.
 function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
@@ -887,7 +888,6 @@ function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
                 neighbor_cost = cost_fn(default_cost_fn_args)
 
                 if neighbor_cost >= 0 then
-
                     -- Handle heavy diagonals
                     if options.heavy_diagonals and (d[1] - d[2]) % 2 == 0 then
                         new_cost = cost_lookup[current_cell] + neighbor_cost * options.heavy_diagonals_mult
@@ -912,7 +912,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
                     if not cost_lookup[neighbor_cell] or new_cost < cost_lookup[neighbor_cell] then
                         cl_add(cost_lookup, neighbor_cell, new_cost)
 
-                        priority = new_cost + options.heuristic(end_cell, neighbor_cell, options.heuristic_mult)
+                        priority = new_cost + options.heuristic_mult * options.heuristic(end_cell, neighbor_cell)
                         pq_put(open, neighbor_cell, priority)
 
                         parent_lookup[neighbor_cell] = current_cell
@@ -936,7 +936,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
 
         cell = end_cell
 
-        for i = path_length, 1, - 1 do
+        for i = path_length, 1, -1 do
             path[i] = cell
             cell = parent_lookup[cell]
         end
@@ -974,7 +974,7 @@ function pq_swim(pq)
 end
 
 function pq_put(pq, v, p)
-    pq.heap[pq.current_size + 1] = {v, p}
+    pq.heap[pq.current_size + 1] = { v, p }
     pq.current_size = pq.current_size + 1
     pq_swim(pq)
 end
