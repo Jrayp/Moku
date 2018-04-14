@@ -1,7 +1,7 @@
 # Moku
 Map utility/module for the Defold game engine.
 
-Current Version: _Alpha v2.01_
+Current Version: _Alpha v2.1_
 
 ### Thanks
 
@@ -288,7 +288,7 @@ moku_map.pathfinder.heavy_diagonals = false
 moku_map.pathfinder.heavy_diagonals_mult = 2.41
 
 -- The heuristic used in the calculation. Moku offers a few built in under moku.heuristic.HEURISTIC
--- But you can add your own. This value is multiplies by the amount given in the heuristic_mult option
+-- But you can add your own. This value is multiplied by the amount given in the heuristic_mult option
 moku_map.pathfinder.heuristic = moku.heuristic.MANHATTAN
 moku_map.pathfinder.heuristic_mult = 1
 ```
