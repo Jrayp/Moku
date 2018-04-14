@@ -806,7 +806,7 @@ end
 -- @tparam cell start_cell Given start cell
 -- @tparam cell end_cell Given end cell
 -- @tparam function cost_fn Cost function
--- @tparam[opt] cost_fn_arg any Added to the cost_fn argument table under "user"
+-- @tparam[opt] any cost_fn_arg Added to the cost_fn argument table under "user"
 -- @return An array of cells, in order from start to end cell. Nil if no path found.
 -- @return A table of cell costs. If no path is found a string is returned giving a reason.
 function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
