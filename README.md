@@ -1,7 +1,7 @@
 # Moku
 Map utility/module for the Defold game engine.
 
-Current Version: _Alpha v2.1_
+Current Version: _Alpha v2.2_
 
 ### Thanks
 
@@ -188,6 +188,18 @@ Lets take a look at this functions parameters
 7. An optional list of other tile types that the auto-tile will interact/join to 
 
 So in our example, the `PLAINS` type will interact/join with everything except `OCEAN` tiles; and the `PLATEAU` type will interact with everything except `OCEAN` and `PLAINS` tiles.
+
+_*PROTIP:*_ It is possible to designate multiple Moku Ids using the same tile images as seperate auto-tiles, by using decimal values as such:
+
+```lua
+local moku_ids = {  
+    PLAINS_1 = 1,
+    PLAINS_2 = 1.1,
+}
+
+moku.set_autotile(my_new_map, moku_ids.PLAINS_1, moku.at_algorithm.COMPLEX, true, true, true)
+moku.set_autotile(my_new_map, moku_ids.PLAINS_2, moku.at_algorithm.COMPLEX, true, false, false)
+```
 
 And now we can tell moku to tile the map:
 
