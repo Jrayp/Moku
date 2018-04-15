@@ -604,7 +604,9 @@ function M.calc_autotile_id(map, x, y)
     end
 
     -- Return sum
-    return sum
+    -- (The sum is floored in order to allow decimal values,
+    -- for shared auto-tile image id's)
+    return math.floor(sum)
 end
 
 --- Auto-tiles a given cell.
@@ -888,6 +890,7 @@ function M.find_path(map, start_cell, end_cell, cost_fn, cost_fn_arg)
                 neighbor_cost = cost_fn(default_cost_fn_args)
 
                 if neighbor_cost >= 0 then
+
                     -- Handle heavy diagonals
                     if options.heavy_diagonals and (d[1] - d[2]) % 2 == 0 then
                         new_cost = cost_lookup[current_cell] + neighbor_cost * options.heavy_diagonals_mult
