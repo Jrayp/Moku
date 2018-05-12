@@ -267,7 +267,7 @@ local function my_cost_fn(args)
 -- Assuming my_map is a Moku map. 
 -- (I would just add the tile_costs table to the moku map, but this is 
 -- to demonstrate what the cost_fn_arg parameter can be used for)
-local my_path = moku.find_path(my_path, some_cell, some_other_cell, my_cost_fn, tile_costs)
+local my_path = moku.find_path(my_map, some_cell, some_other_cell, my_cost_fn, tile_costs)
 
 -- Prints the path coordinates and Moku id from start to end
 if my_path then
