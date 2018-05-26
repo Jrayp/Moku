@@ -7,7 +7,7 @@ Current Version: _Alpha v2.2_
 
 Big thanks to Axel Hammerback for the Hero image and thumbnail :)
 
-Moku is 100% free to use, but if you use it in a project a quick shoutout to me may help immensely in my upcoming job search. So it would be greatly appreciated! (Also, I'd like to see how it's used)
+If you find a use for moku in a project, a quick shoutout to me may help immensely in my upcoming job search. It would therefore be greatly appreciated! (Also, I'd like to see how it's used)
 
 ### Documentation
 
