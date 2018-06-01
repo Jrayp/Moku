@@ -30,7 +30,7 @@ M.dir_tables = {
 }
 
 M.heuristic = {
-    NONE = function(a, b, h)
+    NONE = function(a, b)
         return 0
     end,
     MANHATTAN = function(a, b)
