@@ -187,6 +187,7 @@ function M.new_from_tm(tilemap_url, layer_name, tile_width, tile_height, on_new_
     new_map.dimensions = {
         tile_width = tile_width,
         tile_height = tile_height,
+        --world_position = function() go.get(game_object_url, "position") end,
         world_width = world_width,
         world_height = world_height,
     }
@@ -258,6 +259,8 @@ function M.new(width, height, tile_width, tile_height, on_new_cell)
     new_map.dimensions = {
         tile_width = tile_width,
         tile_height = tile_height,
+        world_x = 0,
+        world_y = 0,
         world_width = world_width,
         world_height = world_height,
     }
@@ -366,33 +369,18 @@ function M.iterate_surrounding(map, x, y, fn)
     return M.iterate_region(map, x - 1, y - 1, 3, 3, fn)
 end
 
---o=========================================o
+--o===========================================o
 
---- General.
--- Assorted moku map functions
--- @section General
+--- World Space.
+-- Assorted functions dealing with world space
+-- @section World Space
 
---o=========================================o
+--o===========================================o
 
---- Return whether or not a given map coordinate is within the map bounds.
--- @tparam map map A moku map
--- @tparam number x The x coordinate of the given cell
--- @tparam number y The y coordinate of the given cell
--- @return True if in bounds, false otherwise
-function M.within_bounds(map, x, y)
-    return x >= map.bounds.x and x < map.bounds.x + map.bounds.width
-            and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
-end
-
---- Return whether or not a given cell is an edge cell
--- @tparam map map A moku map
--- @tparam number x The x coordinate of the given cell
--- @tparam number y The y coordinate of the given cell
--- @return True if on edge, false otherwise
-function M.on_edge(map, x, y)
-    return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
-            or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
-end
+--function M.set_world_position(map, x, y)
+--    map.dimensions.world_x = x
+--    map.dimensions.world_y = y
+--end
 
 --- Return whether or not a given world coordinate is within the world dimensions of the map.
 -- World dimensions being defined as the area that the map is taking up in world space.
@@ -424,6 +412,70 @@ function M.cell_center(map, map_world_x, map_world_y, x, y)
     return cx, cy
 end
 
+--o=======================================================o
+
+--- Map Space.
+-- Assorted functions dealing with map/coordinate space
+-- @section Map Space
+
+--o=======================================================o
+
+--- Return whether or not a given map coordinate is within the map bounds.
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
+-- @return True if in bounds, false otherwise
+function M.within_bounds(map, x, y)
+    return x >= map.bounds.x and x < map.bounds.x + map.bounds.width
+            and y >= map.bounds.y and y < map.bounds.y + map.bounds.height
+end
+
+--- Return whether or not a given cell is an edge cell
+-- @tparam map map A moku map
+-- @tparam number x The x coordinate of the given cell
+-- @tparam number y The y coordinate of the given cell
+-- @return True if on edge, false otherwise
+function M.on_edge(map, x, y)
+    return x == map.bounds.x or x == map.bounds.x + map.bounds.width - 1
+            or y == map.bounds.y or y == map.bounds.y + map.bounds.height - 1
+end
+
+--- Return the direction from a given starting cell to a given neighbor cell.
+-- @tparam from_x number The x coordinate of the starting cell
+-- @tparam from_y number The y coordinate of the starting cell
+-- @tparam to_x number The x coordinate of the neighbor cell
+-- @tparam to_y number The y coordinate of the neighbor cell
+-- @return Returns the direction, or nil if not a neighbor cell
+function M.neighbor_direction(from_x, from_y, to_x, to_y)
+    local dif_x = to_x - from_x
+    local dif_y = to_y - from_y
+    if dif_x == 0 then
+        if dif_y == 1 then
+            return M.dir.N
+        elseif dif_y == -1 then
+            return M.dir.S
+        end
+    elseif dif_x == 1 then
+        if dif_y == 0 then
+            return M.dir.E
+        elseif dif_y == 1 then
+            return M.dir.NE
+        elseif dif_y == -1 then
+            return M.dir.SE
+        end
+    elseif dif_x == -1 then
+        if dif_y == 0 then
+            return M.dir.W
+        elseif dif_y == 1 then
+            return M.dir.NW
+        elseif dif_y == -1 then
+            return M.dir.SW
+        end
+    end
+    return nil
+end
+
+
 --- Return coordinates of a cell neighboring a given cell.
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
@@ -437,8 +489,8 @@ end
 --- Return a list of all coordinates neighboring a given cell.
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return A list of neighbor coordinates in the form
--- { {Nx, Ny}, {Ex, Ey}, {Sx, Sy}, {Wx, Wy}, {NEx, NEy}, {SEx, SEy}, {SWx, SWy}, {NWx, NWy} }
+-- @return A list of neighbor coordinates to be called as such:
+-- this_list[i].x, this_list[i].y
 function M.all_neighbor_coords(x, y)
     local nc = {}
     local nx
@@ -471,13 +523,112 @@ end
 -- @tparam number y The x coordinate of the given cell
 -- @return A list of neighbor cells in the form
 -- { N, E, S, W, NE, SE, SW, NW }
-function M.all_neighbor_cells(map, x, y)
-    local nc = {}
+function M.all_neighbor_cells_list(map, x, y)
+    local ancl = {}
     for i = 1, 8 do
-        nc[i] = M.neighbor_cell(map, x, y, i)
+        ancl[i] = M.neighbor_cell(map, x, y, i)
     end
-    return nc
+    return ancl
 end
+
+--- Return a set of all cells neighboring a given cell.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @return A set of unordered neighbor cells to be used as a lookup table as such:
+-- if this_set[my_moku_cell] == true then do ...
+function M.all_neighbor_cells_set(map, x, y)
+    local ancs = {}
+    for i = 1, 8 do
+        local nc = M.neighbor_cell(map, x, y, i)
+        if nc then
+            ancs[nc] = true
+        end
+    end
+    return ancs
+end
+
+--- Return a list of cell coordinates in a line, starting from, and including given cell coordinates.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @tparam moku.dir The direction of the line
+-- @tparam number The length of the line
+-- @return A list of coordinates to be called as such:
+-- this_list[i].x, this_list[i].y
+function M.line_coords(map, x, y, dir, length)
+    local line_coords = {}
+    line_coords[1] = { x = x, y = y }
+    if length > 1 then
+        for i = 2, length do
+            x, y = M.neighbor_coords(x, y, dir)
+            line_coords[i] = { x = x, y = y }
+        end
+    end
+    return line_coords
+end
+
+--- Return a list of cells in a line, starting from, and including a given cell.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @tparam moku.dir The direction of the line
+-- @tparam number The length of the line
+-- @return A list of cells in the form
+-- { c1, c2, c3, ... }
+function M.line_cells_list(map, x, y, dir, length)
+    local line_cells = {}
+    line_cells[1] = map[x][y]
+    if length > 1 then
+        for i = 2, length do
+            x, y = M.neighbor_coords(x, y, dir)
+            if map[x] and map[x][y] then
+                line_cells[i] = map[x][y]
+            else
+                line_cells[i] = nil
+            end
+        end
+    end
+    return line_cells
+end
+
+--- Return a set of cells that form a line, starting from, and including a given cell.
+-- @tparam map map A moku map
+-- @tparam number x The y coordinate of the given cell
+-- @tparam number y The x coordinate of the given cell
+-- @tparam moku.dir The direction of the line
+-- @tparam number The length of the line
+-- @return A set of unordered cells to be used as a lookup table as such:
+-- if this_set[my_moku_cell] == true then do ...
+function M.line_cells_set(map, x, y, dir, length)
+    local line_cells = {}
+    line_cells[map[x][y]] = true
+    if length > 1 then
+        for i = 2, length do
+            x, y = M.neighbor_coords(x, y, dir)
+            if map[x] and map[x][y] then
+                line_cells[map[x][y]] = true
+            end
+        end
+        return line_cells
+    end
+end
+
+--o=========================================o
+
+--- Distance Calculating.
+-- Functions for computing distances
+-- @section Distance Calculating
+
+--o=========================================o
+
+function M.diagonal_shortcut_distance(x1, y1, x2, y2)
+    local h_diag = math.min(math.abs(x1 - x2), math.abs(y1 - y2))
+    local h_straight = math.abs(x1 - x2) + math.abs(y1 - y2)
+    return 2 * h_diag + (h_straight - 2 * h_diag)
+end
+
+
 
 --o=========================================o
 

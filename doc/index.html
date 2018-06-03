@@ -31,7 +31,8 @@
 <ul>
 <li><a href="#Constructors">Constructors </a></li>
 <li><a href="#Iterators">Iterators </a></li>
-<li><a href="#General">General </a></li>
+<li><a href="#World_Space">World Space </a></li>
+<li><a href="#Map_Space">Map Space </a></li>
 <li><a href="#Cell_Picking">Cell Picking </a></li>
 <li><a href="#Auto_Tiling">Auto-Tiling </a></li>
 <li><a href="#Tiling_Matrices">Tiling Matrices </a></li>
@@ -79,15 +80,11 @@
 	<td class="summary">Iterates through a given cell and its surrounding cells.</td>
 	</tr>
 </table>
-<h2><a href="#General">General </a></h2>
+<h2><a href="#World_Space">World Space </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#within_bounds">within_bounds (map, x, y)</a></td>
 	<td class="summary">Return whether or not a given map coordinate is within the map bounds.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#on_edge">on_edge (map, x, y)</a></td>
-	<td class="summary">Return whether or not a given cell is an edge cell</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#within_dimensions">within_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</a></td>
@@ -96,6 +93,13 @@
 	<tr>
 	<td class="name" nowrap><a href="#cell_center">cell_center (map, map_world_x, map_world_y, x, y)</a></td>
 	<td class="summary">Return world coordinates of a given cells center.</td>
+	</tr>
+</table>
+<h2><a href="#Map_Space">Map Space </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#on_edge">on_edge (map, x, y)</a></td>
+	<td class="summary">Return whether or not a given cell is an edge cell</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#neighbor_coords">neighbor_coords (x, y, dir)</a></td>
@@ -111,6 +115,10 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#all_neighbor_cells">all_neighbor_cells (map, x, y)</a></td>
+	<td class="summary">Return a list of all cells neighboring a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line_coords">line_coords (map, x, y)</a></td>
 	<td class="summary">Return a list of all cells neighboring a given cell.</td>
 	</tr>
 </table>
@@ -392,11 +400,11 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="General"></a>General </h2>
+    <h2 class="section-header has-description"><a name="World_Space"></a>World Space </h2>
 
           <div class="section-description">
 
- Assorted moku map functions
+ Assorted functions dealing with world space
           </div>
     <dl class="function">
     <dt>
@@ -427,40 +435,6 @@
     <ol>
 
         True if in bounds, false otherwise
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "on_edge"></a>
-    <strong>on_edge (map, x, y)</strong>
-    </dt>
-    <dd>
-    Return whether or not a given cell is an edge cell
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
-         A moku map
-        </li>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-         The x coordinate of the given cell
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-         The y coordinate of the given cell
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        True if on edge, false otherwise
     </ol>
 
 
@@ -548,6 +522,48 @@
         World x of cells center</li>
         <li>
         World y of cells center</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Map_Space"></a>Map Space </h2>
+
+          <div class="section-description">
+
+ Assorted functions dealing with map/coordinate space
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "on_edge"></a>
+    <strong>on_edge (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return whether or not a given cell is an edge cell
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        True if on edge, false otherwise
     </ol>
 
 
@@ -688,6 +704,40 @@
 
         A list of neighbor cells in the form
  { N, E, S, W, NE, SE, SW, NW }
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line_coords"></a>
+    <strong>line_coords (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return a list of all cells neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">map</span></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of neighbor cells in the form
     </ol>
 
 
@@ -1177,7 +1227,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2018-04-13 21:37:06 </i>
+<i style="float:right;">Last updated 2018-06-01 16:33:20 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
