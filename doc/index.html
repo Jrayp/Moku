@@ -29,10 +29,15 @@
 
 <h2>Contents</h2>
 <ul>
+<li><a href="#Tables">Tables </a></li>
 <li><a href="#Constructors">Constructors </a></li>
 <li><a href="#Iterators">Iterators </a></li>
-<li><a href="#World_Space">World Space </a></li>
-<li><a href="#Map_Space">Map Space </a></li>
+<li><a href="#Miscellaneous">Miscellaneous </a></li>
+<li><a href="#Neighbor_Functions">Neighbor Functions </a></li>
+<li><a href="#Coordinate_List_Functions">Coordinate List Functions </a></li>
+<li><a href="#Cell_List_Functions">Cell List Functions </a></li>
+<li><a href="#Cell_Set_Functions">Cell Set Functions </a></li>
+<li><a href="#Distance_Calculating">Distance Calculating </a></li>
 <li><a href="#Cell_Picking">Cell Picking </a></li>
 <li><a href="#Auto_Tiling">Auto-Tiling </a></li>
 <li><a href="#Tiling_Matrices">Tiling Matrices </a></li>
@@ -54,135 +59,190 @@
 <p></p>
 
 
+<h2><a href="#Tables">Tables </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.table.dir">M.table.dir</a></td>
+	<td class="summary">A table of directions for use in multiple moku functions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.table.direction_offsets">M.table.direction_offsets</a></td>
+	<td class="summary">A table containing direction offsets for use in path finding.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.table.at_algorithm">M.table.at_algorithm</a></td>
+	<td class="summary">A table containing the moku auto-tiling algorithms</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.table.heuristic">M.table.heuristic</a></td>
+	<td class="summary">A table of heuristics for use in path finding.</td>
+	</tr>
+</table>
 <h2><a href="#Constructors">Constructors </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#new_from_tm">new_from_tm (tilemap_url, layer_name, tile_width, tile_height[, on_new_cell])</a></td>
+	<td class="name" nowrap><a href="#M.new.from_tilemap">M.new.from_tilemap (tilemap_url, layer_name, tile_width, tile_height[, on_new_cell])</a></td>
 	<td class="summary">Builds and returns a new moku map from a supplied defold tilemap.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#new">new (width, height, tile_width, tile_height[, on_new_cell])</a></td>
+	<td class="name" nowrap><a href="#M.new.from_scratch">M.new.from_scratch (width, height, tile_width, tile_height[, on_new_cell])</a></td>
 	<td class="summary">Returns a new moku map from scratch.</td>
 	</tr>
 </table>
 <h2><a href="#Iterators">Iterators </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#iterate_map">iterate_map (map[, fn])</a></td>
+	<td class="name" nowrap><a href="#M.iterate.map">M.iterate.map (map[, fn])</a></td>
 	<td class="summary">Iterates through all moku map cells.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#iterate_region">iterate_region (map, x, y, width, height[, fn])</a></td>
+	<td class="name" nowrap><a href="#M.iterate.region">M.iterate.region (map, x, y, width, height[, fn])</a></td>
 	<td class="summary">Iterates through a rectangular region of a moku maps cells.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#iterate_surrounding">iterate_surrounding (map, x, y[, fn])</a></td>
+	<td class="name" nowrap><a href="#M.iterate.surrounding">M.iterate.surrounding (map, x, y[, fn])</a></td>
 	<td class="summary">Iterates through a given cell and its surrounding cells.</td>
 	</tr>
 </table>
-<h2><a href="#World_Space">World Space </a></h2>
+<h2><a href="#Miscellaneous">Miscellaneous </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#within_bounds">within_bounds (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.misc.in_bounds">M.misc.in_bounds (map, x, y)</a></td>
 	<td class="summary">Return whether or not a given map coordinate is within the map bounds.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#within_dimensions">within_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</a></td>
+	<td class="name" nowrap><a href="#M.misc.in_dimensions">M.misc.in_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</a></td>
 	<td class="summary">Return whether or not a given world coordinate is within the world dimensions of the map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#cell_center">cell_center (map, map_world_x, map_world_y, x, y)</a></td>
-	<td class="summary">Return world coordinates of a given cells center.</td>
-	</tr>
-</table>
-<h2><a href="#Map_Space">Map Space </a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#on_edge">on_edge (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.misc.on_edge">M.misc.on_edge (map, x, y)</a></td>
 	<td class="summary">Return whether or not a given cell is an edge cell</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#neighbor_coords">neighbor_coords (x, y, dir)</a></td>
+	<td class="name" nowrap><a href="#M.misc.cell_center">M.misc.cell_center (map, map_world_x, map_world_y, x, y)</a></td>
+	<td class="summary">Return world coordinates of a given cells center.</td>
+	</tr>
+</table>
+<h2><a href="#Neighbor_Functions">Neighbor Functions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.neighbor.coords">M.neighbor.coords (x, y, dir)</a></td>
 	<td class="summary">Return coordinates of a cell neighboring a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#all_neighbor_coords">all_neighbor_coords (x, y)</a></td>
-	<td class="summary">Return a list of all coordinates neighboring a given cell.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#neighbor_cell">neighbor_cell (map, x, y, dir)</a></td>
+	<td class="name" nowrap><a href="#M.neighbor.cell">M.neighbor.cell (map, x, y, dir)</a></td>
 	<td class="summary">Return the neighbor cell of a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#all_neighbor_cells">all_neighbor_cells (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.neighbor.direction">M.neighbor.direction (from_x, from_y, to_x, to_y)</a></td>
+	<td class="summary">Return the direction from some given set of coordinates to another set of coordinates.</td>
+	</tr>
+</table>
+<h2><a href="#Coordinate_List_Functions">Coordinate List Functions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.coord_list.neighbors">M.coord_list.neighbors (x, y)</a></td>
+	<td class="summary">Return a list of all coordinates neighboring a given coordinate.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.coord_list.directed_line">M.coord_list.directed_line (map, x, y, dir, length, include_start)</a></td>
+	<td class="summary">Return a list of cell coordinates that form a directed line, given starting coordinates, a direction, and length.</td>
+	</tr>
+</table>
+<h2><a href="#Cell_List_Functions">Cell List Functions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.cell_list.neighbors">M.cell_list.neighbors (map, x, y)</a></td>
 	<td class="summary">Return a list of all cells neighboring a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#line_coords">line_coords (map, x, y)</a></td>
-	<td class="summary">Return a list of all cells neighboring a given cell.</td>
+	<td class="name" nowrap><a href="#M.cell_list.line">M.cell_list.line (map, x, y, dir, length)</a></td>
+	<td class="summary">Return a list of cells in a line, starting from, and including a given cell.</td>
+	</tr>
+</table>
+<h2><a href="#Cell_Set_Functions">Cell Set Functions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.cell_set.neighbors">M.cell_set.neighbors (map, x, y)</a></td>
+	<td class="summary">Return a set of all cells neighboring a given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.cell_set.line">M.cell_set.line (map, x, y, dir, length)</a></td>
+	<td class="summary">Return a set of cells that form a line, starting from, and including a given cell.</td>
+	</tr>
+</table>
+<h2><a href="#Distance_Calculating">Distance Calculating </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.distance.manhatten">M.distance.manhatten (x1, y1, x2, y2)</a></td>
+	<td class="summary">Returns the manhattan distance between two coordinates</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.distance.diagonal">M.distance.diagonal (x1, y1, x2, y2)</a></td>
+	<td class="summary">Returns the diagonal (Chebyshev) distance between two coordinates</td>
 	</tr>
 </table>
 <h2><a href="#Cell_Picking">Cell Picking </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#pick_coords">pick_coords (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</a></td>
+	<td class="name" nowrap><a href="#M.pick.coords">M.pick.coords (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</a></td>
 	<td class="summary">Returns the coordinates of the cell at given world coordinates</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#pick_cell">pick_cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</a></td>
+	<td class="name" nowrap><a href="#M.pick.cell">M.pick.cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</a></td>
 	<td class="summary">Returns the cell at given world coordinates</td>
 	</tr>
 </table>
 <h2><a href="#Auto_Tiling">Auto-Tiling </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#link_tilemap">link_tilemap (map, tilemap_url, layer_name)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.link_tilemap">M.auto_tile.link_tilemap (map, tilemap_url, layer_name)</a></td>
 	<td class="summary">Links a tilemap and layer to a moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#set_autotile">set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.set_autotile">M.auto_tile.set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
 	<td class="summary">Designates a tile id as as an auto-tile.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#calc_autotile_id">calc_autotile_id (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.calc_cell_id">M.auto_tile.calc_cell_id (map, x, y)</a></td>
 	<td class="summary">Calculates a given cells auto-tile id/sum</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#autotile_cell">autotile_cell (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.cell">M.auto_tile.cell (map, x, y)</a></td>
 	<td class="summary">Auto-tiles a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#autotile_map">autotile_map (map)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.map">M.auto_tile.map (map)</a></td>
 	<td class="summary">Auto-tiles an entire moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#autotile_region">autotile_region (map, x, y, width, height)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.region">M.auto_tile.region (map, x, y, width, height)</a></td>
 	<td class="summary">Auto-tiles a rectangular region of a moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#autotile_surrounding">autotile_surrounding (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.surrounding">M.auto_tile.surrounding (map, x, y)</a></td>
 	<td class="summary">Auto-tiles a given cell and its surrounding cells.</td>
 	</tr>
 </table>
 <h2><a href="#Tiling_Matrices">Tiling Matrices </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#tiling_matrix_map">tiling_matrix_map (map)</a></td>
+	<td class="name" nowrap><a href="#M.tiling_matrix.map">M.tiling_matrix.map (map)</a></td>
 	<td class="summary">Returns a tiling matrix for an entire moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#tiling_matrix_region">tiling_matrix_region (map, x, y, width, height)</a></td>
+	<td class="name" nowrap><a href="#M.tiling_matrix.region">M.tiling_matrix.region (map, x, y, width, height)</a></td>
 	<td class="summary">Returns a rectangular tiling matrix.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#tiling_matrix_surrounding">tiling_matrix_surrounding (map, x, y)</a></td>
+	<td class="name" nowrap><a href="#M.tiling_matrix.surrounding">M.tiling_matrix.surrounding (map, x, y)</a></td>
 	<td class="summary">Returns a tiling matrix for a given cell and its surrounding cells.</td>
 	</tr>
 </table>
 <h2><a href="#Path_finding">Path-finding </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#find_path">find_path (map, start_cell, end_cell, cost_fn[, cost_fn_arg])</a></td>
+	<td class="name" nowrap><a href="#M.path.find">M.path.find (map, start_cell, end_cell, cost_fn[, cost_fn_arg])</a></td>
 	<td class="summary">Computes, and returns a path from a given start cell, to a given end cell.</td>
 	</tr>
 </table>
@@ -191,6 +251,139 @@
 <br/>
 
 
+    <h2 class="section-header has-description"><a name="Tables"></a>Tables </h2>
+
+          <div class="section-description">
+
+ Tables used together with moku
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "M.table.dir"></a>
+    <strong>M.table.dir</strong>
+    </dt>
+    <dd>
+    A table of directions for use in multiple moku functions.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">N</span>
+
+        </li>
+        <li><span class="parameter">E</span>
+
+        </li>
+        <li><span class="parameter">S</span>
+
+        </li>
+        <li><span class="parameter">W</span>
+
+        </li>
+        <li><span class="parameter">NE</span>
+
+        </li>
+        <li><span class="parameter">SE</span>
+
+        </li>
+        <li><span class="parameter">SW</span>
+
+        </li>
+        <li><span class="parameter">NW</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.table.direction_offsets"></a>
+    <strong>M.table.direction_offsets</strong>
+    </dt>
+    <dd>
+    A table containing direction offsets for use in path finding.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">ALL</span>
+         - { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } }
+        </li>
+        <li><span class="parameter">CARDINAL</span>
+         - { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }
+        </li>
+        <li><span class="parameter">DIAGONAL</span>
+         - { { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } }
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.table.at_algorithm"></a>
+    <strong>M.table.at_algorithm</strong>
+    </dt>
+    <dd>
+    A table containing the moku auto-tiling algorithms
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">SIMPLE</span>
+
+        </li>
+        <li><span class="parameter">COMPLEX</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.table.heuristic"></a>
+    <strong>M.table.heuristic</strong>
+    </dt>
+    <dd>
+    A table of heuristics for use in path finding.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">NONE</span>
+
+        </li>
+        <li><span class="parameter">MANHATTAN</span>
+
+        </li>
+        <li><span class="parameter">MAX_DXDY</span>
+
+        </li>
+        <li><span class="parameter">DIAGONAL_SHORTCUT</span>
+
+        </li>
+        <li><span class="parameter">EUCLIDEAN</span>
+
+        </li>
+        <li><span class="parameter">EUCLIDEAN_NO_SQR</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
     <h2 class="section-header has-description"><a name="Constructors"></a>Constructors </h2>
 
           <div class="section-description">
@@ -199,8 +392,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "new_from_tm"></a>
-    <strong>new_from_tm (tilemap_url, layer_name, tile_width, tile_height[, on_new_cell])</strong>
+    <a name = "M.new.from_tilemap"></a>
+    <strong>M.new.from_tilemap (tilemap_url, layer_name, tile_width, tile_height[, on_new_cell])</strong>
     </dt>
     <dd>
     Builds and returns a new moku map from a supplied defold tilemap.
@@ -244,8 +437,8 @@
 
 </dd>
     <dt>
-    <a name = "new"></a>
-    <strong>new (width, height, tile_width, tile_height[, on_new_cell])</strong>
+    <a name = "M.new.from_scratch"></a>
+    <strong>M.new.from_scratch (width, height, tile_width, tile_height[, on_new_cell])</strong>
     </dt>
     <dd>
     Returns a new moku map from scratch.
@@ -295,8 +488,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "iterate_map"></a>
-    <strong>iterate_map (map[, fn])</strong>
+    <a name = "M.iterate.map"></a>
+    <strong>M.iterate.map (map[, fn])</strong>
     </dt>
     <dd>
     Iterates through all moku map cells.
@@ -306,7 +499,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">fn</span>
@@ -322,8 +515,8 @@
 
 </dd>
     <dt>
-    <a name = "iterate_region"></a>
-    <strong>iterate_region (map, x, y, width, height[, fn])</strong>
+    <a name = "M.iterate.region"></a>
+    <strong>M.iterate.region (map, x, y, width, height[, fn])</strong>
     </dt>
     <dd>
     Iterates through a rectangular region of a moku maps cells.
@@ -333,7 +526,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -365,8 +558,8 @@
 
 </dd>
     <dt>
-    <a name = "iterate_surrounding"></a>
-    <strong>iterate_surrounding (map, x, y[, fn])</strong>
+    <a name = "M.iterate.surrounding"></a>
+    <strong>M.iterate.surrounding (map, x, y[, fn])</strong>
     </dt>
     <dd>
     Iterates through a given cell and its surrounding cells.
@@ -376,7 +569,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -400,16 +593,16 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="World_Space"></a>World Space </h2>
+    <h2 class="section-header has-description"><a name="Miscellaneous"></a>Miscellaneous </h2>
 
           <div class="section-description">
 
- Assorted functions dealing with world space
+ Miscellaneous functions
           </div>
     <dl class="function">
     <dt>
-    <a name = "within_bounds"></a>
-    <strong>within_bounds (map, x, y)</strong>
+    <a name = "M.misc.in_bounds"></a>
+    <strong>M.misc.in_bounds (map, x, y)</strong>
     </dt>
     <dd>
     Return whether or not a given map coordinate is within the map bounds.
@@ -418,7 +611,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -442,8 +635,8 @@
 
 </dd>
     <dt>
-    <a name = "within_dimensions"></a>
-    <strong>within_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</strong>
+    <a name = "M.misc.in_dimensions"></a>
+    <strong>M.misc.in_dimensions (map, map_world_x, map_world_y, test_world_x, test_world_y)</strong>
     </dt>
     <dd>
     Return whether or not a given world coordinate is within the world dimensions of the map.
@@ -453,7 +646,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">map_world_x</span>
@@ -485,8 +678,42 @@
 
 </dd>
     <dt>
-    <a name = "cell_center"></a>
-    <strong>cell_center (map, map_world_x, map_world_y, x, y)</strong>
+    <a name = "M.misc.on_edge"></a>
+    <strong>M.misc.on_edge (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return whether or not a given cell is an edge cell
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        True if on edge, false otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.misc.cell_center"></a>
+    <strong>M.misc.cell_center (map, map_world_x, map_world_y, x, y)</strong>
     </dt>
     <dd>
     Return world coordinates of a given cells center.
@@ -495,7 +722,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">map_world_x</span>
@@ -529,50 +756,16 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Map_Space"></a>Map Space </h2>
+    <h2 class="section-header has-description"><a name="Neighbor_Functions"></a>Neighbor Functions </h2>
 
           <div class="section-description">
 
- Assorted functions dealing with map/coordinate space
+ Functions that return a cells neighbor, neighbor coordinates, or direction
           </div>
     <dl class="function">
     <dt>
-    <a name = "on_edge"></a>
-    <strong>on_edge (map, x, y)</strong>
-    </dt>
-    <dd>
-    Return whether or not a given cell is an edge cell
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
-         A moku map
-        </li>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-         The x coordinate of the given cell
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-         The y coordinate of the given cell
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        True if on edge, false otherwise
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "neighbor_coords"></a>
-    <strong>neighbor_coords (x, y, dir)</strong>
+    <a name = "M.neighbor.coords"></a>
+    <strong>M.neighbor.coords (x, y, dir)</strong>
     </dt>
     <dd>
     Return coordinates of a cell neighboring a given cell.
@@ -607,39 +800,8 @@
 
 </dd>
     <dt>
-    <a name = "all_neighbor_coords"></a>
-    <strong>all_neighbor_coords (x, y)</strong>
-    </dt>
-    <dd>
-    Return a list of all coordinates neighboring a given cell.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-         The y coordinate of the given cell
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-         The x coordinate of the given cell
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        A list of neighbor coordinates in the form
- { {Nx, Ny}, {Ex, Ey}, {Sx, Sy}, {Wx, Wy}, {NEx, NEy}, {SEx, SEy}, {SWx, SWy}, {NWx, NWy} }
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "neighbor_cell"></a>
-    <strong>neighbor_cell (map, x, y, dir)</strong>
+    <a name = "M.neighbor.cell"></a>
+    <strong>M.neighbor.cell (map, x, y, dir)</strong>
     </dt>
     <dd>
     Return the neighbor cell of a given cell.
@@ -648,7 +810,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -676,8 +838,140 @@
 
 </dd>
     <dt>
-    <a name = "all_neighbor_cells"></a>
-    <strong>all_neighbor_cells (map, x, y)</strong>
+    <a name = "M.neighbor.direction"></a>
+    <strong>M.neighbor.direction (from_x, from_y, to_x, to_y)</strong>
+    </dt>
+    <dd>
+    Return the direction from some given set of coordinates to another set of coordinates.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">from_x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the starting cell
+        </li>
+        <li><span class="parameter">from_y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the starting cell
+        </li>
+        <li><span class="parameter">to_x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the neighbor cell
+        </li>
+        <li><span class="parameter">to_y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the neighbor cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Returns the direction, or nil if not a neighbor cell
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Coordinate_List_Functions"></a>Coordinate List Functions </h2>
+
+          <div class="section-description">
+
+ Functions that return lists of coordinates
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "M.coord_list.neighbors"></a>
+    <strong>M.coord_list.neighbors (x, y)</strong>
+    </dt>
+    <dd>
+    Return a list of all coordinates neighboring a given coordinate.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         Given x coordinate
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         Given y coordinate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of neighbor coordinates to be called as such:
+ neighbors[i].x, neighbors[i].y
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.coord_list.directed_line"></a>
+    <strong>M.coord_list.directed_line (map, x, y, dir, length, include_start)</strong>
+    </dt>
+    <dd>
+    Return a list of cell coordinates that form a directed line, given starting coordinates, a direction, and length.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         Given x coordinate
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         Given y coordinate
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><span class="type">moku.dir</span></span>
+         The direction of the line
+        </li>
+        <li><span class="parameter">length</span>
+            <span class="types"><span class="type">number</span></span>
+         The length of the line
+        </li>
+        <li><span class="parameter">include_start</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether or not to include the starting coordinates
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of coordinates to be called as such:
+ my_line[i].x, my_line[i].y
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Cell_List_Functions"></a>Cell List Functions </h2>
+
+          <div class="section-description">
+
+ Functions that return lists of cells
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "M.cell_list.neighbors"></a>
+    <strong>M.cell_list.neighbors (map, x, y)</strong>
     </dt>
     <dd>
     Return a list of all cells neighboring a given cell.
@@ -686,7 +980,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -711,17 +1005,68 @@
 
 </dd>
     <dt>
-    <a name = "line_coords"></a>
-    <strong>line_coords (map, x, y)</strong>
+    <a name = "M.cell_list.line"></a>
+    <strong>M.cell_list.line (map, x, y, dir, length)</strong>
     </dt>
     <dd>
-    Return a list of all cells neighboring a given cell.
+    Return a list of cells in a line, starting from, and including a given cell.
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><span class="type">moku.dir</span></span>
+         The direction of the line
+        </li>
+        <li><span class="parameter">length</span>
+            <span class="types"><span class="type">number</span></span>
+         The length of the line
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A list of cells in the form
+ { c1, c2, c3, ... }
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Cell_Set_Functions"></a>Cell Set Functions </h2>
+
+          <div class="section-description">
+
+ Functions that return sets of cells
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "M.cell_set.neighbors"></a>
+    <strong>M.cell_set.neighbors (map, x, y)</strong>
+    </dt>
+    <dd>
+    Return a set of all cells neighboring a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -737,7 +1082,135 @@
     <h3>Returns:</h3>
     <ol>
 
-        A list of neighbor cells in the form
+        A set of unordered neighbor cells to be used as a lookup table as such:
+ if this_set[my_moku_cell] == true then do ...
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.cell_set.line"></a>
+    <strong>M.cell_set.line (map, x, y, dir, length)</strong>
+    </dt>
+    <dd>
+    Return a set of cells that form a line, starting from, and including a given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><span class="type">moku.dir</span></span>
+         The direction of the line
+        </li>
+        <li><span class="parameter">length</span>
+            <span class="types"><span class="type">number</span></span>
+         The length of the line
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        A set of unordered cells to be used as a lookup table as such:
+ if this_set[my_moku_cell] == true then do ...
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Distance_Calculating"></a>Distance Calculating </h2>
+
+          <div class="section-description">
+
+ Functions for computing distances between coordinates
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "M.distance.manhatten"></a>
+    <strong>M.distance.manhatten (x1, y1, x2, y2)</strong>
+    </dt>
+    <dd>
+    Returns the manhattan distance between two coordinates
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x1</span>
+            <span class="types"><span class="type">number</span></span>
+         First x coordinate
+        </li>
+        <li><span class="parameter">y1</span>
+            <span class="types"><span class="type">number</span></span>
+         First y coordinate
+        </li>
+        <li><span class="parameter">x2</span>
+            <span class="types"><span class="type">number</span></span>
+         Second x coordinate
+        </li>
+        <li><span class="parameter">y2</span>
+            <span class="types"><span class="type">number</span></span>
+         Second y coordinate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Distance in cells
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.distance.diagonal"></a>
+    <strong>M.distance.diagonal (x1, y1, x2, y2)</strong>
+    </dt>
+    <dd>
+    Returns the diagonal (Chebyshev) distance between two coordinates
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x1</span>
+            <span class="types"><span class="type">number</span></span>
+         First x coordinate
+        </li>
+        <li><span class="parameter">y1</span>
+            <span class="types"><span class="type">number</span></span>
+         First y coordinate
+        </li>
+        <li><span class="parameter">x2</span>
+            <span class="types"><span class="type">number</span></span>
+         Second x coordinate
+        </li>
+        <li><span class="parameter">y2</span>
+            <span class="types"><span class="type">number</span></span>
+         Second y coordinate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Distance in cells
     </ol>
 
 
@@ -749,12 +1222,12 @@
 
           <div class="section-description">
 
- Functions related to cell picking
+ Functions for cell picking
           </div>
     <dl class="function">
     <dt>
-    <a name = "pick_coords"></a>
-    <strong>pick_coords (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</strong>
+    <a name = "M.pick.coords"></a>
+    <strong>M.pick.coords (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</strong>
     </dt>
     <dd>
     Returns the coordinates of the cell at given world coordinates
@@ -763,7 +1236,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">map_world_x</span>
@@ -797,8 +1270,8 @@
 
 </dd>
     <dt>
-    <a name = "pick_cell"></a>
-    <strong>pick_cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</strong>
+    <a name = "M.pick.cell"></a>
+    <strong>M.pick.cell (map, map_world_x, map_world_y, pick_world_x, pick_world_y)</strong>
     </dt>
     <dd>
     Returns the cell at given world coordinates
@@ -807,7 +1280,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">map_world_x</span>
@@ -847,8 +1320,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "link_tilemap"></a>
-    <strong>link_tilemap (map, tilemap_url, layer_name)</strong>
+    <a name = "M.auto_tile.link_tilemap"></a>
+    <strong>M.auto_tile.link_tilemap (map, tilemap_url, layer_name)</strong>
     </dt>
     <dd>
     Links a tilemap and layer to a moku map.
@@ -857,7 +1330,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">tilemap_url</span>
@@ -876,8 +1349,8 @@
 
 </dd>
     <dt>
-    <a name = "set_autotile"></a>
-    <strong>set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
+    <a name = "M.auto_tile.set_autotile"></a>
+    <strong>M.auto_tile.set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
     </dt>
     <dd>
     Designates a tile id as as an auto-tile.
@@ -886,7 +1359,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">moku_id</span>
@@ -921,8 +1394,8 @@
 
 </dd>
     <dt>
-    <a name = "calc_autotile_id"></a>
-    <strong>calc_autotile_id (map, x, y)</strong>
+    <a name = "M.auto_tile.calc_cell_id"></a>
+    <strong>M.auto_tile.calc_cell_id (map, x, y)</strong>
     </dt>
     <dd>
     Calculates a given cells auto-tile id/sum
@@ -931,7 +1404,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -955,8 +1428,8 @@
 
 </dd>
     <dt>
-    <a name = "autotile_cell"></a>
-    <strong>autotile_cell (map, x, y)</strong>
+    <a name = "M.auto_tile.cell"></a>
+    <strong>M.auto_tile.cell (map, x, y)</strong>
     </dt>
     <dd>
     Auto-tiles a given cell.
@@ -965,7 +1438,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -984,8 +1457,8 @@
 
 </dd>
     <dt>
-    <a name = "autotile_map"></a>
-    <strong>autotile_map (map)</strong>
+    <a name = "M.auto_tile.map"></a>
+    <strong>M.auto_tile.map (map)</strong>
     </dt>
     <dd>
     Auto-tiles an entire moku map.
@@ -994,7 +1467,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
     </ul>
@@ -1005,8 +1478,8 @@
 
 </dd>
     <dt>
-    <a name = "autotile_region"></a>
-    <strong>autotile_region (map, x, y, width, height)</strong>
+    <a name = "M.auto_tile.region"></a>
+    <strong>M.auto_tile.region (map, x, y, width, height)</strong>
     </dt>
     <dd>
     Auto-tiles a rectangular region of a moku map.
@@ -1015,7 +1488,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -1042,8 +1515,8 @@
 
 </dd>
     <dt>
-    <a name = "autotile_surrounding"></a>
-    <strong>autotile_surrounding (map, x, y)</strong>
+    <a name = "M.auto_tile.surrounding"></a>
+    <strong>M.auto_tile.surrounding (map, x, y)</strong>
     </dt>
     <dd>
     Auto-tiles a given cell and its surrounding cells.
@@ -1052,7 +1525,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -1079,8 +1552,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "tiling_matrix_map"></a>
-    <strong>tiling_matrix_map (map)</strong>
+    <a name = "M.tiling_matrix.map"></a>
+    <strong>M.tiling_matrix.map (map)</strong>
     </dt>
     <dd>
     Returns a tiling matrix for an entire moku map.
@@ -1089,7 +1562,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
     </ul>
@@ -1100,8 +1573,8 @@
 
 </dd>
     <dt>
-    <a name = "tiling_matrix_region"></a>
-    <strong>tiling_matrix_region (map, x, y, width, height)</strong>
+    <a name = "M.tiling_matrix.region"></a>
+    <strong>M.tiling_matrix.region (map, x, y, width, height)</strong>
     </dt>
     <dd>
     Returns a rectangular tiling matrix.
@@ -1110,7 +1583,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -1137,8 +1610,8 @@
 
 </dd>
     <dt>
-    <a name = "tiling_matrix_surrounding"></a>
-    <strong>tiling_matrix_surrounding (map, x, y)</strong>
+    <a name = "M.tiling_matrix.surrounding"></a>
+    <strong>M.tiling_matrix.surrounding (map, x, y)</strong>
     </dt>
     <dd>
     Returns a tiling matrix for a given cell and its surrounding cells.
@@ -1147,7 +1620,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">x</span>
@@ -1174,8 +1647,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "find_path"></a>
-    <strong>find_path (map, start_cell, end_cell, cost_fn[, cost_fn_arg])</strong>
+    <a name = "M.path.find"></a>
+    <strong>M.path.find (map, start_cell, end_cell, cost_fn[, cost_fn_arg])</strong>
     </dt>
     <dd>
     Computes, and returns a path from a given start cell, to a given end cell.
@@ -1186,15 +1659,15 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">map</span>
-            <span class="types"><span class="type">map</span></span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
          A moku map
         </li>
         <li><span class="parameter">start_cell</span>
-            <span class="types"><span class="type">cell</span></span>
+            <span class="types"><a class="type" href="index.html#M.neighbor.cell">cell</a></span>
          Given start cell
         </li>
         <li><span class="parameter">end_cell</span>
-            <span class="types"><span class="type">cell</span></span>
+            <span class="types"><a class="type" href="index.html#M.neighbor.cell">cell</a></span>
          Given end cell
         </li>
         <li><span class="parameter">cost_fn</span>
@@ -1227,7 +1700,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2018-06-01 16:33:20 </i>
+<i style="float:right;">Last updated 2018-06-03 23:39:46 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

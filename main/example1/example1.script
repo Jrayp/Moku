@@ -34,7 +34,7 @@ end
 --o  Local functions
 --o===================o
 
--- Setup the complex 8bit tilemap
+-- Setup the complex tiled (8bit) tilemap
 function setup_complex(self)
 
     -- Store the map objects world position for cell picking
@@ -50,18 +50,18 @@ function setup_complex(self)
     }
 
     -- Build the moku map from the defold tilemap
-    self.map_complex = moku.new_from_tm("map_complex#example1_tm", "layer1", 32, 32)
+    self.map_complex = moku.new.from_tilemap("map_complex#example1_tm", "layer1", 32, 32)
 
     -- Add the tile id table to the map, for easy and logical access.
-    -- *This is not required, but probably good practice
+    -- This is not required, but probably good practice
     self.map_complex.moku_ids = moku_ids
 
     -- Designate the PLAINS and PLATEAU tile ids as autotiles.
-    moku.set_autotile(self.map_complex, moku_ids.PLAINS, moku.at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
-    moku.set_autotile(self.map_complex, moku_ids.PLATEAU, moku.at_algorithm.COMPLEX, true, true, true)
+    moku.auto_tile.designate_id(self.map_complex, moku_ids.PLAINS, moku.table.at_algorithm.COMPLEX, true, true, true, {moku_ids.PLATEAU})
+    moku.auto_tile.designate_id(self.map_complex, moku_ids.PLATEAU, moku.table.at_algorithm.COMPLEX, true, true, true)
 
     -- Autotile the map
-    moku.autotile_map(self.map_complex)
+    moku.auto_tile.map(self.map_complex)
 end
 
 -- Setup the horrible mess "simple" custom map. (Simple here refers to the algorithm used. I missed the irony while designing this example.)
@@ -106,22 +106,22 @@ function setup_simple(self)
     end
 
     -- Create new moku map, and pass the on_new_cell function
-    self.map_simple = moku.new(8, 8, 32, 32, on_new_cell)
+    self.map_simple = moku.new.from_scratch(8, 8, 32, 32, on_new_cell)
 
     -- Add the tile id table to the map, for easy and logical access
     self.map_simple.moku_ids = moku_ids
 
     -- Designate the WALL and YELLOW_WALL tile ids as autotiles.
-    moku.set_autotile(self.map_simple, moku_ids.WALL, moku.at_algorithm.SIMPLE, true, true, false)
-    moku.set_autotile(self.map_simple, moku_ids.YELLOW_WALL, moku.at_algorithm.SIMPLE, true, false, false)
+    moku.auto_tile.designate_id(self.map_simple, moku_ids.WALL, moku.table.at_algorithm.SIMPLE, true, true, false)
+    moku.auto_tile.designate_id(self.map_simple, moku_ids.YELLOW_WALL, moku.table.at_algorithm.SIMPLE, true, false, false)
 
     -- Since this is a custom map, we can not actually "auto"-tile, as
     -- moku has no way of knowing how we are doing things. In this case
-    -- we can simply use a tiling matrix
-    local tiling_matrix = moku.tiling_matrix_map(self.map_simple)
+    -- we can "simply" use a tiling matrix
+    local tiling_matrix = moku.tiling_matrix.map(self.map_simple)
 
     -- Apply the values from the tiling matrix as needed
-    for x, y, value in moku.iterate_map(self.map_simple) do
+    for x, y, value in moku.iterate.map(self.map_simple) do
         msg.post(self.map_simple[x][y].sprite_url, "play_animation", {id = hash(tiling_matrix[x][y])})
     end
 end
@@ -137,14 +137,14 @@ function get_map_and_coords(self, mx, my)
     local wy = my + cam_pos.y
 
     -- Check if we are over a complex map cell
-    local cx, cy = moku.pick_coords(self.map_complex, self.map_complex_pos.x, self.map_complex_pos.y, wx, wy)
+    local cx, cy = moku.pick.coords(self.map_complex, self.map_complex_pos.x, self.map_complex_pos.y, wx, wy)
 
     -- If yes return its coords, and tell user it was the complex map
     if cx and cy then
         return "complex", cx, cy
     else
         -- Otherwise check the simple map
-        cx, cy = moku.pick_coords(self.map_simple, self.map_simple_pos.x, self.map_simple_pos.y, wx, wy)
+        cx, cy = moku.pick.coords(self.map_simple, self.map_simple_pos.x, self.map_simple_pos.y, wx, wy)
         if cx and cy then
             return "simple", cx, cy
         else
@@ -168,7 +168,7 @@ function set_cell_id(self, action_id, action)
             moku_id = self.map_complex.moku_ids.PLATEAU
         end
         self.map_complex[cx][cy].moku_id = moku_id
-        moku.autotile_surrounding(self.map_complex, cx, cy)
+        moku.auto_tile.surrounding(self.map_complex, cx, cy)
     elseif map == "simple" then
         if action_id == hash("left_click") then
             moku_id = self.map_simple.moku_ids.WALL
@@ -178,9 +178,9 @@ function set_cell_id(self, action_id, action)
             moku_id = self.map_simple.moku_ids.YELLOW_WALL
         end
         self.map_simple[cx][cy].moku_id = moku_id
-        -- Since custom maps cant use true autotiling we use the tiling matrix workaround
-        local surrounding_matrix = moku.tiling_matrix_surrounding(self.map_simple, cx, cy)
-        for _x, _y, value in moku.iterate_surrounding(self.map_simple, cx, cy ) do
+        -- Since custom maps cant use true auto-tiling we use the tiling matrix workaround
+        local surrounding_matrix = moku.tiling_matrix.surrounding(self.map_simple, cx, cy)
+        for _x, _y, value in moku.iterate.surrounding(self.map_simple, cx, cy ) do
             msg.post(self.map_simple[_x][_y].sprite_url, "play_animation", {id = hash(surrounding_matrix[_x][_y])})
         end
     end
