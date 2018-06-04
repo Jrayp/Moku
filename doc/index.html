@@ -40,7 +40,7 @@
 <li><a href="#Distance_Calculating">Distance Calculating </a></li>
 <li><a href="#Cell_Picking">Cell Picking </a></li>
 <li><a href="#Auto_Tiling">Auto-Tiling </a></li>
-<li><a href="#Tiling_Matrices">Tiling Matrices </a></li>
+<li><a href="#Tiling_matrices">Tiling matrices </a></li>
 <li><a href="#Path_finding">Path-finding </a></li>
 </ul>
 
@@ -87,6 +87,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#M.new.from_scratch">M.new.from_scratch (width, height, tile_width, tile_height[, on_new_cell])</a></td>
 	<td class="summary">Returns a new moku map from scratch.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#M.new.cell">M.new.cell (x, y, moku_id)</a></td>
+	<td class="summary">Returns a new moku cell</td>
 	</tr>
 </table>
 <h2><a href="#Iterators">Iterators </a></h2>
@@ -156,8 +160,8 @@
 	<td class="summary">Return a list of all cells neighboring a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#M.cell_list.line">M.cell_list.line (map, x, y, dir, length)</a></td>
-	<td class="summary">Return a list of cells in a line, starting from, and including a given cell.</td>
+	<td class="name" nowrap><a href="#M.cell_list.directed_line">M.cell_list.directed_line (map, x, y, dir, length, include_start)</a></td>
+	<td class="summary">Return a list of cells that form a directed line, given starting cell, a direction, and length.</td>
 	</tr>
 </table>
 <h2><a href="#Cell_Set_Functions">Cell Set Functions </a></h2>
@@ -167,8 +171,8 @@
 	<td class="summary">Return a set of all cells neighboring a given cell.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#M.cell_set.line">M.cell_set.line (map, x, y, dir, length)</a></td>
-	<td class="summary">Return a set of cells that form a line, starting from, and including a given cell.</td>
+	<td class="name" nowrap><a href="#M.cell_set.directed_line">M.cell_set.directed_line (map, x, y, dir, length, include_start)</a></td>
+	<td class="summary">Return an unordered set of cells that form a directed line, given starting cell, a direction, and length.</td>
 	</tr>
 </table>
 <h2><a href="#Distance_Calculating">Distance Calculating </a></h2>
@@ -200,12 +204,8 @@
 	<td class="summary">Links a tilemap and layer to a moku map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#M.auto_tile.set_autotile">M.auto_tile.set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
+	<td class="name" nowrap><a href="#M.auto_tile.designate_id">M.auto_tile.designate_id (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</a></td>
 	<td class="summary">Designates a tile id as as an auto-tile.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#M.auto_tile.calc_cell_id">M.auto_tile.calc_cell_id (map, x, y)</a></td>
-	<td class="summary">Calculates a given cells auto-tile id/sum</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#M.auto_tile.cell">M.auto_tile.cell (map, x, y)</a></td>
@@ -224,8 +224,13 @@
 	<td class="summary">Auto-tiles a given cell and its surrounding cells.</td>
 	</tr>
 </table>
-<h2><a href="#Tiling_Matrices">Tiling Matrices </a></h2>
+<h2><a href="#Tiling_matrices">Tiling matrices </a></h2>
 <table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#M.tiling_matrix.cell">M.tiling_matrix.cell (map, x, y)</a></td>
+	<td class="summary">Calculates a given cells auto-tile id/sum
+ (Yes it's not technically a matrix.)</td>
+	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#M.tiling_matrix.map">M.tiling_matrix.map (map)</a></td>
 	<td class="summary">Returns a tiling matrix for an entire moku map.</td>
@@ -255,7 +260,7 @@
 
           <div class="section-description">
 
- Tables used together with moku
+ Tables used with moku
           </div>
     <dl class="function">
     <dt>
@@ -474,6 +479,35 @@
 
         A new moku map
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "M.new.cell"></a>
+    <strong>M.new.cell (x, y, moku_id)</strong>
+    </dt>
+    <dd>
+    Returns a new moku cell
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         x Coordinate
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         y Coordinate
+        </li>
+        <li><span class="parameter">moku_id</span>
+            <span class="types"><span class="type">number</span></span>
+         Moku Id
+        </li>
+    </ul>
+
 
 
 
@@ -760,7 +794,7 @@
 
           <div class="section-description">
 
- Functions that return a cells neighbor, neighbor coordinates, or direction
+ Functions that return a cells neighbor, neighbor coordinates, or direction.
           </div>
     <dl class="function">
     <dt>
@@ -1005,11 +1039,11 @@
 
 </dd>
     <dt>
-    <a name = "M.cell_list.line"></a>
-    <strong>M.cell_list.line (map, x, y, dir, length)</strong>
+    <a name = "M.cell_list.directed_line"></a>
+    <strong>M.cell_list.directed_line (map, x, y, dir, length, include_start)</strong>
     </dt>
     <dd>
-    Return a list of cells in a line, starting from, and including a given cell.
+    Return a list of cells that form a directed line, given starting cell, a direction, and length.
 
 
     <h3>Parameters:</h3>
@@ -1033,6 +1067,10 @@
         <li><span class="parameter">length</span>
             <span class="types"><span class="type">number</span></span>
          The length of the line
+        </li>
+        <li><span class="parameter">include_start</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether or not to include the starting cell
         </li>
     </ul>
 
@@ -1082,8 +1120,8 @@
     <h3>Returns:</h3>
     <ol>
 
-        A set of unordered neighbor cells to be used as a lookup table as such:
- if this_set[my_moku_cell] == true then do ...
+        A set of unordered neighbor cells to be used as a quick lookup table. For example:
+ if neighbor_set[my_moku_cell] == true then do ...
     </ol>
 
 
@@ -1091,11 +1129,11 @@
 
 </dd>
     <dt>
-    <a name = "M.cell_set.line"></a>
-    <strong>M.cell_set.line (map, x, y, dir, length)</strong>
+    <a name = "M.cell_set.directed_line"></a>
+    <strong>M.cell_set.directed_line (map, x, y, dir, length, include_start)</strong>
     </dt>
     <dd>
-    Return a set of cells that form a line, starting from, and including a given cell.
+    Return an unordered set of cells that form a directed line, given starting cell, a direction, and length.
 
 
     <h3>Parameters:</h3>
@@ -1120,13 +1158,17 @@
             <span class="types"><span class="type">number</span></span>
          The length of the line
         </li>
+        <li><span class="parameter">include_start</span>
+            <span class="types"><span class="type">bool</span></span>
+         Whether or not to include the starting cell
+        </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        A set of unordered cells to be used as a lookup table as such:
- if this_set[my_moku_cell] == true then do ...
+        A set of unordered cells to be used as a quick lookup table. For example:
+ if line_set[my_moku_cell] == true then do ...
     </ol>
 
 
@@ -1349,8 +1391,8 @@
 
 </dd>
     <dt>
-    <a name = "M.auto_tile.set_autotile"></a>
-    <strong>M.auto_tile.set_autotile (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
+    <a name = "M.auto_tile.designate_id"></a>
+    <strong>M.auto_tile.designate_id (map, moku_id, algorithm, join_self, join_edge, join_nil, joining_ids)</strong>
     </dt>
     <dd>
     Designates a tile id as as an auto-tile.
@@ -1388,40 +1430,6 @@
         </li>
     </ul>
 
-
-
-
-
-</dd>
-    <dt>
-    <a name = "M.auto_tile.calc_cell_id"></a>
-    <strong>M.auto_tile.calc_cell_id (map, x, y)</strong>
-    </dt>
-    <dd>
-    Calculates a given cells auto-tile id/sum
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">map</span>
-            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
-         A moku map
-        </li>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-         The y coordinate of the given cell
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-         The x coordinate of the given cell
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        The auto-tile id
-    </ol>
 
 
 
@@ -1544,13 +1552,49 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Tiling_Matrices"></a>Tiling Matrices </h2>
+    <h2 class="section-header has-description"><a name="Tiling_matrices"></a>Tiling matrices </h2>
 
           <div class="section-description">
 
- Functions that return tiling matrices
+ Functions that return auto-tile id's, and matrices of such.
+ Intended for use with custom maps (non defold tilemaps).
           </div>
     <dl class="function">
+    <dt>
+    <a name = "M.tiling_matrix.cell"></a>
+    <strong>M.tiling_matrix.cell (map, x, y)</strong>
+    </dt>
+    <dd>
+    Calculates a given cells auto-tile id/sum
+ (Yes it's not technically a matrix.)
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><a class="type" href="index.html#M.tiling_matrix.map">map</a></span>
+         A moku map
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The y coordinate of the given cell
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The x coordinate of the given cell
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The auto-tile id
+    </ol>
+
+
+
+
+</dd>
     <dt>
     <a name = "M.tiling_matrix.map"></a>
     <strong>M.tiling_matrix.map (map)</strong>
@@ -1567,6 +1611,11 @@
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+        A 2d array of calculated auto-tile id's
+    </ol>
 
 
 
@@ -1604,6 +1653,11 @@
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+        A 2d array of calculated auto-tile id's
+    </ol>
 
 
 
@@ -1633,6 +1687,11 @@
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+        A 2d array of calculated auto-tile id's
+    </ol>
 
 
 
@@ -1663,11 +1722,11 @@
          A moku map
         </li>
         <li><span class="parameter">start_cell</span>
-            <span class="types"><a class="type" href="index.html#M.neighbor.cell">cell</a></span>
+            <span class="types"><a class="type" href="index.html#M.pick.cell">cell</a></span>
          Given start cell
         </li>
         <li><span class="parameter">end_cell</span>
-            <span class="types"><a class="type" href="index.html#M.neighbor.cell">cell</a></span>
+            <span class="types"><a class="type" href="index.html#M.pick.cell">cell</a></span>
          Given end cell
         </li>
         <li><span class="parameter">cost_fn</span>
@@ -1700,7 +1759,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2018-06-03 23:39:46 </i>
+<i style="float:right;">Last updated 2018-06-04 01:09:50 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

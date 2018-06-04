@@ -324,9 +324,9 @@ function M.new.from_scratch(width, height, tile_width, tile_height, on_new_cell)
 end
 
 --- Returns a new moku cell
---@tparam x number x Coordinate
---@tparam y number y Coordinate
---@tparam moku_id number Moku Id
+--@tparam number x x Coordinate
+--@tparam number y y Coordinate
+--@tparam number moku_id Moku Id
 function M.new.cell(x, y, moku_id)
     return
     {
@@ -475,8 +475,8 @@ end
 -- @tparam moku.dir dir Direction of neighbor
 -- @return Neighbor cell. Nil if outside of bounds (or the neighbor is nil)
 function M.neighbor.cell(map, x, y, dir)
-    local nx, ny = M.neighbor_coords(x, y, dir)
-    if M.in_bounds(map, nx, ny) then
+    local nx, ny = M.neighbor.coords(x, y, dir)
+    if M.misc.in_bounds(map, nx, ny) then
         return map[nx][ny]
     else
         return nil
@@ -494,25 +494,25 @@ function M.neighbor.direction(from_x, from_y, to_x, to_y)
     local dif_y = to_y - from_y
     if dif_x == 0 then
         if dif_y == 1 then
-            return M.dir.N
+            return M.table.dir.N
         elseif dif_y == -1 then
-            return M.dir.S
+            return M.table.dir.S
         end
     elseif dif_x == 1 then
         if dif_y == 0 then
-            return M.dir.E
+            return M.table.dir.E
         elseif dif_y == 1 then
-            return M.dir.NE
+            return M.table.dir.NE
         elseif dif_y == -1 then
-            return M.dir.SE
+            return M.table.dir.SE
         end
     elseif dif_x == -1 then
         if dif_y == 0 then
-            return M.dir.W
+            return M.table.dir.W
         elseif dif_y == 1 then
-            return M.dir.NW
+            return M.table.dir.NW
         elseif dif_y == -1 then
-            return M.dir.SW
+            return M.table.dir.SW
         end
     end
     return nil
@@ -594,28 +594,34 @@ function M.cell_list.neighbors(map, x, y)
     return ancl
 end
 
---- Return a list of cells in a line, starting from, and including a given cell.
+--- Return a list of cells that form a directed line, given starting cell, a direction, and length.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
 -- @tparam moku.dir dir The direction of the line
 -- @tparam number length The length of the line
+-- @tparam bool include_start Whether or not to include the starting cell
 -- @return A list of cells in the form
 -- { c1, c2, c3, ... }
-function M.cell_list.line(map, x, y, dir, length, include_start)
-    local line_cells = {}
-    line_cells[1] = map[x][y]
-    if length > 1 then
-        for i = 2, length do
-            x, y = M.neighbor_coords(x, y, dir)
-            if map[x] and map[x][y] then
-                line_cells[i] = map[x][y]
-            else
-                line_cells[i] = nil
-            end
+function M.cell_list.directed_line(map, x, y, dir, length, include_start)
+    local cells = {}
+    local j = 1
+
+    if include_start then
+        cells[1] = map[x][y]
+        j = 2
+    end
+
+    for i = j, length do
+        x, y = M.neighbor.coords(x, y, dir)
+        if map[x] and map[x][y] then
+            cells[i] = map[x][y]
+        else
+            cells[i] = nil
         end
     end
-    return line_cells
+
+    return cells
 end
 
 --o==========================================================================o
@@ -627,16 +633,18 @@ end
 --o==========================================================================o
 M.cell_set = {}
 
+-- todo: Sets could likely take values other than true, in order to convey more information without losing the hashset properties. For instance the directed_line could still store position in the line.
+
 --- Return a set of all cells neighboring a given cell.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
--- @return A set of unordered neighbor cells to be used as a lookup table as such:
--- if this_set[my_moku_cell] == true then do ...
+-- @return A set of unordered neighbor cells to be used as a quick lookup table. For example:
+-- if neighbor_set[my_moku_cell] == true then do ...
 function M.cell_set.neighbors(map, x, y)
     local ancs = {}
     for i = 1, 8 do
-        local nc = M.neighbor_cell(map, x, y, i)
+        local nc = M.neighbor.cell(map, x, y, i)
         if nc then
             ancs[nc] = true
         end
@@ -644,26 +652,31 @@ function M.cell_set.neighbors(map, x, y)
     return ancs
 end
 
---- Return a set of cells that form a line, starting from, and including a given cell.
+--- Return an unordered set of cells that form a directed line, given starting cell, a direction, and length.
 -- @tparam map map A moku map
 -- @tparam number x The y coordinate of the given cell
 -- @tparam number y The x coordinate of the given cell
 -- @tparam moku.dir dir The direction of the line
 -- @tparam number length The length of the line
--- @return A set of unordered cells to be used as a lookup table as such:
--- if this_set[my_moku_cell] == true then do ...
-function M.cell_set.line(map, x, y, dir, length)
-    local line_cells = {}
-    line_cells[map[x][y]] = true
-    if length > 1 then
-        for i = 2, length do
-            x, y = M.neighbor_coords(x, y, dir)
-            if map[x] and map[x][y] then
-                line_cells[map[x][y]] = true
-            end
-        end
-        return line_cells
+-- @tparam bool include_start Whether or not to include the starting cell
+-- @return A set of unordered cells to be used as a quick lookup table. For example:
+-- if line_set[my_moku_cell] == true then do ...
+function M.cell_set.directed_line(map, x, y, dir, length, include_start)
+    local cells = {}
+    local j = 1
+
+    if include_start then
+        cells[map[x][y]] = true
+        j = 2
     end
+
+    for i = j, length do
+        x, y = M.neighbor.coords(x, y, dir)
+        if map[x] and map[x][y] then
+            cells[map[x][y]] = true
+        end
+    end
+
 end
 
 --o=========================================o
@@ -891,6 +904,7 @@ end
 
 --- Returns a tiling matrix for an entire moku map.
 -- @tparam map map A moku map
+-- @return A 2d array of calculated auto-tile id's
 function M.tiling_matrix.map(map)
     return M.tiling_matrix.region(map, map.bounds.x, map.bounds.y, map.bounds.width, map.bounds.height)
 end
@@ -901,6 +915,7 @@ end
 -- @tparam number y Lower left y coordinate of region
 -- @tparam number width Width of the region
 -- @tparam number height Height of the region
+-- @return A 2d array of calculated auto-tile id's
 function M.tiling_matrix.region(map, x, y, width, height)
     local tiling_matrix = {}
     for _x, _y, _v in M.iterate.region(map, x, y, width, height) do
@@ -916,6 +931,7 @@ end
 -- @tparam map map A moku map
 -- @tparam number x The x coordinate of the given cell
 -- @tparam number y The y coordinate of the given cell
+-- @return A 2d array of calculated auto-tile id's
 function M.tiling_matrix.surrounding(map, x, y)
     return M.tiling_matrix.region(map, x - 1, y - 1, 3, 3)
 end
