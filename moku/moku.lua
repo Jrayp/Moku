@@ -3,6 +3,7 @@
 local M = {}
 
 -- todo: Add function for changing a moku cells id, and auto-tiling at the same time.
+-- todo: Maybe make it possible to attach a game object for position etc.
 
 --o=================================================o
 
@@ -749,7 +750,7 @@ end
 -- @tparam number pick_world_y Given world y
 -- @return Cell at given world coordinates. Nil if out of map bounds (or the cell is nil)
 function M.pick.cell(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
-    local cx, cy = M.pic.coords(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
+    local cx, cy = M.pick.coords(map, map_world_x, map_world_y, pick_world_x, pick_world_y)
     if cx and cy then
         return map[cx][cy]
     else
