@@ -28,6 +28,8 @@ If you find a use for moku in a project, a quick shoutout to me may help immense
 
 Currently in alpha. Missing some features, and probably buggy. Things are still bound to change. Use at own risk.
 
+NOTE: There is an updated rework branch that contains bug fixes, and uses a completely different method of organization. I do not have time to rewrite the documentation for that branch, so I am not merging it, but it is there (with updated LDoc documentation) if you would like to use it.
+
 ## Basics
 
 A Moku map is nothing but a two-dimensional table of moku cells. A moku cell is a table of the form
