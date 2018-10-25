@@ -4,5 +4,5 @@ This rework branch is altered significiantly from the master branch. Although th
 
 ### Documentation
 
-[LDoc generated module documentation](http://htmlpreview.github.io/?https://github.com/Jrayp/Moku/blob/master/doc/index.html)
+[LDoc generated module documentation](http://htmlpreview.github.io/?https://github.com/Jrayp/Moku/blob/rework/doc/index.html)
 
